@@ -1,0 +1,27 @@
+# Godot generated files
+.godot/
+/android/
+*.import
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temporary files
+*.tmp
+*.bak
+
+# Godot export credentials
+export_credentials.cfg
+
+# mcp
+*.mcp.json
+
+# obsidian
+*.obsidian
+
+# images
+*.svg
+*.png
+*.jpg
