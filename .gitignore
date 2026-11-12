@@ -1,7 +1,12 @@
+
 # Godot generated files
 .godot/
 /android/
-*.import
+
+# Exported builds
+/builds/
+*.exe
+*.pck
 
 # macOS
 .DS_Store
@@ -15,13 +20,9 @@
 # Godot export credentials
 export_credentials.cfg
 
-# mcp
-*.mcp.json
+# Local MCP configuration
+.mcp.json
 
-# obsidian
-*.obsidian
-
-# images
-*.svg
-*.png
-*.jpg
+# Obsidian temporary workspace
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
