@@ -18,8 +18,9 @@ static func get_cities() -> Array[Dictionary]:
 			"type": "city",
 			"position": Vector2(250.0, 600.0),
 			"entry_location_id": START_LOCATION_ID,
+			"entrances": {CENTRAL_JUNCTION_ID: START_LOCATION_ID},
 			"street_nodes": [
-				{"id": START_LOCATION_ID, "position": Vector2(-70.0, 15.0)},
+				{"id": START_LOCATION_ID, "position": Vector2(110.0, 15.0)},
 				{"id": "company_depot_road", "position": Vector2(-20.0, 0.0)},
 				{"id": "company_fuel_road", "position": Vector2(5.0, 25.0)},
 				{"id": "company_north_junction", "position": Vector2(-5.0, -45.0)},
@@ -73,12 +74,12 @@ static func get_cities() -> Array[Dictionary]:
 			"type": "settlement",
 			"position": Vector2(1030.0, 600.0),
 			"entry_location_id": "settlement_west",
+			"entrances": {CENTRAL_JUNCTION_ID: "settlement_west", BRANCH_CITY_ID: "settlement_north"},
 			"street_nodes": [
 				{"id": "settlement_west", "position": Vector2(-100.0, -25.0)},
 				{"id": "settlement_center", "position": Vector2(-20.0, -25.0)},
 				{"id": "settlement_fuel_road", "position": Vector2(-55.0, 45.0)},
 				{"id": "settlement_delivery_road", "position": Vector2(0.0, 35.0)},
-				{"id": "settlement_east", "position": Vector2(105.0, 35.0)},
 				{"id": "settlement_north", "position": Vector2(-5.0, -80.0)},
 				{"id": "settlement_shop_road", "position": Vector2(40.0, -80.0)},
 			],
@@ -86,7 +87,6 @@ static func get_cities() -> Array[Dictionary]:
 				{"from": "settlement_west", "to": "settlement_center"},
 				{"from": "settlement_center", "to": "settlement_fuel_road"},
 				{"from": "settlement_center", "to": "settlement_delivery_road"},
-				{"from": "settlement_delivery_road", "to": "settlement_east"},
 				{"from": "settlement_center", "to": "settlement_north"},
 				{"from": "settlement_north", "to": "settlement_shop_road"},
 			],
@@ -114,14 +114,17 @@ static func get_cities() -> Array[Dictionary]:
 			"type": "settlement",
 			"position": Vector2(640.0, 260.0),
 			"entry_location_id": "northern_settlement_entry",
+			"entrances": {CENTRAL_JUNCTION_ID: "northern_settlement_entry", DELIVERY_CITY_ID: "northern_settlement_east"},
 			"street_nodes": [
-				{"id": "northern_settlement_entry", "position": Vector2(0.0, 0.0)},
+				{"id": "northern_settlement_entry", "position": Vector2(0.0, 110.0)},
+				{"id": "northern_settlement_east", "position": Vector2(110.0, 70.0)},
 				{"id": "northern_settlement_center", "position": Vector2(0.0, 45.0)},
 				{"id": "northern_settlement_workshop_road", "position": Vector2(55.0, 75.0)},
 			],
 			"street_roads": [
 				{"from": "northern_settlement_entry", "to": "northern_settlement_center"},
 				{"from": "northern_settlement_center", "to": "northern_settlement_workshop_road"},
+				{"from": "northern_settlement_workshop_road", "to": "northern_settlement_east"},
 			],
 			"places": [
 				{

@@ -8,6 +8,9 @@ var cities_by_id: Dictionary = {}
 var road_junctions: Array[Dictionary] = WorldMapData.get_road_junctions()
 var road_junctions_by_id: Dictionary = {}
 var roads: Array[Dictionary] = WorldMapData.get_roads()
+# Геометрия карты неизменна в течение сессии; поиск улиц выполняется один раз
+# для каждой пары узлов. Выдаём копии, чтобы очистка маршрута не меняла кеш.
+var local_route_cache: Dictionary = {}
 
 
 func _init() -> void:
@@ -17,25 +20,49 @@ func _init() -> void:
 		road_junctions_by_id[junction["id"]] = junction
 
 
+func entrance_for(city_id: String, neighbor_id: String) -> String:
+	return cities_by_id[city_id]["entrances"][neighbor_id]
+
+
+func arrival_location(start_city_id: String, destination_city_id: String) -> String:
+	var path := find_route(start_city_id, destination_city_id)
+	if path.size() < 2:
+		return cities_by_id[destination_city_id]["entry_location_id"]
+	return entrance_for(destination_city_id, path[-2])
+
+
+func road_endpoint(node_id: String, neighbor_id: String) -> Vector2:
+	if cities_by_id.has(node_id):
+		return position_for_location(cities_by_id[node_id], entrance_for(node_id, neighbor_id))
+	return world_position_for_node(node_id)
+
+
+func build_intercity_route(start_city_id: String, start_location_id: String, destination_city_id: String) -> Array[Vector2]:
+	var path := find_route(start_city_id, destination_city_id)
+	var points: Array[Vector2] = []
+	if path.size() < 2:
+		return points
+	var city: Dictionary = cities_by_id[start_city_id]
+	points.append(position_for_location(city, start_location_id))
+	points.append_array(build_local_route(city, start_location_id, entrance_for(start_city_id, path[1])))
+	for index in range(path.size() - 1):
+		var departure := road_endpoint(path[index], path[index + 1])
+		if points[-1].distance_to(departure) > 0.01:
+			points.append(departure)
+		points.append(road_endpoint(path[index + 1], path[index]))
+		if index + 2 < path.size() and cities_by_id.has(path[index + 1]):
+			var through_city: Dictionary = cities_by_id[path[index + 1]]
+			points.append_array(build_local_route(through_city, entrance_for(path[index + 1], path[index]), entrance_for(path[index + 1], path[index + 2])))
+	return points
+
+
 func get_route_distance(start_city_id: String, start_location_id: String, destination_city_id: String, destination_location_id: String) -> float:
-	var city_route := find_route(start_city_id, destination_city_id)
-	if city_route.is_empty():
-		return 0.0
 	if start_city_id == destination_city_id:
 		return _distance_between_locations(start_city_id, start_location_id, destination_city_id, destination_location_id)
-	var start_city: Dictionary = cities_by_id[start_city_id]
-	var destination_city: Dictionary = cities_by_id[destination_city_id]
-	var start_entry_node := node_id_for_location(start_city, start_city["entry_location_id"])
-	var destination_entry_node := node_id_for_location(destination_city, destination_city["entry_location_id"])
-	var distance := _distance_between_locations(start_city_id, start_location_id, start_city_id, "")
-	distance += street_node_position(start_city, start_entry_node).length()
-	for index in range(city_route.size() - 1):
-		var start_position := world_position_for_node(city_route[index])
-		var finish_position := world_position_for_node(city_route[index + 1])
-		distance += start_position.distance_to(finish_position)
-	distance += street_node_position(destination_city, destination_entry_node).length()
-	distance += _distance_between_locations(destination_city_id, "", destination_city_id, destination_location_id)
-	return distance
+	var points := build_intercity_route(start_city_id, start_location_id, destination_city_id)
+	if points.is_empty():
+		return 0.0
+	return RouteGeometry.length(points) + _distance_between_locations(destination_city_id, arrival_location(start_city_id, destination_city_id), destination_city_id, destination_location_id)
 
 
 func build_local_route(city: Dictionary, start_location_id: String, destination_place_id: String) -> Array[Vector2]:
@@ -44,11 +71,16 @@ func build_local_route(city: Dictionary, start_location_id: String, destination_
 	var destination_node_id := node_id_for_location(city, destination_place_id)
 	if start_node_id.is_empty() or destination_node_id.is_empty() or start_node_id == destination_node_id:
 		return result
+	var cache_key := "%s/%s/%s" % [city["id"], start_node_id, destination_node_id]
+	if local_route_cache.has(cache_key):
+		result.assign(local_route_cache[cache_key])
+		return result
 
 	var node_ids := _find_node_path(city["street_roads"], start_node_id, destination_node_id)
 	var origin: Vector2 = city["position"]
 	for node_id in node_ids:
 		result.append(origin + street_node_position(city, node_id))
+	local_route_cache[cache_key] = result.duplicate()
 	return result
 
 

@@ -22,7 +22,8 @@ func setup(inventory: VehicleInventory) -> void:
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
-		queue_redraw()
+		if selected != null:
+			queue_redraw()
 		var hover_item: CargoItem
 		if model != null:
 			for placement in model.placements:
@@ -53,13 +54,16 @@ func _gui_input(event: InputEvent) -> void:
 func _draw() -> void:
 	if model == null:
 		return
-	for y in range(model.dimensions.y):
-		for x in range(model.dimensions.x):
-			draw_rect(Rect2(Vector2(x, y) * CELL, Vector2.ONE * CELL), Color(0.3, 0.4, 0.4), false)
-	for placement in model.placements:
+	var grid_color := Color(0.3, 0.4, 0.4)
+	for y in range(model.dimensions.y + 1):
+		draw_line(Vector2(0, y * CELL), Vector2(model.dimensions.x * CELL, y * CELL), grid_color)
+	for x in range(model.dimensions.x + 1):
+		draw_line(Vector2(x * CELL, 0), Vector2(x * CELL, model.dimensions.y * CELL), grid_color)
+	for index in range(model.placements.size()):
+		var placement: Dictionary = model.placements[index]
 		var rect := Rect2(Vector2(placement.cell) * CELL + Vector2.ONE, Vector2(placement.extent) * CELL - Vector2.ONE * 2)
 		draw_rect(rect, Color(0.85, 0.7, 0.3) if selected == placement.item else Color(0.3, 0.65, 0.55))
-		draw_string(ThemeDB.fallback_font, rect.position + Vector2(1, 9), str(model.placements.find(placement) + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 9)
+		draw_string(ThemeDB.fallback_font, rect.position + Vector2(1, 9), str(index + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 9)
 	if selected != null:
 		var mouse := get_local_mouse_position()
 		if Rect2(Vector2.ZERO, size).has_point(mouse):

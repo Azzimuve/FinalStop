@@ -50,6 +50,14 @@ func auto_load(items: Array[CargoItem]) -> bool:
 	for item in items:
 		if not contains(item):
 			pending.append(item)
+	var required_area := 0
+	for item in pending:
+		required_area += item.size.x * item.size.y
+	var occupied_area := 0
+	for placement in placements:
+		occupied_area += placement.extent.x * placement.extent.y
+	if required_area > dimensions.x * dimensions.y - occupied_area:
+		return false
 	if _pack(pending, 0):
 		return true
 	placements = before
@@ -63,6 +71,8 @@ func _pack(items: Array[CargoItem], index: int) -> bool:
 	for y in range(dimensions.y):
 		for x in range(dimensions.x):
 			for rotated in [false, true]:
+				if rotated and item.size.x == item.size.y:
+					continue
 				if place(item, Vector2i(x, y), rotated):
 					if _pack(items, index + 1):
 						return true

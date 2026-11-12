@@ -388,6 +388,9 @@ func _on_location_selected(
 	local_destination_place_id = place_id
 	local_destination_name = place_name
 	route_available = selection_has_route
+	# Локальный маршрут уже построен картой; удаляем предыдущую межгородскую цель.
+	if not route_is_intercity:
+		map_view.clear_route()
 	if route_is_intercity:
 		route_available = map_view.set_route(
 			current_city_id,
@@ -410,8 +413,7 @@ func _update_route_estimate() -> void:
 	if not route_available or not route_is_intercity:
 		return
 
-	var destination_city: Dictionary = map_view.routes.cities_by_id[route_target_city_id]
-	var city_entry_location_id: String = destination_city["entry_location_id"]
+	var city_entry_location_id: String = map_view.arrival_location_id
 	intercity_distance_units = map_view.routes.get_route_distance(
 		current_city_id,
 		current_location_id,
@@ -485,8 +487,7 @@ func _process_intercity_trip(delta: float) -> void:
 
 	intercity_trip.active = false
 	current_city_id = route_target_city_id
-	var destination_city: Dictionary = map_view.routes.cities_by_id[current_city_id]
-	var city_entry_location_id: String = destination_city["entry_location_id"]
+	var city_entry_location_id: String = map_view.arrival_location_id
 	current_location_id = city_entry_location_id
 	map_view.set_route_visible(false)
 	map_view.set_current_location(current_city_id, current_location_id, true)
@@ -840,6 +841,7 @@ func _refresh_buttons() -> void:
 func _refresh_trip_controls() -> void:
 	var active := _is_trip_active()
 	var moving := active and not travel_paused
+	map_view.set_follow_traveling(moving, local_trip.active)
 	inventory_button.disabled = moving
 	inventory_button.tooltip_text = "Остановите автомобиль, чтобы открыть инвентарь." if moving else ""
 	if moving and inventory_window.visible:
