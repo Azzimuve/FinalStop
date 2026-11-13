@@ -78,3 +78,17 @@ func _pack(items: Array[CargoItem], index: int) -> bool:
 						return true
 					remove(item)
 	return false
+
+
+func total_weight_kg() -> float:
+	var total := 0.0
+	for placement in placements:
+		total += maxf(0.0, placement.item.weight_kg)
+	return total
+
+
+func has_unknown_weights() -> bool:
+	for placement in placements:
+		if placement.item.weight_kg < 0.0:
+			return true
+	return false

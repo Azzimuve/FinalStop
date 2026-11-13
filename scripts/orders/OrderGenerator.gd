@@ -52,7 +52,8 @@ func generate(routes: RoutePlanner, current_minutes: float) -> Array[DeliveryOrd
 			var order := DeliveryOrder.new()
 			order.cargo = [CargoItem.new("Тестовый ящик", Vector2i(2, 2)), CargoItem.new("Тестовая коробка", Vector2i(1, 2)), CargoItem.new("Тестовый длинный груз", Vector2i(1, 4))]
 			order.cargo.append(CargoItem.new("Тестовый маленький предмет", Vector2i(1, 1)))
-			order.title = "Доставка груза: %s" % destination_place["name"]
+			order.is_urgent = randf() < clampf(settings.urgent_order_chance_percent / 100.0, 0.0, 1.0)
+			order.title = ("Срочная доставка: %s" if order.is_urgent else "Доставка груза: %s") % destination_place["name"]
 			order.pickup_city_id = company_city["id"]
 			order.pickup_city_name = company_city["name"]
 			order.pickup_location_id = pickup["id"]
@@ -62,8 +63,13 @@ func generate(routes: RoutePlanner, current_minutes: float) -> Array[DeliveryOrd
 			order.delivery_location_id = destination_place["id"]
 			order.delivery_name = destination_place["name"]
 			order.distance_km = distance * TravelRules.DISTANCE_KM_PER_UNIT
-			order.reward = roundi(distance / 100.0 * settings.order_payment_per_100_distance_units)
-			order.deadline_total_minutes = current_minutes + estimated_minutes + DEADLINE_BUFFER_MINUTES
+			var reward_multiplier := 1.0
+			var buffer_minutes := DEADLINE_BUFFER_MINUTES
+			if order.is_urgent:
+				reward_multiplier += maxf(0.0, settings.urgent_order_reward_bonus_percent) / 100.0
+				buffer_minutes *= 1.0 - clampf(settings.urgent_order_buffer_reduction_percent / 100.0, 0.0, 1.0)
+			order.reward = roundi(distance / 100.0 * settings.order_payment_per_100_distance_units * reward_multiplier)
+			order.deadline_total_minutes = current_minutes + estimated_minutes + buffer_minutes
 			offers.append(order)
 
 	offers.shuffle()

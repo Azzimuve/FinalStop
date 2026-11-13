@@ -4,6 +4,8 @@
 [ext_resource type="Script" uid="uid://c4jox1qcfqhtm" path="res://scripts/Map.gd" id="2_0bbpv"]
 [ext_resource type="Script" uid="uid://dsv67oqbe47ve" path="res://scripts/ui/OrderBoard.gd" id="3_board"]
 
+[ext_resource type="Script" path="res://scripts/ui/VehicleStatusDialog.gd" id="4_status"]
+
 [sub_resource type="Theme" id="Theme_compact"]
 default_font_size = 12
 
@@ -221,6 +223,7 @@ grow_horizontal = 0
 text = "Диагностика — бесплатно"
 
 [node name="VehicleStatusDialog" type="AcceptDialog" parent="HUD/UI" unique_id=831420873]
+script = ExtResource("4_status")
 title = "Диагностика автомобиля"
 size = Vector2i(390, 290)
 ok_button_text = "Закрыть"

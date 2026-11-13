@@ -34,7 +34,7 @@ func _ready() -> void:
 	add_child(close_button)
 
 
-func open(model: VehicleInventory, order_cargo: Array[CargoItem], allow_loading: bool) -> void:
+func open(model: VehicleInventory, order_cargo: Array[CargoItem], allow_loading: bool, capacity_kg: float) -> void:
 	loading = allow_loading
 	pickup_cargo = order_cargo.duplicate()
 	warehouse = VehicleInventory.new(Vector2i(24, 24))
@@ -45,6 +45,7 @@ func open(model: VehicleInventory, order_cargo: Array[CargoItem], allow_loading:
 	size = Vector2(550 if loading else 270, 325)
 	close_button.position = Vector2(size.x - 100, 285)
 	auto_button.visible = loading
+	interaction.cargo_capacity_kg = capacity_kg
 	interaction.configure(model, warehouse if loading else null, "Инвентарь склада · 24×24")
 	position = (get_viewport_rect().size - size) / 2.0
 	show()

@@ -18,13 +18,16 @@ func start(distance: float, duration: float) -> void:
 	duration_seconds = duration
 
 
-func advance(delta: float, vehicle: VehicleState, speed_multiplier: float = 1.0) -> float:
+func advance(delta: float, vehicle: VehicleState, speed_multiplier: float = 1.0, distance_limit: float = INF) -> float:
 	# elapsed_seconds хранит эффективное время прохождения маршрута.
 	# delta остаётся реальным временем: штраф скорости увеличивает длительность
 	# поездки, но не замедляет игровые часы.
+	speed_multiplier *= vehicle.overload_speed_multiplier() * vehicle.drive_speed_multiplier()
 	var effective_delta := delta * maxf(speed_multiplier, 0.01)
 	var proposed_elapsed := minf(elapsed_seconds + effective_delta, duration_seconds)
 	var proposed_progress := proposed_elapsed / duration_seconds
+	if distance_units > 0.0:
+		proposed_progress = minf(proposed_progress, progress + maxf(0.0, distance_limit) / distance_units)
 	var distance_delta := maxf(0.0, proposed_progress - progress) * distance_units
 	var actual_distance := vehicle.consume_distance(distance_delta)
 	if actual_distance < distance_delta:

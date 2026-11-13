@@ -20,6 +20,8 @@ func cargo_text() -> String:
 		names.append("%s %d×%d" % [item.title, item.size.x, item.size.y])
 	return ", ".join(names)
 
+var is_urgent: bool = false
+
 var title: String
 var pickup_city_id: String
 var pickup_city_name: String

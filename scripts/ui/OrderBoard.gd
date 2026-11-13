@@ -35,7 +35,7 @@ func show_offers(offers: Array[DeliveryOrder], clock: GameClock) -> void:
 		content.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		content.add_theme_constant_override("separation", 2)
 		card.add_child(content)
-		_add_order_card_label(content, "Доставка · %d кр." % order.reward, 12)
+		_add_order_card_label(content, ("Срочный · %d кр." if order.is_urgent else "Доставка · %d кр.") % order.reward, 12)
 		var details := VBoxContainer.new()
 		details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		details.add_theme_constant_override("separation", 2)

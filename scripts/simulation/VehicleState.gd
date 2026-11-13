@@ -3,6 +3,9 @@ extends RefCounted
 const TravelRules = preload("res://scripts/simulation/TravelRules.gd")
 const VehicleInventory = preload("res://scripts/simulation/VehicleInventory.gd")
 
+enum DriveMode { ECONOMY, NORMAL, FORCED }
+
+var drive_mode: DriveMode = DriveMode.NORMAL
 var inventory := VehicleInventory.new()
 
 var fuel_liters: float
@@ -56,7 +59,7 @@ func consume_distance(distance_units: float) -> float:
 	# Возвращаем реально пройденное расстояние, ограниченное запасом топлива.
 	if distance_units <= 0.0:
 		return 0.0
-	var liters_per_unit := settings.fuel_consumption_liters_per_100_units / 100.0
+	var liters_per_unit := settings.fuel_consumption_liters_per_100_units / 100.0 * overload_fuel_multiplier() * drive_fuel_multiplier()
 	var actual_distance := distance_units
 	if distance_units * liters_per_unit >= fuel_liters:
 		actual_distance = fuel_liters / liters_per_unit
@@ -64,15 +67,31 @@ func consume_distance(distance_units: float) -> float:
 	else:
 		fuel_liters = maxf(0.0, fuel_liters - distance_units * liters_per_unit)
 	var distance_km := actual_distance * TravelRules.DISTANCE_KM_PER_UNIT
-	var condition_loss := distance_km / 10.0 * settings.vehicle_condition_loss_percent_per_10_km
 	for part_id in PART_NAMES:
 		if get_part(part_id) != null:
-			get_part(part_id).wear(condition_loss)
+			var service_distance := settings.service_distance_km(slot_type(part_id))
+			if service_distance > 0.0:
+				var loss := distance_km / service_distance * (100.0 - settings.vehicle_service_condition_percent)
+				get_part(part_id).wear(loss * overload_wear_multiplier() * drive_wear_multiplier())
 	return actual_distance
 
 
 func get_part(part_id: String) -> VehiclePart:
 	return _parts.get(part_id)
+
+
+func repair_cost(part_id: String) -> float:
+	var part := get_part(part_id)
+	if part == null:
+		return 0.0
+	return settings.full_repair_cost(slot_type(part_id)) * (100.0 - part.condition_percent) / 100.0
+
+
+func repair_time_minutes(part_id: String) -> float:
+	var part := get_part(part_id)
+	if part == null:
+		return 0.0
+	return settings.full_repair_time(slot_type(part_id)) * (100.0 - part.condition_percent) / 100.0
 
 
 func repair_part(part_id: String) -> bool:
@@ -96,11 +115,6 @@ func replace_part(part_id: String, replacement: VehiclePart) -> bool:
 			return false
 	_parts[part_id] = replacement
 	return true
-
-
-func repair_all() -> void:
-	for part_id in PART_NAMES:
-		repair_part(part_id)
 
 
 static func slot_type(part_id: String) -> String:
@@ -130,3 +144,41 @@ func duration_for_distance(distance: float) -> float:
 	var engine := get_part("engine")
 	var multiplier := float(engine.parameters.get("speed_multiplier", 1.0)) if engine != null else 1.0
 	return maxf(0.5, distance / (TravelRules.DISTANCE_UNITS_PER_SECOND * multiplier))
+
+
+func overload_ratio() -> float:
+	return maxf(0.0, inventory.total_weight_kg() / maxf(settings.cargo_capacity_kg, 1.0) - 1.0)
+
+
+func overload_speed_multiplier() -> float:
+	var loss := overload_ratio() / 0.1 * maxf(0.0, settings.overload_speed_loss_percent_per_10_percent)
+	return 1.0 - minf(loss, clampf(settings.overload_max_speed_loss_percent, 0.0, 99.0)) / 100.0
+
+
+func overload_fuel_multiplier() -> float:
+	return 1.0 + overload_ratio() / 0.1 * maxf(0.0, settings.overload_fuel_increase_percent_per_10_percent) / 100.0
+
+
+func overload_wear_multiplier() -> float:
+	return 1.0 + overload_ratio() / 0.1 * maxf(0.0, settings.overload_wear_increase_percent_per_10_percent) / 100.0
+
+
+func drive_speed_multiplier() -> float:
+	match drive_mode:
+		DriveMode.ECONOMY: return maxf(0.01, settings.economy_speed_multiplier)
+		DriveMode.FORCED: return maxf(0.01, settings.forced_speed_multiplier)
+	return 1.0
+
+
+func drive_fuel_multiplier() -> float:
+	match drive_mode:
+		DriveMode.ECONOMY: return maxf(0.01, settings.economy_fuel_multiplier)
+		DriveMode.FORCED: return maxf(0.01, settings.forced_fuel_multiplier)
+	return 1.0
+
+
+func drive_wear_multiplier() -> float:
+	match drive_mode:
+		DriveMode.ECONOMY: return maxf(0.0, settings.economy_wear_multiplier)
+		DriveMode.FORCED: return maxf(0.0, settings.forced_wear_multiplier)
+	return 1.0

@@ -18,6 +18,8 @@ var card: PanelContainer
 var card_title: Label
 var card_shape: ColorRect
 var card_price: Label
+var card_weight: Label
+var cargo_capacity_kg: float = -1.0
 var left: VehicleInventory
 var right: VehicleInventory
 var grids: Array[InventoryGrid] = []
@@ -68,9 +70,17 @@ func _ready() -> void:
 	description.text = "Описание"
 	description.custom_minimum_size = Vector2(200, 60)
 	layout.add_child(description)
+	var footer := HBoxContainer.new()
+	footer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layout.add_child(footer)
+	card_weight = Label.new()
+	card_weight.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card_weight.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	footer.add_child(card_weight)
 	card_price = Label.new()
+	card_price.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card_price.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	layout.add_child(card_price)
+	footer.add_child(card_price)
 	for child in layout.get_children():
 		child.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.hide()
@@ -80,6 +90,7 @@ func _hover(item: CargoItem, on_right: bool) -> void:
 	if item == null or menu.visible:
 		card.hide()
 		return
+	card_weight.text = "Вес: %s кг" % str(item.weight_kg) if item.weight_kg >= 0.0 else "Вес не задан"
 	card_title.text = item.title
 	card_shape.custom_minimum_size = Vector2(item.size) * 20.0
 	card_price.visible = trading
@@ -131,7 +142,16 @@ func refresh() -> void:
 		grid.selected = selected
 		grid.selected_rotation = rotated
 		grid.queue_redraw()
-	info.text = "ЛКМ: взять / положить. R: поворот. ПКМ: меню."
+	info.text = ""
+	if left != null and cargo_capacity_kg > 0.0:
+		var weight := left.total_weight_kg()
+		info.text = "Груз: %s / %s кг" % [str(weight), str(cargo_capacity_kg)]
+		if left.has_unknown_weights():
+			info.text += "\nВес неполный: есть предметы без веса."
+		if weight > cargo_capacity_kg:
+			info.text += "\nПерегруз: %.1f%%" % ((weight / cargo_capacity_kg - 1.0) * 100.0)
+		info.text += "\n"
+	info.text += "ЛКМ: взять / положить. R: поворот. ПКМ: меню."
 	if right != null:
 		info.text += "\nДвойной ЛКМ: перенос."
 	if selected != null:

@@ -15,6 +15,7 @@ const SLOTS := [
 
 var vehicle: VehicleState
 var editable: bool = false
+var selectable: bool = false
 var selected: VehiclePart
 var show_condition: bool = true
 signal slot_clicked(part_id: String)
@@ -23,7 +24,7 @@ signal slot_clicked(part_id: String)
 func _ready() -> void:
 	custom_minimum_size = Vector2(240, 160)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	if editable:
+	if editable or selectable:
 		mouse_filter = Control.MOUSE_FILTER_STOP
 	size = custom_minimum_size
 
@@ -31,7 +32,7 @@ func _ready() -> void:
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		queue_redraw()
-	if not editable or not event is InputEventMouseButton:
+	if not (editable or selectable) or not event is InputEventMouseButton:
 		return
 	if not event.pressed or event.button_index != MOUSE_BUTTON_LEFT:
 		return

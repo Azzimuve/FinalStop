@@ -7,6 +7,7 @@ const BRANCH_CITY_ID := "northern_settlement"
 const CENTRAL_JUNCTION_ID := "central_road_junction"
 const START_LOCATION_ID := "company_start"
 const DELIVERY_LOCATION_ID := "settlement_delivery"
+const HOTEL_LOCATION_ID := "northern_settlement_hotel"
 const WORLD_CENTER := Vector2(640.0, 360.0)
 
 
@@ -119,10 +120,12 @@ static func get_cities() -> Array[Dictionary]:
 				{"id": "northern_settlement_entry", "position": Vector2(0.0, 110.0)},
 				{"id": "northern_settlement_east", "position": Vector2(110.0, 70.0)},
 				{"id": "northern_settlement_center", "position": Vector2(0.0, 45.0)},
+				{"id": "northern_settlement_hotel_road", "position": Vector2(-65.0, 20.0)},
 				{"id": "northern_settlement_workshop_road", "position": Vector2(55.0, 75.0)},
 			],
 			"street_roads": [
 				{"from": "northern_settlement_entry", "to": "northern_settlement_center"},
+				{"from": "northern_settlement_center", "to": "northern_settlement_hotel_road"},
 				{"from": "northern_settlement_center", "to": "northern_settlement_workshop_road"},
 				{"from": "northern_settlement_workshop_road", "to": "northern_settlement_east"},
 			],
@@ -133,6 +136,13 @@ static func get_cities() -> Array[Dictionary]:
 					"type": "garage",
 					"position": Vector2(55.0, 75.0),
 					"road_node_id": "northern_settlement_workshop_road",
+				},
+				{
+					"id": HOTEL_LOCATION_ID,
+					"name": "Отель",
+					"type": "hotel",
+					"position": Vector2(-65.0, 20.0),
+					"road_node_id": "northern_settlement_hotel_road",
 				},
 			],
 		},
