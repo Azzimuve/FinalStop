@@ -137,13 +137,13 @@ func _create_service_windows() -> void:
 	$HUD/UI.add_child(workshop_trade)
 	workshop_trade.credits_changed.connect(_on_trade_credits_changed)
 	workshop_trade.discarded.connect(_on_cargo_discarded)
-	workshop_trade.used.connect(_on_cigarettes_used)
+	workshop_trade.used.connect(_on_item_used)
 	store_trade = WorkshopTrade.new()
 	store_trade.is_store = true
 	$HUD/UI.add_child(store_trade)
 	store_trade.credits_changed.connect(_on_trade_credits_changed)
 	store_trade.discarded.connect(_on_cargo_discarded)
-	store_trade.used.connect(_on_cigarettes_used)
+	store_trade.used.connect(_on_item_used)
 	workshop_upgrade = WorkshopUpgrade.new()
 	$HUD/UI.add_child(workshop_upgrade)
 	workshop_upgrade.accepted.connect(_on_upgrade_accepted)
@@ -163,7 +163,7 @@ func _create_inventory_controls() -> void:
 	$HUD/UI.add_child(inventory_window)
 	inventory_window.closed.connect(_on_inventory_closed)
 	inventory_window.discarded.connect(_on_cargo_discarded)
-	inventory_window.used.connect(_on_cigarettes_used)
+	inventory_window.used.connect(_on_item_used)
 	inventory_button = Button.new()
 	inventory_button.text = "Инвентарь машины"
 	inventory_button.scale = order_panel.scale
@@ -280,8 +280,8 @@ func _process(delta: float) -> void:
 func _on_view_orders_pressed() -> void:
 	if current_location_id != "company_office" or current_order != null:
 		return
-	var offers := order_generator.generate(map_view.routes, clock.total_minutes)
-	order_board.show_offers(offers, clock)
+	order_generator.refresh_offers(map_view.routes, clock.total_minutes)
+	order_board.show_offers(order_generator.available_offers, clock)
 	view_orders_button.visible = false
 
 
@@ -289,6 +289,7 @@ func _on_order_selected(order: DeliveryOrder) -> void:
 	if current_order != null:
 		return
 	current_order = order
+	order_generator.available_offers.erase(order)
 	order_state = OrderState.ACCEPTED
 	last_order_result = ""
 	order_panel_collapsed = true
@@ -786,18 +787,17 @@ func _forced_sleep() -> void:
 	forced_sleep_in_progress = false
 
 
-func _on_cigarettes_used(item: RefCounted) -> void:
-	if item.title != "Сигареты" or not vehicle.inventory.contains(item):
+func _on_item_used(item: RefCounted) -> void:
+	if not item.can_use() or not vehicle.inventory.contains(item):
 		return
 	item.uses_remaining -= 1
-	fatigue.restore(5.0)
+	fatigue.restore(float(item.properties.get("fatigue_restore", 0.0)))
+	needs.satiety = minf(BALANCE_SETTINGS.needs_max_value, needs.satiety + float(item.properties.get("satiety_restore", 0.0)))
+	needs.water = minf(BALANCE_SETTINGS.needs_max_value, needs.water + float(item.properties.get("water_restore", 0.0)))
 	if item.uses_remaining <= 0:
 		vehicle.inventory.remove(item)
-		status_label.text = "Сигареты закончились. Усталость восстановлена на 5."
-	else:
-		status_label.text = "Сигарета использована: осталось %d." % item.uses_remaining
-	_refresh_fatigue_controls()
 	_refresh_interface()
+	status_label.text = "%s: осталось использований %d." % [item.title, item.uses_remaining]
 
 
 func _is_fuel_station_location(location_id: String) -> bool:
@@ -1026,6 +1026,8 @@ func _update_trip_clock() -> void:
 
 func _update_game_time_label() -> void:
 	game_time_label.text = clock.time_text()
+	if order_generator.refresh_offers(map_view.routes, clock.total_minutes) and order_board.visible:
+		order_board.show_offers(order_generator.available_offers, clock)
 
 
 func _refresh_vehicle_controls() -> void:

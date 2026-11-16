@@ -22,7 +22,7 @@ signal slot_clicked(part_id: String)
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(240, 160)
+	custom_minimum_size = Vector2(240, 288)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if editable or selectable:
 		mouse_filter = Control.MOUSE_FILTER_STOP
@@ -51,7 +51,7 @@ func show_vehicle(model: VehicleState) -> void:
 
 
 func _slot_origin(index: int) -> Vector2:
-	return Vector2(8 + (index % 3) * 80, 22 + (index / 3) * 80)
+	return Vector2(8 + (index % 3) * 80, 22 + (index / 3) * 144)
 
 
 func _draw() -> void:
@@ -67,7 +67,10 @@ func _draw() -> void:
 		# Фон — место установки. Заполненная область — существующая деталь.
 		draw_rect(Rect2(origin, Vector2(slot_size) * CELL), Color(0.12, 0.16, 0.17))
 		if part != null:
-			draw_rect(Rect2(origin + Vector2.ONE, Vector2(part.size) * CELL - Vector2.ONE * 2), Color(0.85, 0.7, 0.3) if selected == part else Color(0.26, 0.52, 0.46))
+			var part_rect := Rect2(origin + Vector2.ONE, Vector2(part.size) * CELL - Vector2.ONE * 2)
+			var textured := InventoryGrid.draw_item(self, part, part_rect, false, Color(0.85, 0.7, 0.3) if selected == part else Color(0.26, 0.52, 0.46))
+			if textured and selected == part:
+				draw_rect(part_rect, Color(0.85, 0.7, 0.3), false)
 		for y in range(slot_size.y):
 			for x in range(slot_size.x):
 				draw_rect(Rect2(origin + Vector2(x, y) * CELL, Vector2.ONE * CELL), Color(0.65, 0.75, 0.72), false)
@@ -77,4 +80,7 @@ func _draw() -> void:
 			draw_string(font, origin + Vector2(0, slot_size.y * CELL + 23), part.model_name, HORIZONTAL_ALIGNMENT_LEFT, 76, 9)
 		if editable and selected != null and Rect2(origin, Vector2(slot_size) * CELL).has_point(get_local_mouse_position()):
 			var fits := part == null and selected.slot_type == VehicleState.slot_type(id) and selected.size == slot_size
-			draw_rect(Rect2(origin, Vector2(selected.size) * CELL), Color(0.4, 0.9, 0.5, 0.65) if fits else Color(1, 0.3, 0.3, 0.65))
+			var preview_rect := Rect2(origin, Vector2(selected.size) * CELL)
+			var color := Color(0.4, 0.9, 0.5, 0.65) if fits else Color(1, 0.3, 0.3, 0.65)
+			InventoryGrid.draw_item(self, selected, preview_rect, false, color, Color(1, 1, 1, 0.65))
+			draw_rect(preview_rect, color, false)

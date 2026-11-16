@@ -3,6 +3,8 @@ extends Control
 const CargoItem = preload("res://scripts/simulation/CargoItem.gd")
 const VehicleInventory = preload("res://scripts/simulation/VehicleInventory.gd")
 const InventoryGrid = preload("res://scripts/ui/InventoryGrid.gd")
+const CharacterSlots = preload("res://scripts/ui/CharacterSlots.gd")
+const DOUBLE_CLICK_MSEC: int = 300
 
 signal discarded(item: CargoItem)
 signal used(item: CargoItem)
@@ -17,12 +19,15 @@ var trading: bool = false
 var card: PanelContainer
 var card_title: Label
 var card_shape: ColorRect
+var card_description: Label
+var card_texture: TextureRect
 var card_price: Label
 var card_weight: Label
 var cargo_capacity_kg: float = -1.0
 var left: VehicleInventory
 var right: VehicleInventory
 var grids: Array[InventoryGrid] = []
+var grid_scrolls: Array[ScrollContainer] = []
 var right_title: Label
 var info: Label
 var menu: PopupMenu
@@ -31,45 +36,76 @@ var source_right: bool = false
 var rotated: bool = false
 var context_item: CargoItem
 var context_right: bool = false
+var click_item: CargoItem
+var click_side: bool = false
+var click_time: int = 0
+var click_position: Vector2
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(550, 280)
-	_label("Мой инвентарь · 24×8", Vector2(12, 8))
-	right_title = _label("", Vector2(290, 8))
+	custom_minimum_size = Vector2(1200, 588)
+	_label("Мой инвентарь · 6×12", Vector2(12, 8))
+	var character_slots := CharacterSlots.new()
+	character_slots.position = Vector2(12 + (VehicleInventory.SIZE.x * InventoryGrid.CELL - (CharacterSlots.SLOT_SIZE * 3.0 + CharacterSlots.GAP * 2.0)) / 2.0, 32)
+	add_child(character_slots)
+	right_title = _label("", Vector2(612, 8))
 	for side in [false, true]:
+		var scroll := ScrollContainer.new()
+		scroll.position = Vector2(612, 32) if side else Vector2(12, 112)
+		scroll.size = Vector2(576, 544) if side else Vector2(192, 384)
+		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		add_child(scroll)
+		grid_scrolls.append(scroll)
 		var grid := InventoryGrid.new()
-		grid.position = Vector2(290 if side else 12, 32)
-		add_child(grid)
+		scroll.add_child(grid)
+		scroll.get_v_scroll_bar().value_changed.connect(func(_value: float):
+			if card != null:
+				card.hide()
+			grid.queue_redraw()
+		)
+		scroll.get_h_scroll_bar().value_changed.connect(func(_value: float):
+			if card != null:
+				card.hide()
+			grid.queue_redraw()
+		)
 		grid.clicked.connect(_click.bind(side))
-		grid.double_clicked.connect(_double_click.bind(side))
 		grid.context_requested.connect(_context.bind(side))
 		grid.hovered.connect(_hover.bind(side))
 		grid.mouse_exited.connect(func(): card.hide())
 		grids.append(grid)
-	info = _label("", Vector2(12, 122))
-	info.size = Vector2(240, 150)
+	info = _label("", Vector2(228, 32))
+	info.size = Vector2(360, 512)
 	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	menu = PopupMenu.new()
 	add_child(menu)
 	menu.id_pressed.connect(_context_action)
 	card = PanelContainer.new()
 	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.custom_minimum_size.x = 320
+	card.add_theme_font_size_override("font_size", 16)
 	card.z_index = 10
 	add_child(card)
 	var layout := VBoxContainer.new()
+	layout.add_theme_constant_override("separation", 10)
 	layout.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(layout)
 	card_title = Label.new()
+	card_title.add_theme_font_size_override("font_size", 20)
+	card_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	layout.add_child(card_title)
 	card_shape = ColorRect.new()
 	card_shape.color = Color(0.3, 0.65, 0.55)
 	card_shape.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	layout.add_child(card_shape)
-	var description := Label.new()
-	description.text = "Описание"
-	description.custom_minimum_size = Vector2(200, 60)
-	layout.add_child(description)
+	card_texture = TextureRect.new()
+	card_texture.custom_minimum_size = Vector2(160, 140)
+	card_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	card_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	layout.add_child(card_texture)
+	card_description = Label.new()
+	card_description.custom_minimum_size = Vector2(320, 100)
+	card_description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	layout.add_child(card_description)
 	var footer := HBoxContainer.new()
 	footer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layout.add_child(footer)
@@ -92,6 +128,15 @@ func _hover(item: CargoItem, on_right: bool) -> void:
 		return
 	card_weight.text = "Вес: %s кг" % str(item.weight_kg) if item.weight_kg >= 0.0 else "Вес не задан"
 	card_title.text = item.title
+	card_description.text = item.description if not item.description.is_empty() else "Описание не задано"
+	var effects := item.effects_text()
+	if not effects.is_empty():
+		card_description.text += "\n" + effects
+	if item.has_uses:
+		card_description.text += "\nОсталось: %d" % item.uses_remaining
+	card_texture.texture = InventoryGrid.item_texture(item)
+	card_texture.visible = card_texture.texture != null
+	card_shape.visible = not card_texture.visible
 	card_shape.custom_minimum_size = Vector2(item.size) * 20.0
 	card_price.visible = trading
 	if trading:
@@ -113,8 +158,16 @@ func _hover(item: CargoItem, on_right: bool) -> void:
 func configure(player: VehicleInventory, other: VehicleInventory, caption: String) -> void:
 	left = player
 	right = other
+	custom_minimum_size = Vector2(1200, 588) if right != null else Vector2(600, 588)
+	size = custom_minimum_size
+	grid_scrolls[0].size = Vector2(192, 384)
+	info.size.x = 360
 	grids[0].setup(left)
 	grids[1].visible = right != null
+	grid_scrolls[1].visible = right != null
+	for scroll in grid_scrolls:
+		scroll.scroll_vertical = 0
+		scroll.scroll_horizontal = 0
 	right_title.visible = right != null
 	right_title.text = caption
 	if right != null:
@@ -127,6 +180,7 @@ func _model(on_right: bool) -> VehicleInventory:
 
 
 func reset_selection() -> void:
+	click_item = null
 	if card != null:
 		card.hide()
 	selected = null
@@ -175,8 +229,18 @@ func _choose(item: CargoItem, on_right: bool) -> void:
 func _click(item: CargoItem, cell: Vector2i, on_right: bool) -> void:
 	if menu.visible:
 		return
+	var now := Time.get_ticks_msec()
+	var cursor := get_global_mouse_position()
+	if item != null and item == click_item and selected == item and on_right == click_side and now - click_time <= DOUBLE_CLICK_MSEC and cursor.distance_to(click_position) <= 6.0:
+		_double_click(item, cell, on_right)
+		return
+	click_item = null
 	if selected == null:
 		_choose(item, on_right)
+		click_item = item
+		click_side = on_right
+		click_time = now
+		click_position = cursor
 	elif _move(selected, source_right, on_right, cell, rotated):
 		reset_selection()
 
@@ -235,6 +299,7 @@ func handle_input(event: InputEvent) -> void:
 
 
 func _context(item: CargoItem, _cell: Vector2i, on_right: bool) -> void:
+	click_item = null
 	context_item = item
 	context_right = on_right
 	menu.clear()
@@ -246,7 +311,7 @@ func _context(item: CargoItem, _cell: Vector2i, on_right: bool) -> void:
 			menu.add_item("Продать", 5)
 		menu.add_item("Повернуть", 0)
 		menu.add_item("Выбросить", 1)
-		if item.title == "Сигареты":
+		if item.can_use():
 			menu.add_item("Использовать", 2)
 	menu.position = Vector2i(get_viewport().get_mouse_position())
 	menu.popup()

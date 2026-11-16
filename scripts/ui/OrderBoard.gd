@@ -27,18 +27,18 @@ func show_offers(offers: Array[DeliveryOrder], clock: GameClock) -> void:
 
 	for order in offers:
 		var card := PanelContainer.new()
-		card.custom_minimum_size = Vector2(150.0, 210.0)
+		card.custom_minimum_size = Vector2(280.0, 400.0)
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		var content := VBoxContainer.new()
 		content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		content.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		content.add_theme_constant_override("separation", 2)
+		content.add_theme_constant_override("separation", 12)
 		card.add_child(content)
-		_add_order_card_label(content, ("Срочный · %d кр." if order.is_urgent else "Доставка · %d кр.") % order.reward, 12)
+		_add_order_card_label(content, ("Срочный · %d кр." if order.is_urgent else "Доставка · %d кр.") % order.reward, 20)
 		var details := VBoxContainer.new()
 		details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		details.add_theme_constant_override("separation", 2)
+		details.add_theme_constant_override("separation", 10)
 		content.add_child(details)
 		_add_order_card_label(details, "%s → %s" % [order.pickup_city_name, order.delivery_city_name])
 		_add_order_card_label(details, "От: %s\nДо: %s" % [order.pickup_name, order.delivery_name])
@@ -53,14 +53,14 @@ func show_offers(offers: Array[DeliveryOrder], clock: GameClock) -> void:
 		content.add_child(spacer)
 		var choose_button := Button.new()
 		choose_button.text = "Выбрать"
-		choose_button.custom_minimum_size.y = 28.0
-		choose_button.add_theme_font_size_override("font_size", 11)
+		choose_button.custom_minimum_size.y = 40.0
+		choose_button.add_theme_font_size_override("font_size", 16)
 		choose_button.pressed.connect(order_selected.emit.bind(order))
 		content.add_child(choose_button)
 		orders_cards.add_child(card)
 
 
-func _add_order_card_label(parent: VBoxContainer, text: String, font_size: int = 10) -> void:
+func _add_order_card_label(parent: VBoxContainer, text: String, font_size: int = 16) -> void:
 	var label := Label.new()
 	label.text = text
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL

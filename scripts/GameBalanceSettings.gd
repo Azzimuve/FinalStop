@@ -70,8 +70,6 @@ class_name GameBalanceSettings
 
 @export_group("Торговля и улучшения")
 @export var workshop_upgrade_cost_credits: float = 400.0
-@export var upgraded_engine_price_credits: float = 600.0
-@export var upgraded_engine_speed_multiplier: float = 1.2
 @export var trader_buyback_multiplier: float = 0.5
 
 

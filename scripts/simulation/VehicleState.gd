@@ -1,5 +1,7 @@
 extends RefCounted
 
+const ItemCatalog = preload("res://scripts/simulation/ItemCatalog.gd")
+
 const TravelRules = preload("res://scripts/simulation/TravelRules.gd")
 const VehicleInventory = preload("res://scripts/simulation/VehicleInventory.gd")
 
@@ -45,9 +47,8 @@ func _init(balance_settings: GameBalanceSettings) -> void:
 	settings = balance_settings
 	fuel_liters = settings.fuel_tank_capacity_liters
 	for part_id in PART_NAMES:
-		_parts[part_id] = VehiclePart.new("Стандартная", {}, PART_SLOT_SIZES[part_id])
-		get_part(part_id).slot_type = slot_type(part_id)
-		get_part(part_id).title = PART_NAMES[part_id]
+		_parts[part_id] = ItemCatalog.create("standard_" + part_id)
+
 
 
 func affordable_refuel_liters(credits: float) -> float:

@@ -9,7 +9,7 @@ signal discarded(item: CargoItem)
 signal used(item: CargoItem)
 
 var interaction: InventoryInteraction
-var warehouse := VehicleInventory.new(Vector2i(24, 24))
+var warehouse := VehicleInventory.new(Vector2i(16, 24))
 var pickup_cargo: Array[CargoItem] = []
 var auto_button: Button
 var close_button: Button
@@ -25,7 +25,7 @@ func _ready() -> void:
 	interaction.used.connect(func(item: CargoItem): used.emit(item))
 	auto_button = Button.new()
 	auto_button.text = "Взять всё"
-	auto_button.position = Vector2(12, 285)
+	auto_button.position = Vector2(12, 600)
 	auto_button.pressed.connect(_take_all)
 	add_child(auto_button)
 	close_button = Button.new()
@@ -37,16 +37,16 @@ func _ready() -> void:
 func open(model: VehicleInventory, order_cargo: Array[CargoItem], allow_loading: bool, capacity_kg: float) -> void:
 	loading = allow_loading
 	pickup_cargo = order_cargo.duplicate()
-	warehouse = VehicleInventory.new(Vector2i(24, 24))
+	warehouse = VehicleInventory.new(Vector2i(16, 24))
 	if loading:
 		for item in pickup_cargo:
 			if not model.contains(item):
 				warehouse.auto_load([item])
-	size = Vector2(550 if loading else 270, 325)
-	close_button.position = Vector2(size.x - 100, 285)
+	size = Vector2(1200 if loading else 600, 640)
+	close_button.position = Vector2(size.x - 100, size.y - 40)
 	auto_button.visible = loading
 	interaction.cargo_capacity_kg = capacity_kg
-	interaction.configure(model, warehouse if loading else null, "Инвентарь склада · 24×24")
+	interaction.configure(model, warehouse if loading else null, "Инвентарь склада · 16×24")
 	position = (get_viewport_rect().size - size) / 2.0
 	show()
 

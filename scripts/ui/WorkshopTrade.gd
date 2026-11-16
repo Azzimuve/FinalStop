@@ -1,5 +1,7 @@
 extends AcceptDialog
 
+const ItemCatalog = preload("res://scripts/simulation/ItemCatalog.gd")
+
 const VehicleInventory = preload("res://scripts/simulation/VehicleInventory.gd")
 const VehiclePart = preload("res://scripts/simulation/VehiclePart.gd")
 const CargoItem = preload("res://scripts/simulation/CargoItem.gd")
@@ -9,7 +11,7 @@ signal credits_changed(delta: float)
 signal discarded(item: CargoItem)
 signal used(item: CargoItem)
 
-var stock := VehicleInventory.new(Vector2i(24, 24))
+var stock := VehicleInventory.new(Vector2i(16, 24))
 var interaction: InventoryInteraction
 var credits: float
 var settings: GameBalanceSettings
@@ -19,7 +21,7 @@ var stock_initialized: bool = false
 
 func _ready() -> void:
 	title = "Магазин · Торговля" if is_store else "Мастерская · Торговля"
-	size = Vector2i(550, 330)
+	size = Vector2i(1224, 640)
 	ok_button_text = "Закрыть"
 	# Единственный прямой Control сохраняет раскладку внутри AcceptDialog.
 	interaction = InventoryInteraction.new()
@@ -38,17 +40,15 @@ func open(inventory: VehicleInventory, money: float, balance: GameBalanceSetting
 	credits = money
 	settings = balance
 	if not stock_initialized:
+		var item := ItemCatalog.create("cigarettes" if is_store else "upgraded_engine")
+		if item != null:
+			stock.place(item, Vector2i.ZERO, false)
 		if is_store:
-			var cigarettes := CargoItem.new("Сигареты", Vector2i(1, 1), 20.0)
-			cigarettes.uses_remaining = 21
-			stock.place(cigarettes, Vector2i.ZERO, false)
-		else:
-			var engine := VehiclePart.new("Новый двигатель", {"speed_multiplier": settings.upgraded_engine_speed_multiplier}, Vector2i(2, 3))
-			engine.slot_type = "engine"
-			engine.price_credits = settings.upgraded_engine_price_credits
-			stock.place(engine, Vector2i.ZERO, false)
+			var water := ItemCatalog.create("water_bottle")
+			if water != null:
+				stock.auto_load([water])
 		stock_initialized = true
-	interaction.configure(inventory, stock, "Инвентарь торговца · 24×24")
+	interaction.configure(inventory, stock, "Инвентарь торговца · 16×24")
 	popup_centered()
 
 

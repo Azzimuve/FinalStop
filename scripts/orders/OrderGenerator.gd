@@ -1,5 +1,7 @@
 extends RefCounted
 
+const ItemCatalog = preload("res://scripts/simulation/ItemCatalog.gd")
+
 const DeliveryOrder = preload("res://scripts/orders/DeliveryOrder.gd")
 const CargoItem = preload("res://scripts/simulation/CargoItem.gd")
 const RoutePlanner = preload("res://scripts/map/RoutePlanner.gd")
@@ -9,8 +11,22 @@ const TravelRules = preload("res://scripts/simulation/TravelRules.gd")
 
 const DEADLINE_BUFFER_MINUTES: float = 300.0
 const CARD_COUNT: int = 3
+const REFRESH_MINUTES: float = 360.0
 
 var settings: GameBalanceSettings
+var available_offers: Array[DeliveryOrder] = []
+var next_refresh_minutes: float = -1.0
+
+
+func refresh_offers(routes: RoutePlanner, current_minutes: float) -> bool:
+	if next_refresh_minutes >= 0.0 and current_minutes < next_refresh_minutes:
+		return false
+	var refresh_time := current_minutes
+	if next_refresh_minutes >= 0.0:
+		refresh_time = next_refresh_minutes + floorf((current_minutes - next_refresh_minutes) / REFRESH_MINUTES) * REFRESH_MINUTES
+	available_offers = generate(routes, refresh_time)
+	next_refresh_minutes = refresh_time + REFRESH_MINUTES
+	return true
 
 
 func _init(balance_settings: GameBalanceSettings) -> void:
@@ -50,8 +66,12 @@ func generate(routes: RoutePlanner, current_minutes: float) -> Array[DeliveryOrd
 				continue
 			var estimated_minutes := TravelRules.duration_for_distance(distance) * GameClock.GAME_MINUTES_PER_REAL_SECOND
 			var order := DeliveryOrder.new()
-			order.cargo = [CargoItem.new("Тестовый ящик", Vector2i(2, 2)), CargoItem.new("Тестовая коробка", Vector2i(1, 2)), CargoItem.new("Тестовый длинный груз", Vector2i(1, 4))]
-			order.cargo.append(CargoItem.new("Тестовый маленький предмет", Vector2i(1, 1)))
+			for item_id in ["test_crate", "test_box", "test_long_cargo", "test_small_item"]:
+				var item := ItemCatalog.create(item_id)
+				if item != null:
+					order.cargo.append(item)
+			if order.cargo.size() != 4:
+				continue
 			order.is_urgent = randf() < clampf(settings.urgent_order_chance_percent / 100.0, 0.0, 1.0)
 			order.title = ("Срочная доставка: %s" if order.is_urgent else "Доставка груза: %s") % destination_place["name"]
 			order.pickup_city_id = company_city["id"]

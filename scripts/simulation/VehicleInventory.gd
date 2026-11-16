@@ -1,7 +1,7 @@
 extends RefCounted
 
 const CargoItem = preload("res://scripts/simulation/CargoItem.gd")
-const SIZE := Vector2i(24, 8)
+const SIZE := Vector2i(6, 12)
 
 # Размещение отделено от данных предмета: один и тот же груз сохраняет свою сущность.
 var placements: Array[Dictionary] = []
