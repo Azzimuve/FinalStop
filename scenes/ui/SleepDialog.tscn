@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/SleepDialog.gd" id="1"]
+
+[node name="SleepDialog" type="AcceptDialog"]
+script = ExtResource("1")
+title = "Сон"
+dialog_text = "Сколько часов проспать?"
+ok_button_text = "Спать"
+
+[node name="Hours" type="SpinBox" parent="."]
+min_value = 1.0
+max_value = 12.0
+step = 1.0
+value = 1.0

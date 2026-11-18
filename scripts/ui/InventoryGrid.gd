@@ -1,8 +1,11 @@
+@tool
 extends Control
 
 const VehicleInventory = preload("res://scripts/simulation/VehicleInventory.gd")
 const CargoItem = preload("res://scripts/simulation/CargoItem.gd")
 const CELL: float = 32.0
+@export var preview_dimensions := Vector2i(6, 12)
+
 static var _textures: Dictionary = {}
 
 
@@ -76,17 +79,19 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
-	if model == null:
+	if model == null and not Engine.is_editor_hint():
 		return
-	var grid_size := Vector2(model.dimensions) * CELL
+	var dimensions := model.dimensions if model != null else preview_dimensions
+	var placements: Array = model.placements if model != null else []
+	var grid_size := Vector2(dimensions) * CELL
 	var grid_color := Color(0.4, 0.52, 0.52)
 	draw_rect(Rect2(Vector2.ZERO, grid_size), Color(0.10, 0.14, 0.15))
-	for y in range(1, model.dimensions.y):
+	for y in range(1, dimensions.y):
 		draw_line(Vector2(0, y * CELL), Vector2(grid_size.x, y * CELL), grid_color, 1.0)
-	for x in range(1, model.dimensions.x):
+	for x in range(1, dimensions.x):
 		draw_line(Vector2(x * CELL, 0), Vector2(x * CELL, grid_size.y), grid_color, 1.0)
-	for index in range(model.placements.size()):
-		var placement: Dictionary = model.placements[index]
+	for index in range(placements.size()):
+		var placement: Dictionary = placements[index]
 		var rect := Rect2(Vector2(placement.cell) * CELL + Vector2.ONE, Vector2(placement.extent) * CELL - Vector2.ONE * 2)
 		var textured := draw_item(self, placement.item, rect, placement.rotated, Color(0.85, 0.7, 0.3) if selected == placement.item else Color(0.3, 0.65, 0.55))
 		if textured and selected == placement.item:

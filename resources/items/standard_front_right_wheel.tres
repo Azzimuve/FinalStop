@@ -1,0 +1,20 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/simulation/VehiclePart.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+item_id = "standard_front_right_wheel"
+title = "Переднее правое колесо"
+description = ""
+category = ""
+texture_path = ""
+size = Vector2i(2, 2)
+weight_kg = -1.0
+price_credits = 600
+has_uses = false
+uses_remaining = 1
+properties = {}
+model_name = "Стандартная"
+slot_type = "wheel"
+condition_percent = 100.0

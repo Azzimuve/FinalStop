@@ -4,6 +4,16 @@ const CargoItem = preload("res://scripts/simulation/CargoItem.gd")
 var cargo: Array[CargoItem] = []
 var delivered_cargo: Array[CargoItem] = []
 var lost_cargo: Array[CargoItem] = []
+var passenger_count: int = 0
+var passengers_picked_up: bool = false
+
+
+func is_passenger_order() -> bool:
+	return passenger_count > 0
+
+
+func has_pending_pickup() -> bool:
+	return not passengers_picked_up if is_passenger_order() else not remaining_cargo().is_empty()
 
 
 func remaining_cargo() -> Array[CargoItem]:

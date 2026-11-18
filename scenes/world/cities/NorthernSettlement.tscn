@@ -1,0 +1,221 @@
+[gd_scene format=3 uid="uid://t5214x8q1wp2"]
+
+[ext_resource type="Script" uid="uid://dgwlb3ntiyr14" path="res://scripts/world/MapCity.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/world/RoadPoint.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/world/Road.tscn" id="3"]
+[ext_resource type="Script" uid="uid://dysb5r473b5uh" path="res://scripts/world/MapPoint.gd" id="3_0q0gp"]
+[ext_resource type="PackedScene" path="res://scenes/world/PointOfInterest.tscn" id="4"]
+[ext_resource type="Script" uid="uid://bajmann0p88am" path="res://scripts/world/MapRoad.gd" id="5_nrpu2"]
+
+[sub_resource type="Curve2D" id="Curve2D_0q0gp"]
+resource_local_to_scene = true
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 109.25438, 5.039219, -0.30566406, -17.604782, 0.08358765, 4.8142586, 109.86852, 40.411507, -0.076797485, -4.4232483, 0, 0, 110.11228, 54.451103)
+}
+point_count = 3
+
+[sub_resource type="Curve2D" id="Curve2D_nrpu2"]
+resource_local_to_scene = true
+_data = {
+"points": PackedVector2Array(0, 0, 0.19893646, 11.458099, 110.11228, 54.451103, 0, 0, 0, 0, 110.46602, 74.825134)
+}
+point_count = 2
+
+[node name="City" type="Node2D" unique_id=864855795]
+script = ExtResource("1")
+city_id = "northern_settlement"
+display_name = "Северный посёлок"
+city_type = "settlement"
+entry_node = NodePath("Layout/Points/northern_settlement_entry")
+
+[node name="Marker" type="Polygon2D" parent="." unique_id=659274193]
+modulate = Color(1, 1, 1, 0)
+color = Color(0.76, 0.81, 0.78, 1)
+polygon = PackedVector2Array(20, 0, 19.8289, 2.61052, 19.31852, 5.17638, 18.47759, 7.65367, 17.32051, 10, 15.86707, 12.17523, 14.14214, 14.14214, 12.17523, 15.86707, 10, 17.32051, 7.65367, 18.47759, 5.17638, 19.31852, 2.61052, 19.8289, 0, 20, -2.61052, 19.8289, -5.17638, 19.31852, -7.65367, 18.47759, -10, 17.32051, -12.17523, 15.86707, -14.14214, 14.14214, -15.86707, 12.17523, -17.32051, 10, -18.47759, 7.65367, -19.31852, 5.17638, -19.8289, 2.61052, -20, 0, -19.8289, -2.61052, -19.31852, -5.17638, -18.47759, -7.65367, -17.32051, -10, -15.86707, -12.17523, -14.14214, -14.14214, -12.17523, -15.86707, -10, -17.32051, -7.65367, -18.47759, -5.17638, -19.31852, -2.61052, -19.8289, 0, -20, 2.61052, -19.8289, 5.17638, -19.31852, 7.65367, -18.47759, 10, -17.32051, 12.17523, -15.86707, 14.14214, -14.14214, 15.86707, -12.17523, 17.32051, -10, 18.47759, -7.65367, 19.31852, -5.17638, 19.8289, -2.61052)
+
+[node name="Center" type="Polygon2D" parent="Marker" unique_id=1408620601]
+color = Color(0.055, 0.078, 0.086, 1)
+polygon = PackedVector2Array(8, 0, 7.84628, 1.56072, 7.39104, 3.06147, 6.65176, 4.44456, 5.65685, 5.65685, 4.44456, 6.65176, 3.06147, 7.39104, 1.56072, 7.84628, 0, 8, -1.56072, 7.84628, -3.06147, 7.39104, -4.44456, 6.65176, -5.65685, 5.65685, -6.65176, 4.44456, -7.39104, 3.06147, -7.84628, 1.56072, -8, 0, -7.84628, -1.56072, -7.39104, -3.06147, -6.65176, -4.44456, -5.65685, -5.65685, -4.44456, -6.65176, -3.06147, -7.39104, -1.56072, -7.84628, 0, -8, 1.56072, -7.84628, 3.06147, -7.39104, 4.44456, -6.65176, 5.65685, -5.65685, 6.65176, -4.44456, 7.39104, -3.06147, 7.84628, -1.56072)
+
+[node name="Caption" type="Label" parent="." unique_id=178396587]
+modulate = Color(1, 1, 1, 0)
+offset_left = -80.0
+offset_top = 24.0
+theme_override_colors/font_color = Color(0.76, 0.81, 0.78, 1)
+theme_override_font_sizes/font_size = 24
+text = "Северный посёлок"
+
+[node name="DetailCaption" type="Label" parent="." unique_id=1738839504]
+offset_left = -70.0
+offset_top = -121.0
+theme_override_colors/font_color = Color(0.76, 0.81, 0.78, 1)
+theme_override_font_sizes/font_size = 16
+text = "Северный посёлок"
+
+[node name="Layout" type="Node2D" parent="." unique_id=1345557383]
+
+[node name="Points" type="Node2D" parent="Layout" unique_id=287362739]
+
+[node name="northern_settlement_entry" parent="Layout/Points" unique_id=720056181 instance=ExtResource("2")]
+position = Vector2(0, 110)
+point_id = "northern_settlement_entry"
+
+[node name="northern_settlement_east" parent="Layout/Points" unique_id=2039696326 instance=ExtResource("2")]
+position = Vector2(110.46602, 74.825134)
+point_id = "northern_settlement_east"
+
+[node name="northern_settlement_center" parent="Layout/Points" unique_id=781842970 instance=ExtResource("2")]
+position = Vector2(0, 45)
+point_id = "northern_settlement_center"
+
+[node name="northern_settlement_hotel_road" parent="Layout/Points" unique_id=860573955 instance=ExtResource("2")]
+position = Vector2(-65, 20)
+point_id = "northern_settlement_hotel_road"
+
+[node name="northern_settlement_workshop_road" parent="Layout/Points" unique_id=893355032 instance=ExtResource("2")]
+position = Vector2(55, 75)
+point_id = "northern_settlement_workshop_road"
+
+[node name="Point1" type="Node2D" parent="Layout/Points" unique_id=1354009738 instance=ExtResource("2")]
+position = Vector2(-64.56122, 67.725334)
+script = ExtResource("3_0q0gp")
+point_id = "northern_settlement_road_1"
+
+[node name="Point2" type="Node2D" parent="Layout/Points" unique_id=1813345008 instance=ExtResource("2")]
+position = Vector2(45.832306, 5.4721336)
+script = ExtResource("3_0q0gp")
+point_id = "northern_settlement_road_2"
+
+[node name="Point3" type="Node2D" parent="Layout/Points" unique_id=1586228618 instance=ExtResource("2")]
+position = Vector2(109.25438, 5.039219)
+script = ExtResource("3_0q0gp")
+point_id = "northern_settlement_road_3"
+
+[node name="Point4" type="Node2D" parent="Layout/Points" unique_id=1276257020 instance=ExtResource("2")]
+position = Vector2(110.11228, 54.451103)
+script = ExtResource("3_0q0gp")
+point_id = "northern_settlement_road_4"
+
+[node name="Point5" type="Node2D" parent="Layout/Points" unique_id=1054454978 instance=ExtResource("2")]
+position = Vector2(185.75015, 53.569008)
+script = ExtResource("3_0q0gp")
+point_id = "northern_settlement_road_5"
+
+[node name="Point6" type="Node2D" parent="Layout/Points" unique_id=657250078 instance=ExtResource("2")]
+position = Vector2(185.96661, 94.26303)
+script = ExtResource("3_0q0gp")
+point_id = "northern_settlement_road_6"
+
+[node name="Roads" type="Node2D" parent="Layout" unique_id=1614702540]
+z_index = -1
+
+[node name="Road1" parent="Layout/Roads" unique_id=1773191585 instance=ExtResource("3")]
+from_node = NodePath("../../Points/northern_settlement_entry")
+to_node = NodePath("../../Points/northern_settlement_center")
+
+[node name="Road2" parent="Layout/Roads" unique_id=759009409 instance=ExtResource("3")]
+from_node = NodePath("../../Points/northern_settlement_center")
+to_node = NodePath("../../Points/northern_settlement_hotel_road")
+
+[node name="Road3" parent="Layout/Roads" unique_id=708070562 instance=ExtResource("3")]
+from_node = NodePath("../../Points/northern_settlement_center")
+to_node = NodePath("../../Points/northern_settlement_workshop_road")
+
+[node name="Road4" parent="Layout/Roads" unique_id=82117245 instance=ExtResource("3")]
+from_node = NodePath("../../Points/northern_settlement_workshop_road")
+to_node = NodePath("../../Points/northern_settlement_east")
+
+[node name="Driveway_northern_settlement_workshop" parent="Layout/Roads" unique_id=1092481292 instance=ExtResource("3")]
+from_node = NodePath("../../Points/northern_settlement_workshop_road")
+to_node = NodePath("../../Places/northern_settlement_workshop")
+
+[node name="Driveway_northern_settlement_hotel" parent="Layout/Roads" unique_id=982013738 instance=ExtResource("3")]
+from_node = NodePath("../../Points/northern_settlement_hotel_road")
+to_node = NodePath("../../Places/northern_settlement_hotel")
+
+[node name="Road5" type="Node2D" parent="Layout/Roads" unique_id=1745872923 instance=ExtResource("3")]
+script = ExtResource("5_nrpu2")
+from_node = NodePath("../../Points/northern_settlement_center")
+to_node = NodePath("../../Points/Point1")
+road_width = 5.1
+
+[node name="Road6" type="Node2D" parent="Layout/Roads" unique_id=1145141311 instance=ExtResource("3")]
+script = ExtResource("5_nrpu2")
+from_node = NodePath("../../Points/Point1")
+to_node = NodePath("../../Points/northern_settlement_hotel_road")
+road_width = 5.1
+
+[node name="Road7" type="Node2D" parent="Layout/Roads" unique_id=422496808 instance=ExtResource("3")]
+script = ExtResource("5_nrpu2")
+from_node = NodePath("../../Points/northern_settlement_center")
+to_node = NodePath("../../Points/Point2")
+road_width = 5.1
+
+[node name="Road8" type="Node2D" parent="Layout/Roads" unique_id=1363834143 instance=ExtResource("3")]
+script = ExtResource("5_nrpu2")
+from_node = NodePath("../../Points/Point2")
+to_node = NodePath("../../Points/Point3")
+road_width = 5.1
+
+[node name="Road9" type="Node2D" parent="Layout/Roads" unique_id=275925530 instance=ExtResource("3")]
+script = ExtResource("5_nrpu2")
+from_node = NodePath("../../Points/Point3")
+to_node = NodePath("../../Points/Point4")
+road_width = 5.1
+curve = SubResource("Curve2D_0q0gp")
+
+[node name="Road11" type="Node2D" parent="Layout/Roads" unique_id=554395267 instance=ExtResource("3")]
+script = ExtResource("5_nrpu2")
+from_node = NodePath("../../Points/Point4")
+to_node = NodePath("../../Points/northern_settlement_east")
+road_width = 5.1
+curve = SubResource("Curve2D_nrpu2")
+
+[node name="Road12" type="Node2D" parent="Layout/Roads" unique_id=944948025 instance=ExtResource("3")]
+script = ExtResource("5_nrpu2")
+from_node = NodePath("../../Points/Point4")
+to_node = NodePath("../../Points/Point5")
+road_width = 5.1
+
+[node name="Road13" type="Node2D" parent="Layout/Roads" unique_id=828562086 instance=ExtResource("3")]
+script = ExtResource("5_nrpu2")
+from_node = NodePath("../../Points/Point5")
+to_node = NodePath("../../Points/Point6")
+road_width = 5.1
+
+[node name="Places" type="Node2D" parent="Layout" unique_id=1850096082]
+
+[node name="PointOfInterest2" parent="Layout/Places" unique_id=1551036305 instance=ExtResource("4")]
+position = Vector2(185.96661, 94.26303)
+place_id = "North_Punkt_Dostavki"
+display_name = "Пункт доставки"
+object_type = 8
+road_node = NodePath("../../Points/Point6")
+
+[node name="northern_settlement_workshop" parent="Layout/Places" unique_id=230009589 instance=ExtResource("4")]
+position = Vector2(55, 75)
+place_id = "northern_settlement_workshop"
+display_name = "Мастерская"
+object_type = 2
+road_node = NodePath("../../Points/northern_settlement_workshop_road")
+
+[node name="northern_busstop" parent="Layout/Places" unique_id=802758988 instance=ExtResource("4")]
+position = Vector2(-65, 68)
+place_id = "north_busstop"
+display_name = "Автостанция"
+object_type = 7
+road_node = NodePath("../../Points/Point1")
+
+[node name="PointOfInterest" parent="Layout/Places" unique_id=1683957226 instance=ExtResource("4")]
+position = Vector2(109, 5)
+place_id = "north_gasstation"
+display_name = "Заправка"
+object_type = 3
+road_node = NodePath("../../Points/Point3")
+
+[node name="northern_settlement_hotel" parent="Layout/Places" unique_id=685472053 instance=ExtResource("4")]
+position = Vector2(-65, 20)
+place_id = "northern_settlement_hotel"
+display_name = "Отель"
+object_type = 9
+road_node = NodePath("../../Points/northern_settlement_hotel_road")

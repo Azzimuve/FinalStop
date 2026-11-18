@@ -1,0 +1,74 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/InventoryInteraction.gd" id="1"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/CharacterSlots.tscn" id="2"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/InventoryGrid.tscn" id="3"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/ItemCard.tscn" id="4"]
+
+[node name="InventoryInteraction" type="Control"]
+script = ExtResource("1")
+custom_minimum_size = Vector2(1200, 588)
+offset_left = 0
+offset_top = 0
+offset_right = 1200
+offset_bottom = 588
+
+[node name="PlayerTitle" type="Label" parent="."]
+text = "Мой инвентарь · 6×12"
+offset_left = 12
+offset_top = 8
+offset_right = 204
+offset_bottom = 28
+theme_override_font_sizes/font_size = 12
+
+[node name="CharacterSlots" parent="." instance=ExtResource("2")]
+offset_left = 16
+offset_top = 32
+offset_right = 200
+offset_bottom = 88
+
+[node name="RightTitle" type="Label" parent="."]
+text = "Инвентарь склада · 16×24"
+offset_left = 612
+offset_top = 8
+offset_right = 1188
+offset_bottom = 28
+theme_override_font_sizes/font_size = 12
+
+[node name="LeftScroll" type="ScrollContainer" parent="."]
+offset_left = 12
+offset_top = 112
+offset_right = 204
+offset_bottom = 496
+horizontal_scroll_mode = 0
+
+[node name="Grid" parent="LeftScroll" instance=ExtResource("3")]
+
+
+[node name="RightScroll" type="ScrollContainer" parent="."]
+offset_left = 612
+offset_top = 32
+offset_right = 1188
+offset_bottom = 576
+horizontal_scroll_mode = 0
+
+[node name="Grid" parent="RightScroll" instance=ExtResource("3")]
+preview_dimensions = Vector2i(16, 24)
+custom_minimum_size = Vector2(512, 768)
+
+[node name="Info" type="Label" parent="."]
+text = "ЛКМ: взять / положить. R: поворот. ПКМ: меню."
+offset_left = 228
+offset_top = 32
+offset_right = 588
+offset_bottom = 544
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 12
+
+[node name="ContextMenu" type="PopupMenu" parent="."]
+
+
+[node name="ItemCard" parent="." instance=ExtResource("4")]

@@ -1,21 +1,21 @@
-extends RefCounted
+extends Resource
 
-var item_id: String
-var description: String = ""
-var category: String = ""
-var texture_path: String = ""
-var properties: Dictionary = {}
-var has_uses: bool = false
-var title: String
-var size: Vector2i
+@export var item_id: String
+@export var description: String = ""
+@export var category: String = ""
+@export_file("*.png", "*.svg", "*.webp", "*.jpg") var texture_path: String = ""
+@export var properties: Dictionary = {}
+@export var has_uses: bool = false
+@export var title: String
+@export var size: Vector2i
 # Отрицательная цена означает, что предмет не участвует в торговле.
-var price_credits: float = -1.0
-var uses_remaining: int = 1
+@export var price_credits: float = -1.0
+@export var uses_remaining: int = 1
 # Отрицательный вес означает, что данные ещё не заданы. Ноль — известный вес.
-var weight_kg: float = -1.0
+@export var weight_kg: float = -1.0
 
 
-func _init(item_title: String, item_size: Vector2i, price: float = -1.0) -> void:
+func _init(item_title: String = "", item_size: Vector2i = Vector2i.ONE, price: float = -1.0) -> void:
 	title = item_title
 	size = item_size
 	price_credits = price

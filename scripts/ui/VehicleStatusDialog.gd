@@ -9,30 +9,15 @@ var vehicle: VehicleState
 var repairs_allowed: bool = false
 var credits: float = 0.0
 var selected_repair_part_id: String = ""
-var vehicle_parts_view: VehiclePartsView
-var repair_details: VBoxContainer
-var repair_details_label: Label
-var selected_repair_button: Button
+@onready var vehicle_parts_view: VehiclePartsView = $Content/PartsView
+@onready var repair_details: VBoxContainer = $Content/RepairDetails
+@onready var repair_details_label: Label = $Content/RepairDetails/Description
+@onready var selected_repair_button: Button = $Content/RepairDetails/Repair
 
 
 func _ready() -> void:
-	vehicle_parts_view = VehiclePartsView.new()
-	var status_content := VBoxContainer.new()
-	add_child(status_content)
-	status_content.add_child(vehicle_parts_view)
-	vehicle_parts_view.selectable = true
 	vehicle_parts_view.slot_clicked.connect(_on_repair_slot_clicked)
-	repair_details = VBoxContainer.new()
-	status_content.add_child(repair_details)
-	repair_details_label = Label.new()
-	repair_details_label.custom_minimum_size.x = 280.0
-	repair_details_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	repair_details.add_child(repair_details_label)
-	selected_repair_button = Button.new()
-	selected_repair_button.text = "Ремонт"
 	selected_repair_button.pressed.connect(_request_repair)
-	repair_details.add_child(selected_repair_button)
-	repair_details.hide()
 
 
 func open(model: VehicleState, money: float, allow_repairs: bool) -> void:

@@ -1,14 +1,19 @@
-extends RefCounted
+extends Node2D
 
-const ItemCatalog = preload("res://scripts/simulation/ItemCatalog.gd")
 
 const TravelRules = preload("res://scripts/simulation/TravelRules.gd")
 const VehicleInventory = preload("res://scripts/simulation/VehicleInventory.gd")
 
 enum DriveMode { ECONOMY, NORMAL, FORCED }
 
-var drive_mode: DriveMode = DriveMode.NORMAL
-var inventory := VehicleInventory.new()
+@export var drive_mode: DriveMode = DriveMode.NORMAL
+var inventory: VehicleInventory
+const PASSENGER_CAPACITY: int = 2
+signal passengers_changed
+var _passenger_count: int = 0
+var passenger_count: int:
+	get:
+		return _passenger_count
 
 var fuel_liters: float
 const VehiclePart = preload("res://scripts/simulation/VehiclePart.gd")
@@ -40,20 +45,49 @@ var condition_percent: float:
 			if get_part(part_id) != null:
 				total += get_part(part_id).condition_percent
 		return total / PART_NAMES.size()
-var settings: GameBalanceSettings
+@export_group("Автомобиль")
+@export var settings: GameBalanceSettings
+@export_range(0.0, 1.0) var initial_fuel_fraction: float = 1.0
+@export var inventory_dimensions := Vector2i(6, 12)
+@export_range(0.01, 1000.0) var base_speed: float = TravelRules.DISTANCE_UNITS_PER_SECOND
+@export var installed_parts: Array[VehiclePart] = []
 
 
-func _init(balance_settings: GameBalanceSettings) -> void:
-	settings = balance_settings
-	fuel_liters = settings.fuel_tank_capacity_liters
+func _ready() -> void:
+	inventory = VehicleInventory.new(Vector2i(maxi(1, inventory_dimensions.x), maxi(1, inventory_dimensions.y)))
+	fuel_liters = settings.fuel_tank_capacity_liters * initial_fuel_fraction
+	var index := 0
 	for part_id in PART_NAMES:
-		_parts[part_id] = ItemCatalog.create("standard_" + part_id)
-
+		if index < installed_parts.size() and installed_parts[index] != null:
+			var part := installed_parts[index].duplicate(true) as VehiclePart
+			if part.slot_type == slot_type(part_id) and part.size == PART_SLOT_SIZES[part_id]:
+				_parts[part_id] = part
+		index += 1
 
 
 func affordable_refuel_liters(credits: float) -> float:
 	var missing_liters := maxf(0.0, settings.fuel_tank_capacity_liters - fuel_liters)
 	return minf(missing_liters, credits / settings.fuel_price_per_liter_credits)
+
+
+func free_passenger_seats() -> int:
+	return PASSENGER_CAPACITY - _passenger_count
+
+
+func board_passengers(count: int) -> bool:
+	if count <= 0 or count > free_passenger_seats():
+		return false
+	_passenger_count += count
+	passengers_changed.emit()
+	return true
+
+
+func disembark_passengers(count: int) -> bool:
+	if count <= 0 or count > _passenger_count:
+		return false
+	_passenger_count -= count
+	passengers_changed.emit()
+	return true
 
 
 func consume_distance(distance_units: float) -> float:
@@ -144,7 +178,7 @@ func is_complete() -> bool:
 func duration_for_distance(distance: float) -> float:
 	var engine := get_part("engine")
 	var multiplier := float(engine.parameters.get("speed_multiplier", 1.0)) if engine != null else 1.0
-	return maxf(0.5, distance / (TravelRules.DISTANCE_UNITS_PER_SECOND * multiplier))
+	return maxf(0.5, distance / (base_speed * multiplier))
 
 
 func overload_ratio() -> float:

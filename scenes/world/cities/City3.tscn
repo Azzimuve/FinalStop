@@ -1,0 +1,99 @@
+[gd_scene format=3 uid="uid://da34dop1vksr0"]
+
+[ext_resource type="Script" uid="uid://dgwlb3ntiyr14" path="res://scripts/world/MapCity.gd" id="1_ogwyt"]
+[ext_resource type="PackedScene" path="res://scenes/world/RoadPoint.tscn" id="2_62qw5"]
+[ext_resource type="PackedScene" path="res://scenes/world/Road.tscn" id="3_goc3p"]
+[ext_resource type="PackedScene" path="res://scenes/world/PointOfInterest.tscn" id="4_aspqb"]
+
+[node name="City3" type="Node2D" unique_id=454871126]
+script = ExtResource("1_ogwyt")
+city_id = "city_3"
+display_name = "Даунтаун"
+entry_node = NodePath("Layout/Points/Entry")
+
+[node name="Marker" type="Polygon2D" parent="." unique_id=1328598069]
+modulate = Color(1, 1, 1, 0)
+color = Color(0.76, 0.81, 0.78, 1)
+polygon = PackedVector2Array(20, 0, 19.8289, 2.61052, 19.31852, 5.17638, 18.47759, 7.65367, 17.32051, 10, 15.86707, 12.17523, 14.14214, 14.14214, 12.17523, 15.86707, 10, 17.32051, 7.65367, 18.47759, 5.17638, 19.31852, 2.61052, 19.8289, 0, 20, -2.61052, 19.8289, -5.17638, 19.31852, -7.65367, 18.47759, -10, 17.32051, -12.17523, 15.86707, -14.14214, 14.14214, -15.86707, 12.17523, -17.32051, 10, -18.47759, 7.65367, -19.31852, 5.17638, -19.8289, 2.61052, -20, 0, -19.8289, -2.61052, -19.31852, -5.17638, -18.47759, -7.65367, -17.32051, -10, -15.86707, -12.17523, -14.14214, -14.14214, -12.17523, -15.86707, -10, -17.32051, -7.65367, -18.47759, -5.17638, -19.31852, -2.61052, -19.8289, 0, -20, 2.61052, -19.8289, 5.17638, -19.31852, 7.65367, -18.47759, 10, -17.32051, 12.17523, -15.86707, 14.14214, -14.14214, 15.86707, -12.17523, 17.32051, -10, 18.47759, -7.65367, 19.31852, -5.17638, 19.8289, -2.61052)
+
+[node name="Center" type="Polygon2D" parent="Marker" unique_id=449365980]
+color = Color(0.055, 0.078, 0.086, 1)
+polygon = PackedVector2Array(8, 0, 7.84628, 1.56072, 7.39104, 3.06147, 6.65176, 4.44456, 5.65685, 5.65685, 4.44456, 6.65176, 3.06147, 7.39104, 1.56072, 7.84628, 0, 8, -1.56072, 7.84628, -3.06147, 7.39104, -4.44456, 6.65176, -5.65685, 5.65685, -6.65176, 4.44456, -7.39104, 3.06147, -7.84628, 1.56072, -8, 0, -7.84628, -1.56072, -7.39104, -3.06147, -6.65176, -4.44456, -5.65685, -5.65685, -4.44456, -6.65176, -3.06147, -7.39104, -1.56072, -7.84628, 0, -8, 1.56072, -7.84628, 3.06147, -7.39104, 4.44456, -6.65176, 5.65685, -5.65685, 6.65176, -4.44456, 7.39104, -3.06147, 7.84628, -1.56072)
+
+[node name="Caption" type="Label" parent="." unique_id=1578622518]
+modulate = Color(1, 1, 1, 0)
+offset_left = -80.0
+offset_top = 24.0
+theme_override_colors/font_color = Color(0.76, 0.81, 0.78, 1)
+theme_override_font_sizes/font_size = 24
+text = "Даунтаун"
+
+[node name="DetailCaption" type="Label" parent="." unique_id=842815417]
+offset_left = -70.0
+offset_top = -121.0
+theme_override_colors/font_color = Color(0.76, 0.81, 0.78, 1)
+theme_override_font_sizes/font_size = 16
+text = "Даунтаун"
+
+[node name="Layout" type="Node2D" parent="." unique_id=138000458]
+
+[node name="Points" type="Node2D" parent="Layout" unique_id=641406151]
+
+[node name="Entry" parent="Layout/Points" unique_id=1163327734 instance=ExtResource("2_62qw5")]
+position = Vector2(-100, 0)
+point_id = "entry"
+city_entrance = true
+entrance_name = "Test"
+
+[node name="Point1" parent="Layout/Points" unique_id=143818567 instance=ExtResource("2_62qw5")]
+position = Vector2(-24.18077, 0.20220947)
+point_id = "_road_1"
+
+[node name="Point2" parent="Layout/Points" unique_id=1188957542 instance=ExtResource("2_62qw5")]
+position = Vector2(0.1134491, 48.790634)
+point_id = "_road_2"
+
+[node name="Point3" parent="Layout/Points" unique_id=1172000539 instance=ExtResource("2_62qw5")]
+position = Vector2(25.007523, -0.39764404)
+point_id = "_road_3"
+
+[node name="Point4" parent="Layout/Points" unique_id=143487238 instance=ExtResource("2_62qw5")]
+position = Vector2(1.3131561, -49.885857)
+point_id = "_road_4"
+
+[node name="Roads" type="Node2D" parent="Layout" unique_id=2134213745]
+z_index = -1
+
+[node name="Road1" parent="Layout/Roads" unique_id=1338085093 instance=ExtResource("3_goc3p")]
+from_node = NodePath("../../Points/Entry")
+to_node = NodePath("../../Points/Point1")
+road_width = 5.1
+
+[node name="Road2" parent="Layout/Roads" unique_id=948597645 instance=ExtResource("3_goc3p")]
+from_node = NodePath("../../Points/Point1")
+to_node = NodePath("../../Points/Point2")
+road_width = 5.1
+
+[node name="Road3" parent="Layout/Roads" unique_id=207751518 instance=ExtResource("3_goc3p")]
+from_node = NodePath("../../Points/Point2")
+to_node = NodePath("../../Points/Point3")
+road_width = 5.1
+
+[node name="Road4" parent="Layout/Roads" unique_id=1679721302 instance=ExtResource("3_goc3p")]
+from_node = NodePath("../../Points/Point3")
+to_node = NodePath("../../Points/Point4")
+road_width = 5.1
+
+[node name="Road5" parent="Layout/Roads" unique_id=983264277 instance=ExtResource("3_goc3p")]
+from_node = NodePath("../../Points/Point4")
+to_node = NodePath("../../Points/Point1")
+road_width = 5.1
+
+[node name="Places" type="Node2D" parent="Layout" unique_id=16619640]
+
+[node name="PointOfInterest" parent="Layout/Places" unique_id=1472614666 instance=ExtResource("4_aspqb")]
+position = Vector2(25.007523, -0.39764404)
+place_id = "Sklad"
+display_name = "Склад"
+object_type = 4
+road_node = NodePath("../../Points/Point3")

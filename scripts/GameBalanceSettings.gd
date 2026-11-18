@@ -1,6 +1,8 @@
 extends Resource
 class_name GameBalanceSettings
 
+const CargoItem = preload("res://scripts/simulation/CargoItem.gd")
+
 # Фактические игровые значения хранятся в resources/GameBalanceSettings.tres.
 # Значения ниже служат начальными при создании нового ресурса.
 
@@ -43,6 +45,9 @@ class_name GameBalanceSettings
 @export_range(0.0, 1000.0) var overload_fuel_increase_percent_per_10_percent: float = 10.0
 @export_range(0.0, 1000.0) var overload_wear_increase_percent_per_10_percent: float = 10.0
 @export_range(0.0, 99.0) var overload_max_speed_loss_percent: float = 80.0
+
+@export_group("Грузовые заказы")
+@export var order_cargo: Array[CargoItem] = []
 
 @export_group("Выплаты за заказы")
 @export var order_payment_per_100_distance_units: float = 50.0

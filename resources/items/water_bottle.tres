@@ -1,0 +1,17 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/simulation/CargoItem.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+item_id = "water_bottle"
+title = "Бутылка воды"
+description = ""
+category = ""
+texture_path = ""
+size = Vector2i(1, 2)
+weight_kg = 0.5
+price_credits = 75
+has_uses = true
+uses_remaining = 1
+properties = {"water_restore": 70}

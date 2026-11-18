@@ -1,19 +1,24 @@
 extends RefCounted
 
-const WorldMapData = preload("res://scripts/WorldMapData.gd")
 const RouteGeometry = preload("res://scripts/map/RouteGeometry.gd")
 
-var cities: Array[Dictionary] = WorldMapData.get_cities()
+var cities: Array[Dictionary] = []
 var cities_by_id: Dictionary = {}
-var road_junctions: Array[Dictionary] = WorldMapData.get_road_junctions()
+var road_junctions: Array[Dictionary] = []
 var road_junctions_by_id: Dictionary = {}
-var roads: Array[Dictionary] = WorldMapData.get_roads()
+var roads: Array[Dictionary] = []
 # Геометрия карты неизменна в течение сессии; поиск улиц выполняется один раз
 # для каждой пары узлов. Выдаём копии, чтобы очистка маршрута не меняла кеш.
 var local_route_cache: Dictionary = {}
 
 
-func _init() -> void:
+func configure(graph: Dictionary) -> void:
+	cities.assign(graph.cities)
+	road_junctions.assign(graph.junctions)
+	roads.assign(graph.roads)
+	cities_by_id.clear()
+	road_junctions_by_id.clear()
+	local_route_cache.clear()
 	for city in cities:
 		cities_by_id[city["id"]] = city
 	for junction in road_junctions:
@@ -49,7 +54,10 @@ func build_intercity_route(start_city_id: String, start_location_id: String, des
 		var departure := road_endpoint(path[index], path[index + 1])
 		if points[-1].distance_to(departure) > 0.01:
 			points.append(departure)
-		points.append(road_endpoint(path[index + 1], path[index]))
+		var section := _edge_points(roads, path[index], path[index + 1])
+		if section.is_empty():
+			section.append(road_endpoint(path[index + 1], path[index]))
+		_append_unique(points, section)
 		if index + 2 < path.size() and cities_by_id.has(path[index + 1]):
 			var through_city: Dictionary = cities_by_id[path[index + 1]]
 			points.append_array(build_local_route(through_city, entrance_for(path[index + 1], path[index]), entrance_for(path[index + 1], path[index + 2])))
@@ -77,11 +85,33 @@ func build_local_route(city: Dictionary, start_location_id: String, destination_
 		return result
 
 	var node_ids := _find_node_path(city["street_roads"], start_node_id, destination_node_id)
-	var origin: Vector2 = city["position"]
-	for node_id in node_ids:
-		result.append(origin + street_node_position(city, node_id))
+	for index in range(node_ids.size() - 1):
+		var section := _edge_points(city["street_roads"], node_ids[index], node_ids[index + 1])
+		if section.is_empty():
+			section.assign([city["position"] + street_node_position(city, node_ids[index]),
+				city["position"] + street_node_position(city, node_ids[index + 1])])
+		_append_unique(result, section)
 	local_route_cache[cache_key] = result.duplicate()
 	return result
+
+
+func _edge_points(edges: Array, from_id: String, to_id: String) -> Array[Vector2]:
+	var result: Array[Vector2] = []
+	for edge: Dictionary in edges:
+		if edge["from"] == from_id and edge["to"] == to_id:
+			result.assign(edge.get("points", []))
+			return result
+		if edge["to"] == from_id and edge["from"] == to_id:
+			result.assign(edge.get("points", []))
+			result.reverse()
+			return result
+	return result
+
+
+func _append_unique(target: Array[Vector2], points: Array[Vector2]) -> void:
+	for point in points:
+		if target.is_empty() or not target[-1].is_equal_approx(point):
+			target.append(point)
 
 
 func _distance_between_locations(start_city_id: String, start_location_id: String, destination_city_id: String, destination_location_id: String) -> float:
@@ -160,4 +190,4 @@ func world_position_for_node(node_id: String) -> Vector2:
 	if road_junctions_by_id.has(node_id):
 		return road_junctions_by_id[node_id]["position"]
 	push_warning("Unknown world road node: %s" % node_id)
-	return WorldMapData.WORLD_CENTER
+	return Vector2.ZERO

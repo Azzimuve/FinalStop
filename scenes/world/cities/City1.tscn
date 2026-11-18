@@ -1,0 +1,99 @@
+[gd_scene format=3 uid="uid://dimw7xa4vbhel"]
+
+[ext_resource type="Script" uid="uid://dgwlb3ntiyr14" path="res://scripts/world/MapCity.gd" id="1_wx5bu"]
+[ext_resource type="PackedScene" path="res://scenes/world/RoadPoint.tscn" id="2_qk4jn"]
+[ext_resource type="Script" uid="uid://dysb5r473b5uh" path="res://scripts/world/MapPoint.gd" id="3_05m42"]
+[ext_resource type="PackedScene" path="res://scenes/world/Road.tscn" id="3_poy3p"]
+[ext_resource type="PackedScene" path="res://scenes/world/PointOfInterest.tscn" id="4_05m42"]
+[ext_resource type="Script" uid="uid://bajmann0p88am" path="res://scripts/world/MapRoad.gd" id="5_ud7lf"]
+[ext_resource type="Script" uid="uid://bjsi5ujog47fr" path="res://scripts/world/MapPlace.gd" id="7_05m42"]
+
+[sub_resource type="Curve2D" id="Curve2D_ud7lf"]
+resource_local_to_scene = true
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 22.765182, 22.876244, -21.949455, -4.028187, 18.217316, 3.3432617, 66.54327, 45.89236, 0, 0, 0, 0, 103.79832, 37.74753)
+}
+point_count = 3
+
+[node name="City1" type="Node2D" unique_id=738733315]
+script = ExtResource("1_wx5bu")
+city_id = "city_1"
+display_name = "Нижние залупки"
+entry_node = NodePath("Layout/Points/Entry")
+
+[node name="Marker" type="Polygon2D" parent="." unique_id=1075353315]
+modulate = Color(1, 1, 1, 0)
+color = Color(0.76, 0.81, 0.78, 1)
+polygon = PackedVector2Array(20, 0, 19.8289, 2.61052, 19.31852, 5.17638, 18.47759, 7.65367, 17.32051, 10, 15.86707, 12.17523, 14.14214, 14.14214, 12.17523, 15.86707, 10, 17.32051, 7.65367, 18.47759, 5.17638, 19.31852, 2.61052, 19.8289, 0, 20, -2.61052, 19.8289, -5.17638, 19.31852, -7.65367, 18.47759, -10, 17.32051, -12.17523, 15.86707, -14.14214, 14.14214, -15.86707, 12.17523, -17.32051, 10, -18.47759, 7.65367, -19.31852, 5.17638, -19.8289, 2.61052, -20, 0, -19.8289, -2.61052, -19.31852, -5.17638, -18.47759, -7.65367, -17.32051, -10, -15.86707, -12.17523, -14.14214, -14.14214, -12.17523, -15.86707, -10, -17.32051, -7.65367, -18.47759, -5.17638, -19.31852, -2.61052, -19.8289, 0, -20, 2.61052, -19.8289, 5.17638, -19.31852, 7.65367, -18.47759, 10, -17.32051, 12.17523, -15.86707, 14.14214, -14.14214, 15.86707, -12.17523, 17.32051, -10, 18.47759, -7.65367, 19.31852, -5.17638, 19.8289, -2.61052)
+
+[node name="Center" type="Polygon2D" parent="Marker" unique_id=1304001000]
+color = Color(0.055, 0.078, 0.086, 1)
+polygon = PackedVector2Array(8, 0, 7.84628, 1.56072, 7.39104, 3.06147, 6.65176, 4.44456, 5.65685, 5.65685, 4.44456, 6.65176, 3.06147, 7.39104, 1.56072, 7.84628, 0, 8, -1.56072, 7.84628, -3.06147, 7.39104, -4.44456, 6.65176, -5.65685, 5.65685, -6.65176, 4.44456, -7.39104, 3.06147, -7.84628, 1.56072, -8, 0, -7.84628, -1.56072, -7.39104, -3.06147, -6.65176, -4.44456, -5.65685, -5.65685, -4.44456, -6.65176, -3.06147, -7.39104, -1.56072, -7.84628, 0, -8, 1.56072, -7.84628, 3.06147, -7.39104, 4.44456, -6.65176, 5.65685, -5.65685, 6.65176, -4.44456, 7.39104, -3.06147, 7.84628, -1.56072)
+
+[node name="Caption" type="Label" parent="." unique_id=148784760]
+modulate = Color(1, 1, 1, 0)
+offset_left = -80.0
+offset_top = 24.0
+theme_override_colors/font_color = Color(0.76, 0.81, 0.78, 1)
+theme_override_font_sizes/font_size = 24
+text = "Нижние залупки"
+
+[node name="DetailCaption" type="Label" parent="." unique_id=1916461624]
+visible = false
+offset_left = -70.0
+offset_top = -121.0
+theme_override_colors/font_color = Color(0.76, 0.81, 0.78, 1)
+theme_override_font_sizes/font_size = 16
+text = "Нижние залупки"
+
+[node name="Layout" type="Node2D" parent="." unique_id=697601161]
+
+[node name="Points" type="Node2D" parent="Layout" unique_id=98184506]
+
+[node name="Entry" parent="Layout/Points" unique_id=474549491 instance=ExtResource("2_qk4jn")]
+point_id = "entry"
+city_entrance = true
+entrance_name = "Въезд"
+
+[node name="Point1" type="Node2D" parent="Layout/Points" unique_id=1608652400 instance=ExtResource("2_qk4jn")]
+position = Vector2(22.765182, 22.876244)
+script = ExtResource("3_05m42")
+point_id = "city_1_road_1"
+
+[node name="Point2" type="Node2D" parent="Layout/Points" unique_id=1160639735 instance=ExtResource("2_qk4jn")]
+position = Vector2(103.79832, 37.74753)
+script = ExtResource("3_05m42")
+point_id = "city_1_road_2"
+
+[node name="Roads" type="Node2D" parent="Layout" unique_id=733576128]
+z_index = -1
+
+[node name="Road1" type="Node2D" parent="Layout/Roads" unique_id=1905976150 instance=ExtResource("3_poy3p")]
+script = ExtResource("5_ud7lf")
+from_node = NodePath("../../Points/Entry")
+to_node = NodePath("../../Points/Point1")
+road_width = 5.1
+
+[node name="Road2" type="Node2D" parent="Layout/Roads" unique_id=1710632605 instance=ExtResource("3_poy3p")]
+script = ExtResource("5_ud7lf")
+from_node = NodePath("../../Points/Point1")
+to_node = NodePath("../../Points/Point2")
+road_width = 5.1
+curve = SubResource("Curve2D_ud7lf")
+
+[node name="Places" type="Node2D" parent="Layout" unique_id=1581024672]
+
+[node name="PointOfInterest" parent="Layout/Places" unique_id=722818218 instance=ExtResource("4_05m42")]
+position = Vector2(22.765182, 22.876244)
+place_id = "Shop_Zalupki"
+display_name = "Магазин"
+object_type = 1
+road_node = NodePath("../../Points/Point1")
+
+[node name="PointOfInterest1" type="Node2D" parent="Layout/Places" unique_id=889537327 instance=ExtResource("4_05m42")]
+position = Vector2(103.79832, 37.74753)
+script = ExtResource("7_05m42")
+place_id = "city_1_place_1"
+display_name = "Отель"
+object_type = 9
+road_node = NodePath("../../Points/Point2")

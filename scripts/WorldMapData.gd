@@ -1,164 +1,101 @@
-extends RefCounted
+extends Node2D
 
-# Временные данные для прототипа. Геометрия не является финальной картой.
-const START_CITY_ID := "company_city"
-const DELIVERY_CITY_ID := "nearby_settlement"
-const BRANCH_CITY_ID := "northern_settlement"
-const CENTRAL_JUNCTION_ID := "central_road_junction"
-const START_LOCATION_ID := "company_start"
-const DELIVERY_LOCATION_ID := "settlement_delivery"
-const HOTEL_LOCATION_ID := "northern_settlement_hotel"
-const WORLD_CENTER := Vector2(640.0, 360.0)
+const MapCity = preload("res://scripts/world/MapCity.gd")
+const MapPoint = preload("res://scripts/world/MapPoint.gd")
+const MapRoad = preload("res://scripts/world/MapRoad.gd")
+@export var start_city_id: String = "company_city"
+@export var start_location_id: String = "company_start"
+@export var world_center := Vector2(640, 360)
+var _road_geometry: Dictionary = {}
+var _displayed_points: Dictionary = {}
+var _geometry_reference: Node2D
+var _display_geometry_dirty := true
+var _last_detail := -1.0
+var _last_current_city := ""
+var _last_selected_place := ""
 
+# Снимок графа берётся из сохранённых узлов. Геометрия здесь не создаётся.
+func read_graph() -> Dictionary:
+	var reference: Node2D = get_parent() as Node2D if get_parent() is Node2D else self
+	_geometry_reference = reference
+	for road: MapRoad in _road_geometry:
+		if is_instance_valid(road) and road.geometry_changed.is_connected(_invalidate_display_geometry):
+			road.geometry_changed.disconnect(_invalidate_display_geometry)
+	_road_geometry.clear()
+	_displayed_points.clear()
+	_display_geometry_dirty = true
+	_last_detail = -1.0
+	var data := {"cities": [], "junctions": [], "roads": []}
+	var by_id: Dictionary = {}
+	for city in $Cities.get_children():
+		if city is MapCity:
+			var entry: Dictionary = city.get_data(reference)
+			entry.position = reference.to_local(city.global_position)
+			data.cities.append(entry)
+			by_id[city.city_id] = entry
+			for road in city.get_node("Layout/Roads").get_children():
+				if road is MapRoad:
+					_road_geometry[road] = road.path_points(reference)
+	for point in $Junctions.get_children():
+		if point is MapPoint:
+			data.junctions.append({"id": point.point_id, "position": reference.to_local(point.global_position)})
+	for road in $Roads.get_children():
+		if not road is MapRoad:
+			continue
+		var ends: Array[Node2D] = road.endpoints()
+		if not ends[0] is MapPoint or not ends[1] is MapPoint:
+			push_error("У дороги %s не выбраны узлы." % road.name)
+			continue
+		var ids: Array[String] = []
+		for point in ends:
+			var city := _city_of(point)
+			ids.append(city.city_id if city != null else point.point_id)
+		var points: Array[Vector2] = road.path_points(reference)
+		data.roads.append({"from": ids[0], "to": ids[1], "points": points})
+		_road_geometry[road] = points
+		for index in range(2):
+			if by_id.has(ids[index]):
+				by_id[ids[index]].entrances[ids[1 - index]] = ends[index].point_id
+	for road: MapRoad in _road_geometry:
+		road.geometry_changed.connect(_invalidate_display_geometry)
+	return data
 
-static func get_cities() -> Array[Dictionary]:
-	return [
-		{
-			"id": START_CITY_ID,
-			"name": "Город компании",
-			"type": "city",
-			"position": Vector2(250.0, 600.0),
-			"entry_location_id": START_LOCATION_ID,
-			"entrances": {CENTRAL_JUNCTION_ID: START_LOCATION_ID},
-			"street_nodes": [
-				{"id": START_LOCATION_ID, "position": Vector2(110.0, 15.0)},
-				{"id": "company_depot_road", "position": Vector2(-20.0, 0.0)},
-				{"id": "company_fuel_road", "position": Vector2(5.0, 25.0)},
-				{"id": "company_north_junction", "position": Vector2(-5.0, -45.0)},
-				{"id": "company_office_road", "position": Vector2(-45.0, -85.0)},
-				{"id": "company_garage_road", "position": Vector2(55.0, -65.0)},
-				{"id": "company_station_road", "position": Vector2(30.0, 45.0)},
-			],
-			"street_roads": [
-				{"from": START_LOCATION_ID, "to": "company_depot_road"},
-				{"from": "company_depot_road", "to": "company_fuel_road"},
-				{"from": "company_depot_road", "to": "company_north_junction"},
-				{"from": "company_north_junction", "to": "company_office_road"},
-				{"from": "company_north_junction", "to": "company_garage_road"},
-				{"from": "company_depot_road", "to": "company_station_road"},
-			],
-			"places": [
-				{
-					"id": "company_depot",
-					"name": "Склад компании",
-					"type": "warehouse",
-					"position": Vector2(-20.0, 0.0),
-					"road_node_id": "company_depot_road",
-				},
-				{
-					"id": "company_fuel_station",
-					"name": "Заправка",
-					"type": "fuel_station",
-					"position": Vector2(5.0, 25.0),
-					"road_node_id": "company_fuel_road",
-				},
-				{
-					"id": "company_office",
-					"name": "Офис компании",
-					"type": "company_office",
-					"position": Vector2(-45.0, -85.0),
-					"road_node_id": "company_office_road",
-				},
-				{"id": "company_garage", "name": "Гараж", "type": "garage", "position": Vector2(55.0, -65.0), "road_node_id": "company_garage_road"},
-				{
-					"id": "company_station",
-					"name": "Автостанция",
-					"type": "stop",
-					"position": Vector2(30.0, 45.0),
-					"road_node_id": "company_station_road",
-				},
-			],
-		},
-		{
-			"id": DELIVERY_CITY_ID,
-			"name": "Соседний посёлок",
-			"type": "settlement",
-			"position": Vector2(1030.0, 600.0),
-			"entry_location_id": "settlement_west",
-			"entrances": {CENTRAL_JUNCTION_ID: "settlement_west", BRANCH_CITY_ID: "settlement_north"},
-			"street_nodes": [
-				{"id": "settlement_west", "position": Vector2(-100.0, -25.0)},
-				{"id": "settlement_center", "position": Vector2(-20.0, -25.0)},
-				{"id": "settlement_fuel_road", "position": Vector2(-55.0, 45.0)},
-				{"id": "settlement_delivery_road", "position": Vector2(0.0, 35.0)},
-				{"id": "settlement_north", "position": Vector2(-5.0, -80.0)},
-				{"id": "settlement_shop_road", "position": Vector2(40.0, -80.0)},
-			],
-			"street_roads": [
-				{"from": "settlement_west", "to": "settlement_center"},
-				{"from": "settlement_center", "to": "settlement_fuel_road"},
-				{"from": "settlement_center", "to": "settlement_delivery_road"},
-				{"from": "settlement_center", "to": "settlement_north"},
-				{"from": "settlement_north", "to": "settlement_shop_road"},
-			],
-			"places": [
-				{
-					"id": "settlement_fuel_station",
-					"name": "Заправка",
-					"type": "fuel_station",
-					"position": Vector2(-55.0, 45.0),
-					"road_node_id": "settlement_fuel_road",
-				},
-				{
-					"id": DELIVERY_LOCATION_ID,
-					"name": "Пункт доставки",
-					"type": "delivery_point",
-					"position": Vector2(0.0, 35.0),
-					"road_node_id": "settlement_delivery_road",
-				},
-				{"id": "settlement_shop", "name": "Магазин", "type": "store", "position": Vector2(40.0, -80.0), "road_node_id": "settlement_shop_road"},
-			],
-		},
-		{
-			"id": BRANCH_CITY_ID,
-			"name": "Северный посёлок",
-			"type": "settlement",
-			"position": Vector2(640.0, 260.0),
-			"entry_location_id": "northern_settlement_entry",
-			"entrances": {CENTRAL_JUNCTION_ID: "northern_settlement_entry", DELIVERY_CITY_ID: "northern_settlement_east"},
-			"street_nodes": [
-				{"id": "northern_settlement_entry", "position": Vector2(0.0, 110.0)},
-				{"id": "northern_settlement_east", "position": Vector2(110.0, 70.0)},
-				{"id": "northern_settlement_center", "position": Vector2(0.0, 45.0)},
-				{"id": "northern_settlement_hotel_road", "position": Vector2(-65.0, 20.0)},
-				{"id": "northern_settlement_workshop_road", "position": Vector2(55.0, 75.0)},
-			],
-			"street_roads": [
-				{"from": "northern_settlement_entry", "to": "northern_settlement_center"},
-				{"from": "northern_settlement_center", "to": "northern_settlement_hotel_road"},
-				{"from": "northern_settlement_center", "to": "northern_settlement_workshop_road"},
-				{"from": "northern_settlement_workshop_road", "to": "northern_settlement_east"},
-			],
-			"places": [
-				{
-					"id": "northern_settlement_workshop",
-					"name": "Мастерская",
-					"type": "garage",
-					"position": Vector2(55.0, 75.0),
-					"road_node_id": "northern_settlement_workshop_road",
-				},
-				{
-					"id": HOTEL_LOCATION_ID,
-					"name": "Отель",
-					"type": "hotel",
-					"position": Vector2(-65.0, 20.0),
-					"road_node_id": "northern_settlement_hotel_road",
-				},
-			],
-		},
-	]
+func _city_of(node: Node) -> MapCity:
+	var parent := node.get_parent()
+	while parent != null and parent != self:
+		if parent is MapCity:
+			return parent
+		parent = parent.get_parent()
+	return null
 
+func set_view(detail: float, current_city: String, selected_place: String) -> void:
+	var detail_changed := detail != _last_detail
+	if detail_changed or current_city != _last_current_city or selected_place != _last_selected_place:
+		for city in $Cities.get_children():
+			if city is MapCity:
+				city.set_view(detail, city.city_id == current_city, selected_place)
+		_last_current_city = current_city
+		_last_selected_place = selected_place
+	if detail_changed:
+		for road in $Roads.get_children():
+			if road is MapRoad:
+				road.detail = detail
+		_last_detail = detail
+		_display_geometry_dirty = true
+	if not _display_geometry_dirty:
+		return
+	_displayed_points.clear()
+	for road: MapRoad in _road_geometry:
+		if not is_instance_valid(road) or not road.is_inside_tree():
+			continue
+		var original: Array[Vector2] = _road_geometry[road]
+		var displayed := road.path_points(_geometry_reference)
+		for index in range(mini(original.size(), displayed.size())):
+			_displayed_points[original[index]] = displayed[index]
+	_display_geometry_dirty = false
 
-static func get_road_junctions() -> Array[Dictionary]:
-	return [
-		{"id": CENTRAL_JUNCTION_ID, "position": Vector2(640.0, 600.0)},
-	]
+func _invalidate_display_geometry() -> void:
+	_display_geometry_dirty = true
 
-
-static func get_roads() -> Array[Dictionary]:
-	return [
-		{"from": START_CITY_ID, "to": CENTRAL_JUNCTION_ID},
-		{"from": CENTRAL_JUNCTION_ID, "to": DELIVERY_CITY_ID},
-		{"from": CENTRAL_JUNCTION_ID, "to": BRANCH_CITY_ID},
-		{"from": DELIVERY_CITY_ID, "to": BRANCH_CITY_ID},
-	]
+func display_route_point(point: Vector2) -> Vector2:
+	return _displayed_points.get(point, point)

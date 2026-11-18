@@ -1,7 +1,5 @@
 extends RefCounted
 
-const WorldMapData = preload("res://scripts/WorldMapData.gd")
-
 
 static func length(points: Array[Vector2]) -> float:
 	var distance := 0.0
@@ -22,6 +20,8 @@ static func remaining_points(points: Array[Vector2], progress: float) -> Array[V
 	var distance_so_far := 0.0
 	for index in range(points.size() - 1):
 		var segment_length := points[index].distance_to(points[index + 1])
+		if segment_length <= 0.00001:
+			continue
 		if target_distance <= distance_so_far + segment_length:
 			var segment_progress := (target_distance - distance_so_far) / segment_length
 			remaining.append(points[index].lerp(points[index + 1], segment_progress))
@@ -34,16 +34,20 @@ static func remaining_points(points: Array[Vector2], progress: float) -> Array[V
 
 static func position_at(points: Array[Vector2], progress: float) -> Vector2:
 	if points.is_empty():
-		return WorldMapData.WORLD_CENTER
+		return Vector2.ZERO
 	if points.size() == 1:
 		return points[0]
 
 	var total_length := length(points)
+	if total_length <= 0.00001:
+		return points[0]
 
-	var target_distance := total_length * progress
+	var target_distance := total_length * clampf(progress, 0.0, 1.0)
 	var distance_so_far := 0.0
 	for index in range(points.size() - 1):
 		var segment_length := points[index].distance_to(points[index + 1])
+		if segment_length <= 0.00001:
+			continue
 		if target_distance <= distance_so_far + segment_length:
 			var segment_progress := (target_distance - distance_so_far) / segment_length
 			return points[index].lerp(points[index + 1], segment_progress)

@@ -1,0 +1,117 @@
+[gd_scene format=3 uid="uid://crn583c07h0ws"]
+
+[ext_resource type="Script" uid="uid://dg6rs3f0fb1d6" path="res://scripts/WorldMapData.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/world/Road.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/world/RoadPoint.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/world/cities/CompanyCity.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/world/cities/NearbySettlement.tscn" id="5"]
+[ext_resource type="PackedScene" uid="uid://da34dop1vksr0" path="res://scenes/world/cities/City3.tscn" id="5_qh0kd"]
+[ext_resource type="PackedScene" uid="uid://t5214x8q1wp2" path="res://scenes/world/cities/NorthernSettlement.tscn" id="6"]
+[ext_resource type="PackedScene" uid="uid://dimw7xa4vbhel" path="res://scenes/world/cities/City1.tscn" id="6_yr1n6"]
+[ext_resource type="Script" uid="uid://bajmann0p88am" path="res://scripts/world/MapRoad.gd" id="8_yr1n6"]
+
+[sub_resource type="Curve2D" id="Curve2D_l5ull"]
+resource_local_to_scene = true
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 360, 615, -56.20517, 3.0109863, 0, 0, 464.1431, 609.4209)
+}
+point_count = 2
+
+[sub_resource type="Curve2D" id="Curve2D_16fjv"]
+resource_local_to_scene = true
+_data = {
+"points": PackedVector2Array(0, 0, 79.63107, -4.26593, 464.1431, 609.4209, 0, 0, 0, 0, 640, 600)
+}
+point_count = 2
+
+[sub_resource type="Curve2D" id="Curve2D_ckp8c"]
+resource_local_to_scene = true
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 464.1431, 609.4209, 106.02844, -37.231323, -311.6103, 50.990845, 526.60345, 694.7306, 0, 0, 0, 0, 329.63443, 984.06445)
+}
+point_count = 3
+
+[node name="World" type="Node2D" unique_id=862774615]
+script = ExtResource("1")
+
+[node name="Cities" type="Node2D" parent="." unique_id=1478987270]
+
+[node name="company_city" parent="Cities" unique_id=1899550192 instance=ExtResource("4")]
+position = Vector2(250, 600)
+
+[node name="nearby_settlement" parent="Cities" unique_id=1644878455 instance=ExtResource("5")]
+position = Vector2(1030, 600)
+
+[node name="northern_settlement" parent="Cities" unique_id=34849061 instance=ExtResource("6")]
+position = Vector2(640, 260)
+
+[node name="City1" parent="Cities" unique_id=454871126 instance=ExtResource("5_qh0kd")]
+position = Vector2(429.63443, 984.06445)
+
+[node name="City2" parent="Cities" unique_id=738733315 instance=ExtResource("6_yr1n6")]
+position = Vector2(447.0218, 1381.4872)
+
+[node name="Junctions" type="Node2D" parent="." unique_id=451856639]
+
+[node name="central_road_junction" parent="Junctions" unique_id=2138267547 instance=ExtResource("3")]
+position = Vector2(640, 600)
+point_id = "central_road_junction"
+junction = true
+
+[node name="Point1" parent="Junctions" unique_id=237019678 instance=ExtResource("3")]
+position = Vector2(464.1431, 609.4209)
+point_id = "junction_1"
+junction = true
+
+[node name="Point5" parent="Junctions" unique_id=876528855 instance=ExtResource("3")]
+position = Vector2(11, 1097)
+point_id = "junction_5"
+
+[node name="Roads" type="Node2D" parent="." unique_id=1650049575]
+z_index = -1
+
+[node name="Highway1" parent="Roads" unique_id=1624766804 instance=ExtResource("2")]
+from_node = NodePath("../../Cities/company_city/Layout/Points/company_start")
+to_node = NodePath("../../Junctions/Point1")
+road_width = 12.0
+intercity = true
+curve = SubResource("Curve2D_l5ull")
+
+[node name="Highway2" parent="Roads" unique_id=1816567299 instance=ExtResource("2")]
+from_node = NodePath("../../Junctions/central_road_junction")
+to_node = NodePath("../../Cities/nearby_settlement/Layout/Points/settlement_west")
+road_width = 12.0
+intercity = true
+
+[node name="Highway3" parent="Roads" unique_id=607084529 instance=ExtResource("2")]
+from_node = NodePath("../../Junctions/central_road_junction")
+to_node = NodePath("../../Cities/northern_settlement/Layout/Points/northern_settlement_entry")
+road_width = 12.0
+intercity = true
+
+[node name="Highway4" parent="Roads" unique_id=1609915535 instance=ExtResource("2")]
+from_node = NodePath("../../Cities/nearby_settlement/Layout/Points/settlement_north")
+to_node = NodePath("../../Cities/northern_settlement/Layout/Points/northern_settlement_east")
+road_width = 12.0
+intercity = true
+
+[node name="Road1" parent="Roads" unique_id=954356744 instance=ExtResource("2")]
+from_node = NodePath("../../Junctions/Point1")
+to_node = NodePath("../../Junctions/central_road_junction")
+road_width = 12.0
+intercity = true
+curve = SubResource("Curve2D_16fjv")
+
+[node name="Road4" parent="Roads" unique_id=21782728 instance=ExtResource("2")]
+from_node = NodePath("../../Junctions/Point1")
+to_node = NodePath("../../Cities/City1/Layout/Points/Entry")
+road_width = 12.1
+intercity = true
+curve = SubResource("Curve2D_ckp8c")
+
+[node name="Road2" type="Node2D" parent="Roads" unique_id=1702108124 instance=ExtResource("2")]
+script = ExtResource("8_yr1n6")
+from_node = NodePath("../../Cities/City1/Layout/Points/Entry")
+to_node = NodePath("../../Cities/City2/Layout/Points/Entry")
+road_width = 12.1
+intercity = true

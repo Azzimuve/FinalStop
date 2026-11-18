@@ -17,10 +17,15 @@ const GameClock = preload("res://scripts/simulation/GameClock.gd")
 const NeedsState = preload("res://scripts/simulation/NeedsState.gd")
 const FatigueState = preload("res://scripts/simulation/FatigueState.gd")
 const MapView = preload("res://scripts/Map.gd")
-const WorldMapData = preload("res://scripts/WorldMapData.gd")
-const BALANCE_SETTINGS = preload("res://resources/GameBalanceSettings.tres")
-const HOTEL_SLEEP_COST: float = 100.0
-const HOTEL_RESTORE_PER_HOUR: float = 30.0
+@export var balance_settings: GameBalanceSettings
+@export var hotel_sleep_cost: float = 100.0
+@export var hotel_restore_per_hour: float = 30.0
+@export_group("Раскладка панели заказа")
+@export var collapsed_order_height: float = 150.0
+@export var expanded_order_height: float = 290.0
+@export var workshop_extra_height: float = 30.0
+@export var inventory_follows_order_panel: bool = true
+@export var inventory_button_gap: float = 6.0
 
 enum OrderState {
 	AVAILABLE,
@@ -31,56 +36,57 @@ enum OrderState {
 }
 
 @onready var map_view: MapView = $Map
-@onready var order_panel: PanelContainer = $HUD/UI/OrderPanel
-@onready var status_label: Label = $HUD/UI/OrderPanel/Content/StatusText
-@onready var city_label: Label = $HUD/UI/OrderPanel/Content/CityText
-@onready var accept_button: Button = $HUD/UI/OrderPanel/Content/AcceptButton
-@onready var travel_button: Button = $HUD/UI/OrderPanel/Content/TravelButton
-@onready var order_text: Label = $HUD/UI/OrderPanel/Content/OrderText
-@onready var order_title: Label = $HUD/UI/OrderPanel/Content/Title
-@onready var panel_toggle_button: Button = $HUD/UI/OrderPanel/Content/PanelToggleButton
-@onready var trip_time_label: Label = $HUD/UI/OrderPanel/Content/TripTimeLabel
-@onready var pause_button: Button = $HUD/UI/OrderPanel/Content/PauseButton
-@onready var game_time_label: Label = $HUD/UI/GameTimeLabel
-@onready var fuel_label: Label = $HUD/UI/FuelLabel
-@onready var fatigue_label: Label = $HUD/UI/FatigueLabel
-@onready var refuel_button: Button = $HUD/UI/OrderPanel/Content/RefuelButton
-@onready var money_label: Label = $HUD/UI/MoneyLabel
-@onready var vehicle_condition_label: Label = $HUD/UI/VehicleConditionLabel
-@onready var repair_button: Button = $HUD/UI/OrderPanel/Content/RepairButton
-@onready var view_orders_button: Button = $HUD/UI/OrderPanel/Content/ViewOrdersButton
+@onready var order_panel: PanelContainer = $HUD/UI/BaseHUD/OrderPanel
+@onready var idle_order_height: float = order_panel.custom_minimum_size.y
+@onready var status_label: Label = $HUD/UI/BaseHUD/OrderPanel/Content/StatusText
+@onready var city_label: Label = $HUD/UI/BaseHUD/OrderPanel/Content/CityText
+@onready var accept_button: Button = $HUD/UI/BaseHUD/OrderPanel/Content/AcceptButton
+@onready var travel_button: Button = $HUD/UI/BaseHUD/OrderPanel/Content/TravelButton
+@onready var order_text: Label = $HUD/UI/BaseHUD/OrderPanel/Content/OrderText
+@onready var order_title: Label = $HUD/UI/BaseHUD/OrderPanel/Content/Title
+@onready var panel_toggle_button: Button = $HUD/UI/BaseHUD/OrderPanel/Content/PanelToggleButton
+@onready var trip_time_label: Label = $HUD/UI/BaseHUD/OrderPanel/Content/TripTimeLabel
+@onready var pause_button: Button = $HUD/UI/BaseHUD/OrderPanel/Content/PauseButton
+@onready var game_time_label: Label = $HUD/UI/BaseHUD/GameTimeLabel
+@onready var fuel_label: Label = $HUD/UI/BaseHUD/FuelLabel
+@onready var fatigue_label: Label = $HUD/UI/BaseHUD/FatigueLabel
+@onready var refuel_button: Button = $HUD/UI/BaseHUD/OrderPanel/Content/RefuelButton
+@onready var money_label: Label = $HUD/UI/BaseHUD/MoneyLabel
+@onready var vehicle_condition_label: Label = $HUD/UI/BaseHUD/VehicleConditionLabel
+@onready var repair_button: Button = $HUD/UI/BaseHUD/OrderPanel/Content/RepairButton
+@onready var view_orders_button: Button = $HUD/UI/BaseHUD/OrderPanel/Content/ViewOrdersButton
 @onready var order_board: OrderBoard = $HUD/UI/OrderBoardOverlay
 
-@onready var garage_diagnosis_button: Button = $HUD/UI/GarageDiagnosisButton
+@onready var garage_diagnosis_button: Button = $HUD/UI/BaseHUD/GarageDiagnosisButton
 @onready var vehicle_status_dialog: VehicleStatusDialog = $HUD/UI/VehicleStatusDialog
 
-# Создаваемые окна и элементы управления.
-var modal_layers := ModalLayers.new()
-var workshop_trade: WorkshopTrade
-var store_trade: WorkshopTrade
-var workshop_upgrade: WorkshopUpgrade
-var trade_button: Button
-var upgrade_button: Button
-var inventory_window: InventoryWindow
-var inventory_button: Button
-var sleep_button: Button
-var hotel_sleep_button: Button
-var sleep_dialog: SleepDialog
+# Окна и элементы управления из сохранённой сцены HUD.
+@onready var modal_layers: ModalLayers = $HUD/UI/ModalLayers
+@onready var workshop_trade: WorkshopTrade = $HUD/UI/WorkshopTrade
+@onready var store_trade: WorkshopTrade = $HUD/UI/StoreTrade
+@onready var workshop_upgrade: WorkshopUpgrade = $HUD/UI/WorkshopUpgrade
+@onready var trade_button: Button = $HUD/UI/BaseHUD/OrderPanel/Content/TradeButton
+@onready var upgrade_button: Button = $HUD/UI/BaseHUD/OrderPanel/Content/UpgradeButton
+@onready var inventory_window: InventoryWindow = $HUD/UI/InventoryWindow
+@onready var inventory_button: Button = $HUD/UI/BaseHUD/InventoryButton
+@onready var sleep_button: Button = $HUD/UI/BaseHUD/OrderPanel/Content/SleepButton
+@onready var hotel_sleep_button: Button = $HUD/UI/BaseHUD/OrderPanel/Content/HotelSleepButton
+@onready var sleep_dialog: SleepDialog = $HUD/UI/SleepDialog
 
 # Модели игрового состояния.
-var vehicle := VehicleState.new(BALANCE_SETTINGS)
+@onready var vehicle: VehicleState = $Map/Vehicle
 var clock := GameClock.new()
 var fatigue := FatigueState.new()
-var needs := NeedsState.new(BALANCE_SETTINGS)
-var needs_label: Label
-var hotel_meal_button: Button
-var current_city_id: String = WorldMapData.START_CITY_ID
-var current_location_id: String = WorldMapData.START_LOCATION_ID
+@onready var needs := NeedsState.new(balance_settings)
+@onready var needs_label: Label = $HUD/UI/BaseHUD/NeedsLabel
+@onready var hotel_meal_button: Button = $HUD/UI/BaseHUD/OrderPanel/Content/HotelMealButton
+@onready var current_city_id: String = map_view.world.start_city_id
+@onready var current_location_id: String = map_view.world.start_location_id
 var current_city_name: String = ""
 var money_credits: float = 0.0
 
 # Заказы и состояние панели.
-var order_generator := OrderGenerator.new(BALANCE_SETTINGS)
+@onready var order_generator := OrderGenerator.new(balance_settings)
 var current_order: DeliveryOrder
 var order_state: OrderState = OrderState.AVAILABLE
 var last_order_result: String = ""
@@ -104,22 +110,21 @@ var local_trip := TripPhase.new()
 var trip_elapsed_before_phase_seconds: float = 0.0
 var travel_paused: bool = false
 var travel_events := TravelEvents.new()
-var travel_event_window: TravelEventWindow
+@onready var travel_event_window: TravelEventWindow = $HUD/UI/TravelEventWindow
 var forced_sleep_in_progress: bool = false
-var drive_mode_buttons: Array[Button] = []
+@onready var drive_mode_buttons: Array[Button] = [$HUD/UI/BaseHUD/DriveModeControls/Economy, $HUD/UI/BaseHUD/DriveModeControls/Normal, $HUD/UI/BaseHUD/DriveModeControls/Forced]
 
 
 func _ready() -> void:
+	order_generator.source_city_id = current_city_id
 	travel_events.load_data()
-	travel_event_window = TravelEventWindow.new()
-	$HUD/UI.add_child(travel_event_window)
 	travel_event_window.action_selected.connect(_on_event_action_selected)
 	travel_event_window.continue_requested.connect(_on_event_continue)
-	_create_service_windows()
-	_create_inventory_controls()
-	_create_sleep_controls()
-	_create_needs_controls()
-	_create_drive_mode_controls()
+	_bind_service_windows()
+	_bind_inventory_controls()
+	_bind_sleep_controls()
+	_bind_needs_controls()
+	_bind_drive_mode_controls()
 	_connect_signals()
 	modal_layers.setup($HUD/UI, [inventory_window, order_board, vehicle_status_dialog, workshop_trade, store_trade, workshop_upgrade, sleep_dialog, travel_event_window], map_view)
 	map_view.set_current_location(
@@ -132,112 +137,55 @@ func _ready() -> void:
 	_refresh_interface()
 
 
-func _create_service_windows() -> void:
-	workshop_trade = WorkshopTrade.new()
-	$HUD/UI.add_child(workshop_trade)
-	workshop_trade.credits_changed.connect(_on_trade_credits_changed)
-	workshop_trade.discarded.connect(_on_cargo_discarded)
-	workshop_trade.used.connect(_on_item_used)
-	store_trade = WorkshopTrade.new()
-	store_trade.is_store = true
-	$HUD/UI.add_child(store_trade)
-	store_trade.credits_changed.connect(_on_trade_credits_changed)
-	store_trade.discarded.connect(_on_cargo_discarded)
-	store_trade.used.connect(_on_item_used)
-	workshop_upgrade = WorkshopUpgrade.new()
-	$HUD/UI.add_child(workshop_upgrade)
+func _bind_service_windows() -> void:
+	for trade in [workshop_trade, store_trade]:
+		trade.credits_changed.connect(_on_trade_credits_changed)
+		trade.discarded.connect(_on_cargo_discarded)
+		trade.used.connect(_on_item_used)
 	workshop_upgrade.accepted.connect(_on_upgrade_accepted)
 	workshop_upgrade.credits_changed.connect(_on_trade_credits_changed)
-	trade_button = Button.new()
-	trade_button.text = "Торговать"
 	trade_button.pressed.connect(_open_workshop_trade)
-	$HUD/UI/OrderPanel/Content.add_child(trade_button)
-	upgrade_button = Button.new()
-	upgrade_button.text = "Улучшить — %.0f кр." % BALANCE_SETTINGS.workshop_upgrade_cost_credits
+	upgrade_button.text = "Улучшить — %.0f кр." % balance_settings.workshop_upgrade_cost_credits
 	upgrade_button.pressed.connect(_open_workshop_upgrade)
-	$HUD/UI/OrderPanel/Content.add_child(upgrade_button)
 
 
-func _create_inventory_controls() -> void:
-	inventory_window = InventoryWindow.new()
-	$HUD/UI.add_child(inventory_window)
+func _bind_inventory_controls() -> void:
 	inventory_window.closed.connect(_on_inventory_closed)
 	inventory_window.discarded.connect(_on_cargo_discarded)
 	inventory_window.used.connect(_on_item_used)
-	inventory_button = Button.new()
-	inventory_button.text = "Инвентарь машины"
-	inventory_button.scale = order_panel.scale
 	inventory_button.pressed.connect(_open_inventory)
-	$HUD/UI.add_child(inventory_button)
 	order_panel.resized.connect(_position_inventory_button)
 	_position_inventory_button()
 
 
-func _create_sleep_controls() -> void:
-	sleep_button = Button.new()
-	sleep_button.text = "Спать"
+func _bind_sleep_controls() -> void:
 	sleep_button.pressed.connect(_open_sleep_dialog)
-	$HUD/UI/OrderPanel/Content.add_child(sleep_button)
-	hotel_sleep_button = Button.new()
-	hotel_sleep_button.text = "Спать в отеле — %.0f кр." % HOTEL_SLEEP_COST
+	hotel_sleep_button.text = "Спать в отеле — %.0f кр." % hotel_sleep_cost
 	hotel_sleep_button.pressed.connect(_open_sleep_dialog.bind(true))
-	$HUD/UI/OrderPanel/Content.add_child(hotel_sleep_button)
-	sleep_dialog = SleepDialog.new()
 	sleep_dialog.sleep_requested.connect(_on_sleep_confirmed)
-	$HUD/UI.add_child(sleep_dialog)
 
 
-func _create_needs_controls() -> void:
-	needs_label = Label.new()
-	$HUD/UI.add_child(needs_label)
-	needs_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	needs_label.offset_left = -184.0
-	needs_label.offset_right = -16.0
-	needs_label.offset_top = 106.0
-	needs_label.offset_bottom = 144.0
-	needs_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	garage_diagnosis_button.offset_top = 150.0
-	garage_diagnosis_button.offset_bottom = 176.0
-	hotel_meal_button = Button.new()
-	hotel_meal_button.text = "Поесть и попить — %.0f кр." % BALANCE_SETTINGS.hotel_meal_cost_credits
+func _bind_needs_controls() -> void:
+	hotel_meal_button.text = "Поесть и попить — %.0f кр." % balance_settings.hotel_meal_cost_credits
 	hotel_meal_button.pressed.connect(_on_hotel_meal_pressed)
-	$HUD/UI/OrderPanel/Content.add_child(hotel_meal_button)
 
 
 func _on_hotel_meal_pressed() -> void:
-	if _is_trip_active() or current_city_id != WorldMapData.BRANCH_CITY_ID or current_location_id != WorldMapData.HOTEL_LOCATION_ID:
+	if _is_trip_active() or _place_type(current_location_id) != "hotel":
 		return
-	if money_credits < BALANCE_SETTINGS.hotel_meal_cost_credits:
+	if money_credits < balance_settings.hotel_meal_cost_credits:
 		return
-	money_credits -= BALANCE_SETTINGS.hotel_meal_cost_credits
-	advance_game_time(BALANCE_SETTINGS.hotel_meal_time_minutes)
+	money_credits -= balance_settings.hotel_meal_cost_credits
+	advance_game_time(balance_settings.hotel_meal_time_minutes)
 	needs.refill()
 	_refresh_interface()
 	status_label.text = "Вы поели и попили. Сытость и запас воды восстановлены."
 
 
-func _create_drive_mode_controls() -> void:
-	var controls := HBoxContainer.new()
-	controls.name = "DriveModeControls"
-	$HUD/UI.add_child(controls)
-	controls.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	controls.offset_left = 8.0
-	controls.offset_right = 220.0
-	controls.offset_top = -34.0
-	controls.offset_bottom = -8.0
-	controls.add_theme_constant_override("separation", 3)
-	var group := ButtonGroup.new()
-	group.allow_unpress = false
-	for mode in [VehicleState.DriveMode.ECONOMY, VehicleState.DriveMode.NORMAL, VehicleState.DriveMode.FORCED]:
-		var button := Button.new()
-		button.text = ["Эко", "Обычный", "Форсаж"][mode]
-		button.toggle_mode = true
-		button.button_group = group
-		button.button_pressed = vehicle.drive_mode == mode
-		button.add_theme_font_size_override("font_size", 12)
-		button.pressed.connect(_on_drive_mode_pressed.bind(mode))
-		controls.add_child(button)
-		drive_mode_buttons.append(button)
+func _bind_drive_mode_controls() -> void:
+	for mode in range(drive_mode_buttons.size()):
+		drive_mode_buttons[mode].set_pressed_no_signal(vehicle.drive_mode == mode)
+		drive_mode_buttons[mode].pressed.connect(_on_drive_mode_pressed.bind(mode))
 
 
 func _on_drive_mode_pressed(mode: VehicleState.DriveMode) -> void:
@@ -278,9 +226,9 @@ func _process(delta: float) -> void:
 
 # Заказы компании.
 func _on_view_orders_pressed() -> void:
-	if current_location_id != "company_office" or current_order != null:
+	if _place_type(current_location_id) != "company_office" or current_order != null:
 		return
-	order_generator.refresh_offers(map_view.routes, clock.total_minutes)
+	order_generator.refresh_offers(map_view.routes, clock.total_minutes, current_city_id)
 	order_board.show_offers(order_generator.available_offers, clock)
 	view_orders_button.visible = false
 
@@ -302,12 +250,33 @@ func _on_order_selected(order: DeliveryOrder) -> void:
 
 
 func _on_accept_pressed() -> void:
+	if current_order == null or _is_trip_active():
+		return
 	if order_state == OrderState.READY_TO_PICK_UP and _is_at_order_pickup():
-		_open_inventory(true)
+		if current_order.is_passenger_order():
+			_pick_up_passengers()
+		else:
+			_open_inventory(true)
 		return
 
 	if order_state == OrderState.READY_TO_HAND_OVER and _is_at_order_delivery():
 		_complete_current_order()
+
+
+func _pick_up_passengers() -> void:
+	if current_order == null or not current_order.is_passenger_order() or current_order.passengers_picked_up:
+		return
+	if _is_trip_active() or not _is_at_order_pickup() or _place_type(current_location_id) != "stop":
+		return
+	if not vehicle.board_passengers(current_order.passenger_count):
+		status_label.text = "Недостаточно свободных пассажирских мест."
+		return
+	current_order.passengers_picked_up = true
+	order_state = OrderState.TRAVELLING
+	route_available = false
+	map_view.clear_local_route()
+	map_view.clear_route()
+	_refresh_interface()
 
 
 func _is_at_order_pickup() -> bool:
@@ -327,9 +296,9 @@ func _is_at_order_delivery() -> bool:
 
 
 func _handle_trip_arrival() -> void:
-	if current_order != null and _is_at_order_pickup() and not current_order.remaining_cargo().is_empty():
+	if current_order != null and _is_at_order_pickup() and current_order.has_pending_pickup():
 		order_state = OrderState.READY_TO_PICK_UP
-		status_label.text = "Вы на месте сбора. Заберите груз."
+		status_label.text = "Вы на автостанции. Посадите пассажиров." if current_order.is_passenger_order() else "Вы на месте сбора. Заберите груз."
 	elif order_state == OrderState.TRAVELLING and _is_at_order_delivery():
 		order_state = OrderState.READY_TO_HAND_OVER
 		status_label.text = "Вы на месте доставки. Сдайте заказ."
@@ -339,6 +308,12 @@ func _handle_trip_arrival() -> void:
 
 
 func _complete_current_order() -> void:
+	if current_order == null or _is_trip_active() or not _is_at_order_delivery() or order_state != OrderState.READY_TO_HAND_OVER:
+		return
+	if current_order.is_passenger_order():
+		if not current_order.passengers_picked_up or not vehicle.disembark_passengers(current_order.passenger_count):
+			status_label.text = "Пассажиры этого заказа ещё не посажены в машину."
+			return
 	for item in current_order.cargo:
 		if vehicle.inventory.contains(item):
 			vehicle.inventory.remove(item)
@@ -368,7 +343,9 @@ func _complete_current_order() -> void:
 
 
 func _position_inventory_button() -> void:
-	inventory_button.position = order_panel.position + Vector2(0.0, order_panel.size.y * order_panel.scale.y + 6.0)
+	if not inventory_follows_order_panel:
+		return
+	inventory_button.position = order_panel.position + Vector2(0.0, order_panel.size.y * order_panel.scale.y + inventory_button_gap)
 	inventory_button.size.x = order_panel.size.x
 
 
@@ -378,11 +355,12 @@ func _open_inventory(for_pickup: bool = false) -> void:
 	var items: Array[DeliveryOrder.CargoItem] = []
 	if current_order != null:
 		items = current_order.remaining_cargo()
-	inventory_window.open(vehicle.inventory, items, for_pickup and not _is_trip_active() and _is_at_order_pickup(), BALANCE_SETTINGS.cargo_capacity_kg)
+	var allow_loading := current_order != null and for_pickup and not _is_trip_active() and _is_at_order_pickup() and not current_order.is_passenger_order()
+	inventory_window.open(vehicle, items, allow_loading, vehicle.settings.cargo_capacity_kg)
 
 
 func _on_inventory_closed() -> void:
-	if current_order == null or not _is_at_order_pickup() or _is_trip_active():
+	if current_order == null or current_order.is_passenger_order() or not _is_at_order_pickup() or _is_trip_active():
 		return
 	var remaining := current_order.remaining_cargo()
 	var warehouse_has_cargo := false
@@ -558,7 +536,6 @@ func _advance_trip_phase(phase: TripPhase, delta: float) -> void:
 		travel_event_window.open(travel_events.active_event, available)
 
 
-
 func _process_intercity_trip(delta: float) -> void:
 	_advance_trip_phase(intercity_trip, delta)
 	var progress := intercity_trip.progress
@@ -627,7 +604,6 @@ func _process_intercity_trip(delta: float) -> void:
 	_handle_trip_arrival()
 
 
-
 func _process_local_trip(delta: float) -> void:
 	_advance_trip_phase(local_trip, delta)
 	var progress := local_trip.progress
@@ -652,10 +628,12 @@ func _process_local_trip(delta: float) -> void:
 	current_location_id = local_destination_place_id
 	route_available = false
 	var arrived_place_name := local_destination_name
+	# Прибытие обновляет местоположение, сохраняя текущий вид камеры.
+	# Повторное открытие города запускало перелёт к его центру.
 	map_view.set_current_location(
 		current_city_id,
 		current_location_id,
-		true
+		false
 	)
 	map_view.clear_route()
 	city_label.text = "%s — %s" % [current_city_name, local_destination_name]
@@ -679,7 +657,7 @@ func _on_event_action_selected(index: int) -> void:
 	vehicle.fuel_liters = maxf(0.0, vehicle.fuel_liters - float(action.get("fuel_cost", 0.0)))
 	advance_game_time(float(action.get("minutes", 0.0)))
 	money_credits += float(outcome.get("money", 0.0))
-	vehicle.fuel_liters = minf(BALANCE_SETTINGS.fuel_tank_capacity_liters, vehicle.fuel_liters + float(outcome.get("fuel", 0.0)))
+	vehicle.fuel_liters = minf(vehicle.settings.fuel_tank_capacity_liters, vehicle.fuel_liters + float(outcome.get("fuel", 0.0)))
 	fatigue.restore(float(outcome.get("fatigue_restore", 0.0)))
 	_refresh_interface()
 	travel_event_window.show_result(outcome.text)
@@ -737,10 +715,9 @@ func advance_game_time(minutes: float) -> void:
 
 func _can_sleep_at_hotel() -> bool:
 	return (
-		current_city_id == WorldMapData.BRANCH_CITY_ID
-		and current_location_id == WorldMapData.HOTEL_LOCATION_ID
+		_place_type(current_location_id) == "hotel"
 		and not _is_trip_active()
-		and money_credits >= HOTEL_SLEEP_COST
+		and money_credits >= hotel_sleep_cost
 	)
 
 
@@ -749,7 +726,7 @@ func _open_sleep_dialog(at_hotel: bool = false) -> void:
 		return
 	if at_hotel and not _can_sleep_at_hotel():
 		return
-	sleep_dialog.open(at_hotel, HOTEL_SLEEP_COST, HOTEL_RESTORE_PER_HOUR)
+	sleep_dialog.open(at_hotel, hotel_sleep_cost, hotel_restore_per_hour)
 
 
 func _on_sleep_confirmed(requested_hours: float, sleeping_at_hotel: bool) -> void:
@@ -758,9 +735,9 @@ func _on_sleep_confirmed(requested_hours: float, sleeping_at_hotel: bool) -> voi
 	if sleeping_at_hotel and not _can_sleep_at_hotel():
 		return
 	var hours := clampf(requested_hours, 1.0, 12.0)
-	var restore_per_hour := HOTEL_RESTORE_PER_HOUR if sleeping_at_hotel else 20.0
+	var restore_per_hour := hotel_restore_per_hour if sleeping_at_hotel else 20.0
 	if sleeping_at_hotel:
-		money_credits -= HOTEL_SLEEP_COST
+		money_credits -= hotel_sleep_cost
 	needs.advance(hours * 60.0, true)
 	clock.advance(hours * 60.0)
 	fatigue.restore(hours * restore_per_hour)
@@ -768,7 +745,7 @@ func _on_sleep_confirmed(requested_hours: float, sleeping_at_hotel: bool) -> voi
 	_refresh_fatigue_controls()
 	status_label.text = "Вы поспали %.0f ч. Усталость восстановлена." % hours
 	if sleeping_at_hotel:
-		status_label.text = "Вы поспали в отеле %.0f ч. Оплачено %.0f кр." % [hours, HOTEL_SLEEP_COST]
+		status_label.text = "Вы поспали в отеле %.0f ч. Оплачено %.0f кр." % [hours, hotel_sleep_cost]
 	_refresh_interface()
 
 
@@ -792,8 +769,8 @@ func _on_item_used(item: RefCounted) -> void:
 		return
 	item.uses_remaining -= 1
 	fatigue.restore(float(item.properties.get("fatigue_restore", 0.0)))
-	needs.satiety = minf(BALANCE_SETTINGS.needs_max_value, needs.satiety + float(item.properties.get("satiety_restore", 0.0)))
-	needs.water = minf(BALANCE_SETTINGS.needs_max_value, needs.water + float(item.properties.get("water_restore", 0.0)))
+	needs.satiety = minf(balance_settings.needs_max_value, needs.satiety + float(item.properties.get("satiety_restore", 0.0)))
+	needs.water = minf(balance_settings.needs_max_value, needs.water + float(item.properties.get("water_restore", 0.0)))
 	if item.uses_remaining <= 0:
 		vehicle.inventory.remove(item)
 	_refresh_interface()
@@ -801,7 +778,7 @@ func _on_item_used(item: RefCounted) -> void:
 
 
 func _is_fuel_station_location(location_id: String) -> bool:
-	return location_id == "company_fuel_station" or location_id == "settlement_fuel_station"
+	return _place_type(location_id) == "fuel_station"
 
 
 func _on_refuel_pressed() -> void:
@@ -813,10 +790,10 @@ func _on_refuel_pressed() -> void:
 	if liters_to_refuel <= 0.0:
 		status_label.text = "Недостаточно кредитов для заправки."
 		return
-	var refuel_cost := liters_to_refuel * BALANCE_SETTINGS.fuel_price_per_liter_credits
-	vehicle.fuel_liters = minf(BALANCE_SETTINGS.fuel_tank_capacity_liters, vehicle.fuel_liters + liters_to_refuel)
+	var refuel_cost := liters_to_refuel * balance_settings.fuel_price_per_liter_credits
+	vehicle.fuel_liters = minf(vehicle.settings.fuel_tank_capacity_liters, vehicle.fuel_liters + liters_to_refuel)
 	money_credits = maxf(0.0, money_credits - refuel_cost)
-	advance_game_time(BALANCE_SETTINGS.refuel_time_game_minutes)
+	advance_game_time(balance_settings.refuel_time_game_minutes)
 	_refresh_fuel_controls()
 	_refresh_buttons()
 	status_label.text = "Заправлено %.1f л за %.2f кр. Потрачено 5 игровых минут." % [
@@ -828,16 +805,16 @@ func _on_refuel_pressed() -> void:
 func _open_workshop_trade() -> void:
 	if _is_trip_active():
 		return
-	if current_location_id == "settlement_shop":
-		store_trade.open(vehicle.inventory, money_credits, BALANCE_SETTINGS)
+	if _place_type(current_location_id) == "store":
+		store_trade.open(vehicle, money_credits, balance_settings)
 	elif _is_workshop_location(current_location_id):
-		workshop_trade.open(vehicle.inventory, money_credits, BALANCE_SETTINGS)
+		workshop_trade.open(vehicle, money_credits, balance_settings)
 
 
 func _open_workshop_upgrade() -> void:
 	if _is_trip_active() or not _is_workshop_location(current_location_id):
 		return
-	workshop_upgrade.open(vehicle, money_credits, BALANCE_SETTINGS.workshop_upgrade_cost_credits, BALANCE_SETTINGS.vehicle_inspection_cost_credits)
+	workshop_upgrade.open(vehicle, money_credits, balance_settings.workshop_upgrade_cost_credits, balance_settings.vehicle_inspection_cost_credits)
 
 
 func _on_trade_credits_changed(delta: float) -> void:
@@ -854,7 +831,7 @@ func _on_upgrade_accepted(cost: float) -> void:
 func _can_diagnose_in_garage() -> bool:
 	return (
 		not _is_trip_active()
-		and current_location_id == "company_garage"
+		and _place_type(current_location_id) == "garage"
 	)
 
 
@@ -865,13 +842,13 @@ func _on_garage_diagnosis_pressed() -> void:
 
 
 func _is_workshop_location(location_id: String) -> bool:
-	return location_id == "northern_settlement_workshop"
+	return _place_type(location_id) == "workshop"
 
 
 func _on_repair_pressed() -> void:
 	if _is_trip_active() or not _is_workshop_location(current_location_id) or vehicle_status_dialog.visible:
 		return
-	var inspection_cost: float = BALANCE_SETTINGS.vehicle_inspection_cost_credits
+	var inspection_cost: float = balance_settings.vehicle_inspection_cost_credits
 	if money_credits < inspection_cost:
 		return
 	money_credits -= inspection_cost
@@ -906,12 +883,12 @@ func _on_panel_toggle_pressed() -> void:
 
 func _refresh_interface() -> void:
 	var order_taken := current_order != null
-	var panel_height := 110.0
+	var panel_height := idle_order_height
 	if order_taken:
-		panel_height = 150.0 if order_panel_collapsed else 290.0
+		panel_height = collapsed_order_height if order_panel_collapsed else expanded_order_height
 	if _is_workshop_location(current_location_id) and vehicle.condition_percent < 100.0:
-		panel_height += 30.0
-	order_panel.custom_minimum_size = Vector2(240.0, panel_height)
+		panel_height += workshop_extra_height
+	order_panel.custom_minimum_size.y = panel_height
 	order_panel.offset_bottom = order_panel.offset_top + panel_height
 	order_title.visible = not order_panel_collapsed
 	order_title.text = "Заказ компании" if order_taken else "Заказы компании"
@@ -929,11 +906,11 @@ func _refresh_interface() -> void:
 			if order_state == OrderState.ACCEPTED:
 				status_label.text = "Заказ принят. Доберитесь до точки сбора."
 			elif order_state == OrderState.READY_TO_PICK_UP:
-				status_label.text = "Вы на месте сбора. Заберите груз."
+				status_label.text = "Вы на автостанции. Посадите пассажиров." if current_order.is_passenger_order() else "Вы на месте сбора. Заберите груз."
 			elif order_state == OrderState.TRAVELLING:
-				status_label.text = "Груз получен. Проложите маршрут до доставки."
+				status_label.text = "Пассажиры в машине. Проложите маршрут до высадки." if current_order.is_passenger_order() else "Груз получен. Проложите маршрут до доставки."
 			elif order_state == OrderState.READY_TO_HAND_OVER:
-				status_label.text = "Вы на месте доставки. Сдайте заказ."
+				status_label.text = "Вы на месте назначения. Высадите пассажиров." if current_order.is_passenger_order() else "Вы на месте доставки. Сдайте заказ."
 	else:
 		order_text.text = "Доберитесь до офиса компании, чтобы просмотреть заказы."
 		if not _is_trip_active():
@@ -946,6 +923,9 @@ func _current_order_summary() -> String:
 	var pickup_text := "%s — %s" % [current_order.pickup_city_name, current_order.pickup_name]
 	var delivery_text := "%s — %s" % [current_order.delivery_city_name, current_order.delivery_name]
 	var stage_text := "Ожидает получения" if order_state in [OrderState.ACCEPTED, OrderState.READY_TO_PICK_UP] else "Груз получен"
+	if current_order.is_passenger_order():
+		stage_text = "Пассажиры в машине" if current_order.passengers_picked_up else "Ожидает посадки"
+		stage_text += " · %d чел." % current_order.passenger_count
 	if current_order.is_urgent:
 		stage_text = "Срочный · " + stage_text
 	return "%s\n%s\nЗабрать: %s\nДоставить: %s\nСрок: %s\nРасстояние: %.1f км\nСтоимость: %d кр." % [
@@ -960,7 +940,10 @@ func _current_order_summary() -> String:
 
 
 func _current_order_route() -> String:
-	return ("Срочный · " if current_order.is_urgent else "") + "%s → %s" % [current_order.pickup_name, current_order.delivery_name]
+	var prefix := "Срочный · " if current_order.is_urgent else ""
+	if current_order.is_passenger_order():
+		prefix += "Пассажиры: %d · " % current_order.passenger_count
+	return prefix + "%s → %s" % [current_order.pickup_name, current_order.delivery_name]
 
 
 func _refresh_buttons() -> void:
@@ -977,8 +960,14 @@ func _refresh_buttons() -> void:
 	accept_button.visible = can_pick_up or can_deliver
 	accept_button.disabled = not accept_button.visible
 	accept_button.text = "Забрать груз" if can_pick_up else "Сдать заказ"
+	accept_button.tooltip_text = ""
+	if current_order != null and current_order.is_passenger_order():
+		accept_button.text = "Посадить пассажиров" if can_pick_up else "Высадить пассажиров"
+		if can_pick_up and vehicle.free_passenger_seats() < current_order.passenger_count:
+			accept_button.disabled = true
+			accept_button.tooltip_text = "Недостаточно свободных пассажирских мест."
 	view_orders_button.visible = (
-		current_location_id == "company_office"
+		_place_type(current_location_id) == "company_office"
 		and current_order == null
 		and not _is_trip_active()
 		and not order_board.visible
@@ -1032,7 +1021,7 @@ func _update_game_time_label() -> void:
 
 func _refresh_vehicle_controls() -> void:
 	var can_use_workshop := _is_workshop_location(current_location_id) and not _is_trip_active()
-	trade_button.visible = can_use_workshop or (current_location_id == "settlement_shop" and not _is_trip_active())
+	trade_button.visible = can_use_workshop or (_place_type(current_location_id) == "store" and not _is_trip_active())
 	upgrade_button.visible = can_use_workshop
 	upgrade_button.disabled = false
 	garage_diagnosis_button.visible = _can_diagnose_in_garage()
@@ -1042,33 +1031,32 @@ func _refresh_vehicle_controls() -> void:
 		and not _is_trip_active()
 	)
 	repair_button.visible = at_workshop
-	repair_button.text = "Ремонт деталей — диагностика %.0f кр." % BALANCE_SETTINGS.vehicle_inspection_cost_credits
-	repair_button.disabled = not at_workshop or money_credits < BALANCE_SETTINGS.vehicle_inspection_cost_credits
+	repair_button.text = "Ремонт деталей — диагностика %.0f кр." % balance_settings.vehicle_inspection_cost_credits
+	repair_button.disabled = not at_workshop or money_credits < balance_settings.vehicle_inspection_cost_credits
 	sleep_button.visible = not _is_trip_active()
 	hotel_sleep_button.visible = (
-		current_city_id == WorldMapData.BRANCH_CITY_ID
-		and current_location_id == WorldMapData.HOTEL_LOCATION_ID
+		_place_type(current_location_id) == "hotel"
 		and not _is_trip_active()
 	)
 	hotel_sleep_button.disabled = not _can_sleep_at_hotel()
 	hotel_meal_button.visible = hotel_sleep_button.visible
-	hotel_meal_button.disabled = money_credits < BALANCE_SETTINGS.hotel_meal_cost_credits
+	hotel_meal_button.disabled = money_credits < balance_settings.hotel_meal_cost_credits
 
 
 func _refresh_fuel_controls() -> void:
 	fuel_label.text = "Топливо: %.1f / %.0f л" % [
 		vehicle.fuel_liters,
-		BALANCE_SETTINGS.fuel_tank_capacity_liters,
+		vehicle.settings.fuel_tank_capacity_liters,
 	]
 	_refresh_fatigue_controls()
 	var at_fuel_station := _is_fuel_station_location(current_location_id)
 	refuel_button.visible = at_fuel_station
 	var liters_to_refuel := vehicle.affordable_refuel_liters(money_credits)
-	var refuel_cost := liters_to_refuel * BALANCE_SETTINGS.fuel_price_per_liter_credits
+	var refuel_cost := liters_to_refuel * balance_settings.fuel_price_per_liter_credits
 	refuel_button.text = "Заправить %.1f л — %.2f кр." % [liters_to_refuel, refuel_cost]
 	refuel_button.disabled = (
 		not at_fuel_station
-		or vehicle.fuel_liters >= BALANCE_SETTINGS.fuel_tank_capacity_liters - 0.0001
+		or vehicle.fuel_liters >= vehicle.settings.fuel_tank_capacity_liters - 0.0001
 		or money_credits <= 0.0
 		or _is_trip_active()
 	)
@@ -1077,3 +1065,15 @@ func _refresh_fuel_controls() -> void:
 func _refresh_fatigue_controls() -> void:
 	fatigue_label.text = "Усталость: %.0f" % fatigue.display_value()
 	needs_label.text = "Сытость: %.0f\nЗапас воды: %.0f" % [needs.satiety, needs.water]
+
+
+func _place_data(location_id: String) -> Dictionary:
+	var city: Dictionary = map_view.routes.cities_by_id.get(current_city_id, {})
+	for place in city.get("places", []):
+		if place.id == location_id:
+			return place
+	return {}
+
+
+func _place_type(location_id: String) -> String:
+	return str(_place_data(location_id).get("type", ""))

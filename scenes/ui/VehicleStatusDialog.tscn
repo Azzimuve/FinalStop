@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/VehicleStatusDialog.gd" id="1"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/VehiclePartsView.tscn" id="2"]
+
+[node name="VehicleStatusDialog" type="AcceptDialog"]
+script = ExtResource("1")
+title = "Диагностика автомобиля"
+size = Vector2i(390, 290)
+ok_button_text = "Закрыть"
+
+[node name="Content" type="VBoxContainer" parent="."]
+
+
+[node name="PartsView" parent="Content" instance=ExtResource("2")]
+selectable = true
+
+[node name="RepairDetails" type="VBoxContainer" parent="Content"]
+visible = false
+
+[node name="Description" type="Label" parent="Content/RepairDetails"]
+text = ""
+custom_minimum_size = Vector2(280, 0)
+autowrap_mode = 3
+
+[node name="Repair" type="Button" parent="Content/RepairDetails"]
+text = "Ремонт"

@@ -1,0 +1,49 @@
+[gd_scene format=3]
+
+[node name="ItemCard" type="PanelContainer"]
+visible = false
+mouse_filter = 2
+custom_minimum_size = Vector2(320, 0)
+theme_override_font_sizes/font_size = 16
+z_index = 10
+
+[node name="Layout" type="VBoxContainer" parent="."]
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Layout"]
+text = "Предмет"
+mouse_filter = 2
+theme_override_font_sizes/font_size = 20
+autowrap_mode = 3
+
+[node name="Shape" type="ColorRect" parent="Layout"]
+mouse_filter = 2
+color = Color(0.3, 0.65, 0.55, 1)
+size_flags_horizontal = 0
+custom_minimum_size = Vector2(40, 40)
+
+[node name="Texture" type="TextureRect" parent="Layout"]
+mouse_filter = 2
+custom_minimum_size = Vector2(160, 140)
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Description" type="Label" parent="Layout"]
+text = ""
+mouse_filter = 2
+custom_minimum_size = Vector2(320, 100)
+autowrap_mode = 3
+
+[node name="Footer" type="HBoxContainer" parent="Layout"]
+mouse_filter = 2
+
+[node name="Weight" type="Label" parent="Layout/Footer"]
+text = ""
+mouse_filter = 2
+size_flags_horizontal = 3
+
+[node name="Price" type="Label" parent="Layout/Footer"]
+text = ""
+mouse_filter = 2
+horizontal_alignment = 2

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/simulation/CargoItem.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+item_id = "test_small_item"
+title = "Тестовый маленький предмет"
+description = ""
+category = ""
+texture_path = ""
+size = Vector2i(1, 1)
+weight_kg = -1.0
+price_credits = -1.0
+has_uses = false
+uses_remaining = 1
+properties = {}

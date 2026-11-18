@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/WorkshopTrade.gd" id="1"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/InventoryInteraction.tscn" id="2"]
+
+[ext_resource type="Script" path="res://scripts/simulation/CargoItem.gd" id="cargo"]
+[ext_resource type="Resource" path="res://resources/items/upgraded_engine.tres" id="engine"]
+
+[node name="WorkshopTrade" type="AcceptDialog"]
+script = ExtResource("1")
+initial_stock = Array[ExtResource("cargo")]([ExtResource("engine")])
+title = "Мастерская · Торговля"
+size = Vector2i(1224, 640)
+ok_button_text = "Закрыть"
+
+[node name="Interaction" parent="." instance=ExtResource("2")]

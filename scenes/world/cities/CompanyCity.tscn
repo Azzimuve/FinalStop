@@ -1,0 +1,159 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/world/MapCity.gd" id="1"]
+
+[ext_resource type="PackedScene" path="res://scenes/world/RoadPoint.tscn" id="2"]
+
+[ext_resource type="PackedScene" path="res://scenes/world/Road.tscn" id="3"]
+
+[ext_resource type="PackedScene" path="res://scenes/world/PointOfInterest.tscn" id="4"]
+
+[node name="City" type="Node2D"]
+script = ExtResource("1")
+city_id = "company_city"
+display_name = "Город компании"
+city_type = "city"
+entry_node = NodePath("Layout/Points/company_start")
+
+[node name="Marker" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(20.0, 0.0, 19.8289, 2.61052, 19.31852, 5.17638, 18.47759, 7.65367, 17.32051, 10.0, 15.86707, 12.17523, 14.14214, 14.14214, 12.17523, 15.86707, 10.0, 17.32051, 7.65367, 18.47759, 5.17638, 19.31852, 2.61052, 19.8289, 0.0, 20.0, -2.61052, 19.8289, -5.17638, 19.31852, -7.65367, 18.47759, -10.0, 17.32051, -12.17523, 15.86707, -14.14214, 14.14214, -15.86707, 12.17523, -17.32051, 10.0, -18.47759, 7.65367, -19.31852, 5.17638, -19.8289, 2.61052, -20.0, 0.0, -19.8289, -2.61052, -19.31852, -5.17638, -18.47759, -7.65367, -17.32051, -10.0, -15.86707, -12.17523, -14.14214, -14.14214, -12.17523, -15.86707, -10.0, -17.32051, -7.65367, -18.47759, -5.17638, -19.31852, -2.61052, -19.8289, -0.0, -20.0, 2.61052, -19.8289, 5.17638, -19.31852, 7.65367, -18.47759, 10.0, -17.32051, 12.17523, -15.86707, 14.14214, -14.14214, 15.86707, -12.17523, 17.32051, -10.0, 18.47759, -7.65367, 19.31852, -5.17638, 19.8289, -2.61052)
+color = Color(0.76, 0.81, 0.78, 1)
+
+[node name="Center" type="Polygon2D" parent="Marker"]
+polygon = PackedVector2Array(8.0, 0.0, 7.84628, 1.56072, 7.39104, 3.06147, 6.65176, 4.44456, 5.65685, 5.65685, 4.44456, 6.65176, 3.06147, 7.39104, 1.56072, 7.84628, 0.0, 8.0, -1.56072, 7.84628, -3.06147, 7.39104, -4.44456, 6.65176, -5.65685, 5.65685, -6.65176, 4.44456, -7.39104, 3.06147, -7.84628, 1.56072, -8.0, 0.0, -7.84628, -1.56072, -7.39104, -3.06147, -6.65176, -4.44456, -5.65685, -5.65685, -4.44456, -6.65176, -3.06147, -7.39104, -1.56072, -7.84628, -0.0, -8.0, 1.56072, -7.84628, 3.06147, -7.39104, 4.44456, -6.65176, 5.65685, -5.65685, 6.65176, -4.44456, 7.39104, -3.06147, 7.84628, -1.56072)
+color = Color(0.055, 0.078, 0.086, 1)
+
+[node name="Caption" type="Label" parent="."]
+offset_left = -80
+offset_top = 24
+text = "Город компании"
+theme_override_font_sizes/font_size = 24
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.76, 0.81, 0.78, 1)
+
+[node name="DetailCaption" type="Label" parent="."]
+offset_left = -70
+offset_top = -121
+text = "Город компании"
+theme_override_font_sizes/font_size = 16
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.76, 0.81, 0.78, 1)
+
+[node name="Layout" type="Node2D" parent="."]
+
+
+[node name="Points" type="Node2D" parent="Layout"]
+
+
+[node name="Roads" type="Node2D" parent="Layout"]
+z_index = -1
+
+[node name="Places" type="Node2D" parent="Layout"]
+
+
+[node name="company_start" parent="Layout/Points" instance=ExtResource("2")]
+position = Vector2(110.0, 15.0)
+point_id = "company_start"
+
+[node name="company_depot_road" parent="Layout/Points" instance=ExtResource("2")]
+position = Vector2(-20.0, 0.0)
+point_id = "company_depot_road"
+
+[node name="company_fuel_road" parent="Layout/Points" instance=ExtResource("2")]
+position = Vector2(5.0, 25.0)
+point_id = "company_fuel_road"
+
+[node name="company_north_junction" parent="Layout/Points" instance=ExtResource("2")]
+position = Vector2(-5.0, -45.0)
+point_id = "company_north_junction"
+
+[node name="company_office_road" parent="Layout/Points" instance=ExtResource("2")]
+position = Vector2(-45.0, -85.0)
+point_id = "company_office_road"
+
+[node name="company_garage_road" parent="Layout/Points" instance=ExtResource("2")]
+position = Vector2(55.0, -65.0)
+point_id = "company_garage_road"
+
+[node name="company_station_road" parent="Layout/Points" instance=ExtResource("2")]
+position = Vector2(30.0, 45.0)
+point_id = "company_station_road"
+
+[node name="Road1" parent="Layout/Roads" instance=ExtResource("3")]
+from_node = NodePath("../../Points/company_start")
+to_node = NodePath("../../Points/company_depot_road")
+
+[node name="Road2" parent="Layout/Roads" instance=ExtResource("3")]
+from_node = NodePath("../../Points/company_depot_road")
+to_node = NodePath("../../Points/company_fuel_road")
+
+[node name="Road3" parent="Layout/Roads" instance=ExtResource("3")]
+from_node = NodePath("../../Points/company_depot_road")
+to_node = NodePath("../../Points/company_north_junction")
+
+[node name="Road4" parent="Layout/Roads" instance=ExtResource("3")]
+from_node = NodePath("../../Points/company_north_junction")
+to_node = NodePath("../../Points/company_office_road")
+
+[node name="Road5" parent="Layout/Roads" instance=ExtResource("3")]
+from_node = NodePath("../../Points/company_north_junction")
+to_node = NodePath("../../Points/company_garage_road")
+
+[node name="Road6" parent="Layout/Roads" instance=ExtResource("3")]
+from_node = NodePath("../../Points/company_depot_road")
+to_node = NodePath("../../Points/company_station_road")
+
+[node name="company_depot" parent="Layout/Places" instance=ExtResource("4")]
+position = Vector2(-20.0, 0.0)
+place_id = "company_depot"
+display_name = "Склад компании"
+object_type = 4
+road_node = NodePath("../../Points/company_depot_road")
+
+[node name="Driveway_company_depot" parent="Layout/Roads" instance=ExtResource("3")]
+from_node = NodePath("../../Points/company_depot_road")
+to_node = NodePath("../../Places/company_depot")
+
+[node name="company_fuel_station" parent="Layout/Places" instance=ExtResource("4")]
+position = Vector2(5.0, 25.0)
+place_id = "company_fuel_station"
+display_name = "Заправка"
+object_type = 3
+road_node = NodePath("../../Points/company_fuel_road")
+
+[node name="Driveway_company_fuel_station" parent="Layout/Roads" instance=ExtResource("3")]
+from_node = NodePath("../../Points/company_fuel_road")
+to_node = NodePath("../../Places/company_fuel_station")
+
+[node name="company_office" parent="Layout/Places" instance=ExtResource("4")]
+position = Vector2(-45.0, -85.0)
+place_id = "company_office"
+display_name = "Офис компании"
+object_type = 5
+road_node = NodePath("../../Points/company_office_road")
+
+[node name="Driveway_company_office" parent="Layout/Roads" instance=ExtResource("3")]
+from_node = NodePath("../../Points/company_office_road")
+to_node = NodePath("../../Places/company_office")
+
+[node name="company_garage" parent="Layout/Places" instance=ExtResource("4")]
+position = Vector2(55.0, -65.0)
+place_id = "company_garage"
+display_name = "Гараж"
+object_type = 6
+road_node = NodePath("../../Points/company_garage_road")
+
+[node name="Driveway_company_garage" parent="Layout/Roads" instance=ExtResource("3")]
+from_node = NodePath("../../Points/company_garage_road")
+to_node = NodePath("../../Places/company_garage")
+
+[node name="company_station" parent="Layout/Places" instance=ExtResource("4")]
+position = Vector2(30.0, 45.0)
+place_id = "company_station"
+display_name = "Автостанция"
+object_type = 7
+road_node = NodePath("../../Points/company_station_road")
+
+[node name="Driveway_company_station" parent="Layout/Roads" instance=ExtResource("3")]
+from_node = NodePath("../../Points/company_station_road")
+to_node = NodePath("../../Places/company_station")

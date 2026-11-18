@@ -1,4 +1,4 @@
-extends RefCounted
+extends Node
 
 # Обычный HUD скрывается целиком, сохраняя видимость отдельных кнопок.
 var hud: Control
@@ -11,22 +11,8 @@ var map_view: Node
 func setup(root: Control, modal_windows: Array[Node], map: Node) -> void:
 	windows = modal_windows
 	map_view = map
-	hud = Control.new()
-	hud.name = "BaseHUD"
-	hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(hud)
-	hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for child in root.get_children():
-		if child != hud and child is Control and not windows.has(child):
-			child.reparent(hud, false)
-	backdrop = ColorRect.new()
-	backdrop.name = "ModalBackdrop"
-	backdrop.color = Color(0.0, 0.0, 0.0, 0.55)
-	backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
-	backdrop.z_index = 99
-	root.add_child(backdrop)
-	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	backdrop.hide()
+	hud = root.get_node("BaseHUD")
+	backdrop = root.get_node("ModalBackdrop")
 	for window in windows:
 		if window is Control:
 			window.z_index = 100

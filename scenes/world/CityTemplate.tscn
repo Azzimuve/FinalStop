@@ -1,0 +1,48 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://dgwlb3ntiyr14" path="res://scripts/world/MapCity.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/world/RoadPoint.tscn" id="2"]
+[node name="City" type="Node2D"]
+script = ExtResource("1")
+display_name = "Новый город"
+entry_node = NodePath("Layout/Points/Entry")
+
+[node name="Marker" type="Polygon2D" parent="."]
+modulate = Color(1, 1, 1, 0)
+color = Color(0.76, 0.81, 0.78, 1)
+polygon = PackedVector2Array(20, 0, 19.8289, 2.61052, 19.31852, 5.17638, 18.47759, 7.65367, 17.32051, 10, 15.86707, 12.17523, 14.14214, 14.14214, 12.17523, 15.86707, 10, 17.32051, 7.65367, 18.47759, 5.17638, 19.31852, 2.61052, 19.8289, 0, 20, -2.61052, 19.8289, -5.17638, 19.31852, -7.65367, 18.47759, -10, 17.32051, -12.17523, 15.86707, -14.14214, 14.14214, -15.86707, 12.17523, -17.32051, 10, -18.47759, 7.65367, -19.31852, 5.17638, -19.8289, 2.61052, -20, 0, -19.8289, -2.61052, -19.31852, -5.17638, -18.47759, -7.65367, -17.32051, -10, -15.86707, -12.17523, -14.14214, -14.14214, -12.17523, -15.86707, -10, -17.32051, -7.65367, -18.47759, -5.17638, -19.31852, -2.61052, -19.8289, 0, -20, 2.61052, -19.8289, 5.17638, -19.31852, 7.65367, -18.47759, 10, -17.32051, 12.17523, -15.86707, 14.14214, -14.14214, 15.86707, -12.17523, 17.32051, -10, 18.47759, -7.65367, 19.31852, -5.17638, 19.8289, -2.61052)
+
+[node name="Center" type="Polygon2D" parent="Marker"]
+color = Color(0.055, 0.078, 0.086, 1)
+polygon = PackedVector2Array(8, 0, 7.84628, 1.56072, 7.39104, 3.06147, 6.65176, 4.44456, 5.65685, 5.65685, 4.44456, 6.65176, 3.06147, 7.39104, 1.56072, 7.84628, 0, 8, -1.56072, 7.84628, -3.06147, 7.39104, -4.44456, 6.65176, -5.65685, 5.65685, -6.65176, 4.44456, -7.39104, 3.06147, -7.84628, 1.56072, -8, 0, -7.84628, -1.56072, -7.39104, -3.06147, -6.65176, -4.44456, -5.65685, -5.65685, -4.44456, -6.65176, -3.06147, -7.39104, -1.56072, -7.84628, 0, -8, 1.56072, -7.84628, 3.06147, -7.39104, 4.44456, -6.65176, 5.65685, -5.65685, 6.65176, -4.44456, 7.39104, -3.06147, 7.84628, -1.56072)
+
+[node name="Caption" type="Label" parent="."]
+modulate = Color(1, 1, 1, 0)
+offset_left = -80.0
+offset_top = 24.0
+theme_override_colors/font_color = Color(0.76, 0.81, 0.78, 1)
+theme_override_font_sizes/font_size = 24
+text = "Новый город"
+
+[node name="DetailCaption" type="Label" parent="."]
+visible = false
+offset_left = -70.0
+offset_top = -121.0
+theme_override_colors/font_color = Color(0.76, 0.81, 0.78, 1)
+theme_override_font_sizes/font_size = 16
+text = "Новый город"
+
+[node name="Layout" type="Node2D" parent="."]
+
+[node name="Points" type="Node2D" parent="Layout"]
+
+[node name="Entry" parent="Layout/Points" instance=ExtResource("2")]
+position = Vector2(-100, 0)
+point_id = "entry"
+city_entrance = true
+entrance_name = "Въезд"
+
+[node name="Roads" type="Node2D" parent="Layout"]
+z_index = -1
+
+[node name="Places" type="Node2D" parent="Layout"]

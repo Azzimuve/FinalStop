@@ -1,8 +1,7 @@
 extends AcceptDialog
 
-const ItemCatalog = preload("res://scripts/simulation/ItemCatalog.gd")
-
 const VehicleInventory = preload("res://scripts/simulation/VehicleInventory.gd")
+const VehicleState = preload("res://scripts/simulation/VehicleState.gd")
 const VehiclePart = preload("res://scripts/simulation/VehiclePart.gd")
 const CargoItem = preload("res://scripts/simulation/CargoItem.gd")
 const InventoryInteraction = preload("res://scripts/ui/InventoryInteraction.gd")
@@ -12,20 +11,16 @@ signal discarded(item: CargoItem)
 signal used(item: CargoItem)
 
 var stock := VehicleInventory.new(Vector2i(16, 24))
-var interaction: InventoryInteraction
+@onready var interaction: InventoryInteraction = $Interaction
 var credits: float
 var settings: GameBalanceSettings
-var is_store: bool = false
+@export var is_store: bool = false
 var stock_initialized: bool = false
+@export var initial_stock: Array[CargoItem] = []
 
 
 func _ready() -> void:
 	title = "Магазин · Торговля" if is_store else "Мастерская · Торговля"
-	size = Vector2i(1224, 640)
-	ok_button_text = "Закрыть"
-	# Единственный прямой Control сохраняет раскладку внутри AcceptDialog.
-	interaction = InventoryInteraction.new()
-	add_child(interaction)
 	interaction.transfer_check = _check_trade
 	interaction.describe_item = _describe
 	interaction.trading = true
@@ -36,17 +31,15 @@ func _ready() -> void:
 	visibility_changed.connect(_on_visibility_changed)
 
 
-func open(inventory: VehicleInventory, money: float, balance: GameBalanceSettings) -> void:
+func open(vehicle: VehicleState, money: float, balance: GameBalanceSettings) -> void:
+	var inventory := vehicle.inventory
+	interaction.character_slots.show_vehicle(vehicle)
 	credits = money
 	settings = balance
 	if not stock_initialized:
-		var item := ItemCatalog.create("cigarettes" if is_store else "upgraded_engine")
-		if item != null:
-			stock.place(item, Vector2i.ZERO, false)
-		if is_store:
-			var water := ItemCatalog.create("water_bottle")
-			if water != null:
-				stock.auto_load([water])
+		for definition in initial_stock:
+			if definition != null:
+				stock.auto_load([definition.duplicate(true) as CargoItem])
 		stock_initialized = true
 	interaction.configure(inventory, stock, "Инвентарь торговца · 16×24")
 	popup_centered()

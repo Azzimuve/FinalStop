@@ -1,6 +1,7 @@
 extends Panel
 
 const VehicleInventory = preload("res://scripts/simulation/VehicleInventory.gd")
+const VehicleState = preload("res://scripts/simulation/VehicleState.gd")
 const CargoItem = preload("res://scripts/simulation/CargoItem.gd")
 const InventoryInteraction = preload("res://scripts/ui/InventoryInteraction.gd")
 
@@ -8,33 +9,25 @@ signal closed
 signal discarded(item: CargoItem)
 signal used(item: CargoItem)
 
-var interaction: InventoryInteraction
+@onready var interaction: InventoryInteraction = $Interaction
 var warehouse := VehicleInventory.new(Vector2i(16, 24))
 var pickup_cargo: Array[CargoItem] = []
-var auto_button: Button
-var close_button: Button
+@onready var auto_button: Button = $TakeAll
+@onready var close_button: Button = $Close
 var loading: bool = false
 
 
 func _ready() -> void:
-	hide()
-	interaction = InventoryInteraction.new()
-	add_child(interaction)
 	interaction.transfer_check = _check_pickup_transfer
 	interaction.discarded.connect(func(item: CargoItem): discarded.emit(item))
 	interaction.used.connect(func(item: CargoItem): used.emit(item))
-	auto_button = Button.new()
-	auto_button.text = "Взять всё"
-	auto_button.position = Vector2(12, 600)
 	auto_button.pressed.connect(_take_all)
-	add_child(auto_button)
-	close_button = Button.new()
-	close_button.text = "Закрыть"
 	close_button.pressed.connect(_close)
-	add_child(close_button)
 
 
-func open(model: VehicleInventory, order_cargo: Array[CargoItem], allow_loading: bool, capacity_kg: float) -> void:
+func open(vehicle: VehicleState, order_cargo: Array[CargoItem], allow_loading: bool, capacity_kg: float) -> void:
+	var model := vehicle.inventory
+	interaction.character_slots.show_vehicle(vehicle)
 	loading = allow_loading
 	pickup_cargo = order_cargo.duplicate()
 	warehouse = VehicleInventory.new(Vector2i(16, 24))
@@ -42,8 +35,7 @@ func open(model: VehicleInventory, order_cargo: Array[CargoItem], allow_loading:
 		for item in pickup_cargo:
 			if not model.contains(item):
 				warehouse.auto_load([item])
-	size = Vector2(1200 if loading else 600, 640)
-	close_button.position = Vector2(size.x - 100, size.y - 40)
+	size = Vector2(interaction.dual_inventory_width if loading else interaction.single_inventory_width, size.y)
 	auto_button.visible = loading
 	interaction.cargo_capacity_kg = capacity_kg
 	interaction.configure(model, warehouse if loading else null, "Инвентарь склада · 16×24")

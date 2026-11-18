@@ -1,0 +1,51 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/OrderCard.gd" id="1"]
+
+[node name="OrderCard" type="PanelContainer"]
+script = ExtResource("1")
+custom_minimum_size = Vector2(280, 400)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Content" type="VBoxContainer" parent="."]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="Heading" type="Label" parent="Content"]
+text = "Доставка · 0 кр."
+theme_override_font_sizes/font_size = 20
+autowrap_mode = 3
+
+[node name="Details" type="VBoxContainer" parent="Content"]
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="Cities" type="Label" parent="Content/Details"]
+text = "Город → Город"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
+
+[node name="Places" type="Label" parent="Content/Details"]
+text = "От: Склад\nДо: Пункт доставки"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
+
+[node name="Deadline" type="Label" parent="Content/Details"]
+text = "Срок · Расстояние"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
+
+[node name="Load" type="Label" parent="Content/Details"]
+text = "Груз"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
+
+[node name="Spacer" type="Control" parent="Content"]
+size_flags_vertical = 3
+
+[node name="Choose" type="Button" parent="Content"]
+text = "Выбрать"
+custom_minimum_size = Vector2(0, 40)
+theme_override_font_sizes/font_size = 16

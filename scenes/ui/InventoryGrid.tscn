@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/InventoryGrid.gd" id="1"]
+
+[node name="InventoryGrid" type="Control"]
+script = ExtResource("1")
+custom_minimum_size = Vector2(192, 384)
+offset_left = 0
+offset_top = 0
+offset_right = 192
+offset_bottom = 384
+size_flags_horizontal = 0
+size_flags_vertical = 0

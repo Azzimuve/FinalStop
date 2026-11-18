@@ -2,6 +2,12 @@
 
 [ext_resource type="Script" uid="uid://b4q7rvm8x5fuf" path="res://scripts/GameBalanceSettings.gd" id="1"]
 
+[ext_resource type="Script" path="res://scripts/simulation/CargoItem.gd" id="cargo"]
+[ext_resource type="Resource" path="res://resources/items/test_crate.tres" id="test_crate"]
+[ext_resource type="Resource" path="res://resources/items/test_box.tres" id="test_box"]
+[ext_resource type="Resource" path="res://resources/items/test_long_cargo.tres" id="test_long_cargo"]
+[ext_resource type="Resource" path="res://resources/items/test_small_item.tres" id="test_small_item"]
+
 [resource]
 script = ExtResource("1")
 vehicle_service_condition_percent = 30.0
@@ -44,3 +50,5 @@ hotel_meal_cost_credits = 50.0
 hotel_meal_time_minutes = 30.0
 food_restore_amount = 40.0
 water_restore_amount = 50.0
+
+order_cargo = Array[ExtResource("cargo")]([ExtResource("test_crate"), ExtResource("test_box"), ExtResource("test_long_cargo"), ExtResource("test_small_item")])

@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="FinalStop"
-run/main_scene="uid://dmvlou0ljidsk"
+run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
@@ -30,15 +30,15 @@ window/stretch/aspect="expand"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot_mcp_toolkit/plugin.cfg")
-
-[mcp_toolkit]
-
-updates/check_for_updates=false
+enabled=PackedStringArray("res://addons/godot_mcp_toolkit/plugin.cfg", "res://addons/road_editor/plugin.cfg")
 
 [gui]
 
 theme/default_font_multichannel_signed_distance_field=true
+
+[mcp_toolkit]
+
+updates/check_for_updates=false
 
 [physics]
 

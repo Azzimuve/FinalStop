@@ -16,21 +16,24 @@ var transfer_check: Callable
 var describe_item: Callable
 var item_price: Callable
 var trading: bool = false
-var card: PanelContainer
-var card_title: Label
-var card_shape: ColorRect
-var card_description: Label
-var card_texture: TextureRect
-var card_price: Label
-var card_weight: Label
+@onready var card: PanelContainer = $ItemCard
+@onready var card_title: Label = $ItemCard/Layout/Title
+@onready var card_shape: ColorRect = $ItemCard/Layout/Shape
+@onready var card_description: Label = $ItemCard/Layout/Description
+@onready var card_texture: TextureRect = $ItemCard/Layout/Texture
+@onready var card_price: Label = $ItemCard/Layout/Footer/Price
+@onready var card_weight: Label = $ItemCard/Layout/Footer/Weight
+@export var single_inventory_width: float = 600.0
+@export var dual_inventory_width: float = 1200.0
 var cargo_capacity_kg: float = -1.0
 var left: VehicleInventory
 var right: VehicleInventory
-var grids: Array[InventoryGrid] = []
-var grid_scrolls: Array[ScrollContainer] = []
-var right_title: Label
-var info: Label
-var menu: PopupMenu
+@onready var grids: Array[InventoryGrid] = [$LeftScroll/Grid, $RightScroll/Grid]
+@onready var character_slots: CharacterSlots = $CharacterSlots
+@onready var grid_scrolls: Array[ScrollContainer] = [$LeftScroll, $RightScroll]
+@onready var right_title: Label = $RightTitle
+@onready var info: Label = $Info
+@onready var menu: PopupMenu = $ContextMenu
 var selected: CargoItem
 var source_right: bool = false
 var rotated: bool = false
@@ -43,83 +46,20 @@ var click_position: Vector2
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(1200, 588)
-	_label("Мой инвентарь · 6×12", Vector2(12, 8))
-	var character_slots := CharacterSlots.new()
-	character_slots.position = Vector2(12 + (VehicleInventory.SIZE.x * InventoryGrid.CELL - (CharacterSlots.SLOT_SIZE * 3.0 + CharacterSlots.GAP * 2.0)) / 2.0, 32)
-	add_child(character_slots)
-	right_title = _label("", Vector2(612, 8))
-	for side in [false, true]:
-		var scroll := ScrollContainer.new()
-		scroll.position = Vector2(612, 32) if side else Vector2(12, 112)
-		scroll.size = Vector2(576, 544) if side else Vector2(192, 384)
-		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-		add_child(scroll)
-		grid_scrolls.append(scroll)
-		var grid := InventoryGrid.new()
-		scroll.add_child(grid)
-		scroll.get_v_scroll_bar().value_changed.connect(func(_value: float):
-			if card != null:
+	for index in range(grids.size()):
+		var grid := grids[index]
+		var scroll := grid_scrolls[index]
+		var side := index == 1
+		for bar in [scroll.get_v_scroll_bar(), scroll.get_h_scroll_bar()]:
+			bar.value_changed.connect(func(_value: float):
 				card.hide()
-			grid.queue_redraw()
-		)
-		scroll.get_h_scroll_bar().value_changed.connect(func(_value: float):
-			if card != null:
-				card.hide()
-			grid.queue_redraw()
-		)
+				grid.queue_redraw()
+			)
 		grid.clicked.connect(_click.bind(side))
 		grid.context_requested.connect(_context.bind(side))
 		grid.hovered.connect(_hover.bind(side))
 		grid.mouse_exited.connect(func(): card.hide())
-		grids.append(grid)
-	info = _label("", Vector2(228, 32))
-	info.size = Vector2(360, 512)
-	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	menu = PopupMenu.new()
-	add_child(menu)
 	menu.id_pressed.connect(_context_action)
-	card = PanelContainer.new()
-	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	card.custom_minimum_size.x = 320
-	card.add_theme_font_size_override("font_size", 16)
-	card.z_index = 10
-	add_child(card)
-	var layout := VBoxContainer.new()
-	layout.add_theme_constant_override("separation", 10)
-	layout.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	card.add_child(layout)
-	card_title = Label.new()
-	card_title.add_theme_font_size_override("font_size", 20)
-	card_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	layout.add_child(card_title)
-	card_shape = ColorRect.new()
-	card_shape.color = Color(0.3, 0.65, 0.55)
-	card_shape.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	layout.add_child(card_shape)
-	card_texture = TextureRect.new()
-	card_texture.custom_minimum_size = Vector2(160, 140)
-	card_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	card_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	layout.add_child(card_texture)
-	card_description = Label.new()
-	card_description.custom_minimum_size = Vector2(320, 100)
-	card_description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	layout.add_child(card_description)
-	var footer := HBoxContainer.new()
-	footer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	layout.add_child(footer)
-	card_weight = Label.new()
-	card_weight.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	card_weight.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	footer.add_child(card_weight)
-	card_price = Label.new()
-	card_price.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	card_price.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	footer.add_child(card_price)
-	for child in layout.get_children():
-		child.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	card.hide()
 
 
 func _hover(item: CargoItem, on_right: bool) -> void:
@@ -156,12 +96,11 @@ func _hover(item: CargoItem, on_right: bool) -> void:
 
 
 func configure(player: VehicleInventory, other: VehicleInventory, caption: String) -> void:
+	$PlayerTitle.text = "Мой инвентарь · %d×%d" % [player.dimensions.x, player.dimensions.y]
 	left = player
 	right = other
-	custom_minimum_size = Vector2(1200, 588) if right != null else Vector2(600, 588)
+	custom_minimum_size = Vector2(dual_inventory_width if right != null else single_inventory_width, custom_minimum_size.y)
 	size = custom_minimum_size
-	grid_scrolls[0].size = Vector2(192, 384)
-	info.size.x = 360
 	grids[0].setup(left)
 	grids[1].visible = right != null
 	grid_scrolls[1].visible = right != null
@@ -355,12 +294,3 @@ func _context_action(action: int) -> void:
 				return
 			used.emit(item)
 	refresh()
-
-
-func _label(text: String, at: Vector2) -> Label:
-	var label := Label.new()
-	label.text = text
-	label.position = at
-	label.add_theme_font_size_override("font_size", 12)
-	add_child(label)
-	return label

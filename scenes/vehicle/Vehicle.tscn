@@ -1,0 +1,37 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/simulation/VehicleState.gd" id="1"]
+
+[ext_resource type="Resource" path="res://resources/GameBalanceSettings.tres" id="2"]
+
+[ext_resource type="Script" path="res://scripts/simulation/VehiclePart.gd" id="3"]
+
+[ext_resource type="Resource" path="res://resources/items/standard_front_left_wheel.tres" id="4"]
+
+[ext_resource type="Resource" path="res://resources/items/standard_front_right_wheel.tres" id="5"]
+
+[ext_resource type="Resource" path="res://resources/items/standard_rear_left_wheel.tres" id="6"]
+
+[ext_resource type="Resource" path="res://resources/items/standard_rear_right_wheel.tres" id="7"]
+
+[ext_resource type="Resource" path="res://resources/items/standard_engine.tres" id="8"]
+
+[ext_resource type="Resource" path="res://resources/items/standard_transmission.tres" id="9"]
+
+[node name="Vehicle" type="Node2D"]
+script = ExtResource("1")
+settings = ExtResource("2")
+installed_parts = Array[ExtResource("3")]([ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("8"), ExtResource("9")])
+z_index = 5
+
+[node name="WorldMarker" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-10, -10, 10, -10, 10, 10, -10, 10)
+color = Color(0.95, 0.40, 0.28, 1)
+
+[node name="CityMarker" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(11.0, 0.0, 10.90589, 1.43579, 10.62518, 2.84701, 10.16267, 4.20952, 9.52628, 5.5, 8.72689, 6.69638, 7.77817, 7.77817, 6.69638, 8.72689, 5.5, 9.52628, 4.20952, 10.16267, 2.84701, 10.62518, 1.43579, 10.90589, 0.0, 11.0, -1.43579, 10.90589, -2.84701, 10.62518, -4.20952, 10.16267, -5.5, 9.52628, -6.69638, 8.72689, -7.77817, 7.77817, -8.72689, 6.69638, -9.52628, 5.5, -10.16267, 4.20952, -10.62518, 2.84701, -10.90589, 1.43579, -11.0, 0.0, -10.90589, -1.43579, -10.62518, -2.84701, -10.16267, -4.20952, -9.52628, -5.5, -8.72689, -6.69638, -7.77817, -7.77817, -6.69638, -8.72689, -5.5, -9.52628, -4.20952, -10.16267, -2.84701, -10.62518, -1.43579, -10.90589, -0.0, -11.0, 1.43579, -10.90589, 2.84701, -10.62518, 4.20952, -10.16267, 5.5, -9.52628, 6.69638, -8.72689, 7.77817, -7.77817, 8.72689, -6.69638, 9.52628, -5.5, 10.16267, -4.20952, 10.62518, -2.84701, 10.90589, -1.43579)
+color = Color(0.30, 0.86, 0.76, 1)
+
+[node name="Center" type="Polygon2D" parent="CityMarker"]
+polygon = PackedVector2Array(4.0, 0.0, 3.96578, 0.5221, 3.8637, 1.03528, 3.69552, 1.53073, 3.4641, 2.0, 3.17341, 2.43505, 2.82843, 2.82843, 2.43505, 3.17341, 2.0, 3.4641, 1.53073, 3.69552, 1.03528, 3.8637, 0.5221, 3.96578, 0.0, 4.0, -0.5221, 3.96578, -1.03528, 3.8637, -1.53073, 3.69552, -2.0, 3.4641, -2.43505, 3.17341, -2.82843, 2.82843, -3.17341, 2.43505, -3.4641, 2.0, -3.69552, 1.53073, -3.8637, 1.03528, -3.96578, 0.5221, -4.0, 0.0, -3.96578, -0.5221, -3.8637, -1.03528, -3.69552, -1.53073, -3.4641, -2.0, -3.17341, -2.43505, -2.82843, -2.82843, -2.43505, -3.17341, -2.0, -3.4641, -1.53073, -3.69552, -1.03528, -3.8637, -0.5221, -3.96578, -0.0, -4.0, 0.5221, -3.96578, 1.03528, -3.8637, 1.53073, -3.69552, 2.0, -3.4641, 2.43505, -3.17341, 2.82843, -2.82843, 3.17341, -2.43505, 3.4641, -2.0, 3.69552, -1.53073, 3.8637, -1.03528, 3.96578, -0.5221)
+color = Color(0.055, 0.078, 0.086, 1)
