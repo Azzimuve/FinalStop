@@ -65,12 +65,17 @@ var camera_press_camera_position: Vector2
 var camera_transition: Tween
 var camera_focus_city: String = ""
 var arrival_focus_started: bool = false
+var departure_focus_distance: float = 0.0
+var departure_zoom: float = 1.4
+var displayed_detail: float = -1.0
 var last_camera_position := Vector2(INF, INF)
 var last_camera_zoom := Vector2.ZERO
 var last_viewport_size := Vector2.ZERO
 var follow_idle_seconds: float = 0.0
 @export var follow_zoom: float = 0.75
 @export var follow_response: float = 1.5
+## Скорость автоматического изменения масштаба: меньше — плавнее.
+@export_range(0.1, 5.0, 0.1) var follow_zoom_response: float = 1.0
 var follow_traveling: bool = false
 var follow_in_city: bool = false
 var follow_position := Vector2.ZERO
@@ -84,15 +89,22 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	var automatic_zoom_applied := false
 	if follow_traveling:
 		follow_idle_seconds += delta
 		if follow_idle_seconds >= 2.0 and not camera_drag_pending and not camera_drag_settling and not _camera_transition_active():
 			camera.position = camera.position.lerp(follow_position, 1.0 - exp(-follow_response * delta))
 			# Подъезд уже раскрывает город до смены участка поездки.
 			# Слежение продолжает этот переход, сохраняя городской масштаб.
-			var follow_zoom := city_zoom.x if follow_in_city or arrival_focus_started else follow_zoom
-			target_zoom = follow_zoom
-			camera.zoom = camera.zoom.lerp(Vector2.ONE * follow_zoom, 1.0 - exp(-2.5 * delta))
+			var departing_city := trip_progress * RouteGeometry.length(active_route_points) < departure_focus_distance
+			var desired_zoom := minf(follow_zoom, departure_zoom)
+			if follow_in_city or arrival_focus_started:
+				desired_zoom = city_zoom.x
+			elif departing_city:
+				desired_zoom = departure_zoom
+			target_zoom = desired_zoom
+			camera.zoom = camera.zoom.lerp(Vector2.ONE * desired_zoom, 1.0 - exp(-follow_zoom_response * delta))
+			automatic_zoom_applied = true
 			zoom_anchor = camera.position
 			zoom_cursor = get_viewport_rect().size / 2.0
 			camera.force_update_scroll()
@@ -104,7 +116,8 @@ func _process(delta: float) -> void:
 		zoom_anchor = camera.position
 		zoom_cursor = get_viewport_rect().size / 2.0
 		camera.force_update_scroll()
-	if not _camera_transition_active() and absf(camera.zoom.x - target_zoom) > 0.0001:
+	# Ручной зум не должен повторно ускорять автоматическое сворачивание.
+	if not automatic_zoom_applied and not _camera_transition_active() and absf(camera.zoom.x - target_zoom) > 0.0001:
 		var zoom := lerpf(camera.zoom.x, target_zoom, 1.0 - exp(-12.0 * delta))
 		camera.zoom = Vector2.ONE * zoom
 		if not camera_drag_pending:
@@ -184,6 +197,7 @@ func set_route(
 ) -> bool:
 	active_route_ids = routes.find_route(start_city_id, destination_city_id)
 	arrival_focus_started = false
+	departure_focus_distance = 0.0
 	active_route_points.clear()
 	trip_progress = 0.0
 	if active_route_ids.is_empty():
@@ -209,6 +223,13 @@ func set_route(
 	else:
 		local_route_points.clear()
 		active_route_points = routes.build_intercity_route(start_city_id, start_location_id, destination_city_id)
+		# Сворачиваем город сразу при выезде с улиц на трассу.
+		# Плавность перехода задаётся follow_zoom_response.
+		var departure_city: Dictionary = routes.cities_by_id[start_city_id]
+		var departure_route := routes.build_local_route(departure_city, start_location_id,
+			routes.entrance_for(start_city_id, active_route_ids[1]))
+		departure_focus_distance = RouteGeometry.length(departure_route)
+
 
 	_refresh_visuals()
 	return not active_route_ids.is_empty() and active_route_points.size() > 1
@@ -407,11 +428,26 @@ func _select_place_at(local_position: Vector2) -> bool:
 
 
 func _refresh_visuals() -> void:
+	# Сравниваем один и тот же прогресс до и после изменения геометрии.
+	# В компенсацию не попадает собственное движение машины.
+	var compensate_fold := route_selection_locked and route_visible and follow_traveling \
+		and follow_idle_seconds >= 2.0 and not camera_drag_pending \
+		and not camera_drag_settling and not _camera_transition_active() \
+		and displayed_detail >= 0.0 and detail_alpha < displayed_detail
+	var before_fold := Vector2.ZERO
+	if compensate_fold:
+		before_fold = _displayed_vehicle_position()
 	world.set_view(detail_alpha, current_city_id, selected_place_id)
+	if compensate_fold:
+		var shift := _displayed_vehicle_position() - before_fold
+		camera.position += shift
+		zoom_anchor += shift
+		camera.force_update_scroll()
+	displayed_detail = detail_alpha
 	var in_city := routes.cities_by_id.has(current_city_id)
 	vehicle.get_node("CityMarker").position = Vector2.ZERO
 	vehicle.get_node("WorldMarker").visible = route_visible and active_route_points.size() > 1
-	vehicle.get_node("CityMarker").visible = in_city
+	vehicle.get_node("CityMarker").visible = in_city and not (route_visible and active_route_points.size() > 1)
 	if in_city:
 		var city: Dictionary = routes.cities_by_id[current_city_id]
 		var player_position := routes.position_for_location(city, current_location_id)
@@ -422,10 +458,7 @@ func _refresh_visuals() -> void:
 	if route_visible and active_route_points.size() > 1:
 		var displayed := _displayed_remaining_route()
 		vehicle.position = displayed[0] if not displayed.is_empty() else _displayed_route_point(active_route_points[-1])
-		if in_city:
-			var city: Dictionary = routes.cities_by_id[current_city_id]
-			var city_position := routes.position_for_location(city, current_location_id)
-			vehicle.get_node("CityMarker").position = Vector2(city.position).lerp(city_position, detail_alpha) - vehicle.position
+		follow_position = vehicle.position
 	queue_redraw()
 
 
@@ -448,23 +481,22 @@ func _displayed_route_point(point: Vector2) -> Vector2:
 	return world.display_route_point(point)
 
 
+func _displayed_route() -> Array[Vector2]:
+	var points: Array[Vector2] = []
+	for point in active_route_points:
+		points.append(_displayed_route_point(point))
+	return points
+
+
+func _displayed_vehicle_position() -> Vector2:
+	return RouteGeometry.position_at(_displayed_route(), trip_progress)
+
+
 func _displayed_remaining_route() -> Array[Vector2]:
-	var result: Array[Vector2] = []
-	var remaining_distance := RouteGeometry.length(active_route_points) * trip_progress
-	for index in range(active_route_points.size() - 1):
-		var start := active_route_points[index]
-		var finish := active_route_points[index + 1]
-		var length := start.distance_to(finish)
-		if length <= 0.0001:
-			continue
-		if remaining_distance > length:
-			remaining_distance -= length
-			continue
-		if result.is_empty():
-			result.append(_displayed_route_point(start).lerp(_displayed_route_point(finish), remaining_distance / length))
-		result.append(_displayed_route_point(finish))
-		remaining_distance = 0.0
-	return result
+	# Равный шаг прогресса даёт равное расстояние вдоль всей видимой трассы.
+	# Иначе сжатый въезд растягивает короткий участок и ускоряет на нём машину.
+	# Игровой пробег и расход по-прежнему считает TripPhase по исходной дороге.
+	return RouteGeometry.remaining_points(_displayed_route(), trip_progress)
 
 
 func _fold_city_points(points: Array[Vector2], origin: Vector2) -> Array[Vector2]:
@@ -542,6 +574,8 @@ func set_follow_traveling(traveling: bool, in_city: bool = false) -> void:
 	if traveling != follow_traveling:
 		follow_idle_seconds = 2.0 if traveling else 0.0
 		if traveling:
+			# Выезд сохраняет выбранный масштаб и может только отдалять камеру.
+			departure_zoom = minf(camera.zoom.x, target_zoom)
 			_cancel_camera_transition()
 	follow_traveling = traveling
 	follow_in_city = in_city

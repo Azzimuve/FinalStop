@@ -15,7 +15,7 @@ var stock := VehicleInventory.new(Vector2i(16, 24))
 var credits: float
 var settings: GameBalanceSettings
 @export var is_store: bool = false
-var stock_initialized: bool = false
+var stocks_by_city: Dictionary = {}
 @export var initial_stock: Array[CargoItem] = []
 
 
@@ -31,18 +31,27 @@ func _ready() -> void:
 	visibility_changed.connect(_on_visibility_changed)
 
 
-func open(vehicle: VehicleState, money: float, balance: GameBalanceSettings) -> void:
+func open(vehicle: VehicleState, money: float, balance: GameBalanceSettings, city_id: String, place_id: String) -> void:
 	var inventory := vehicle.inventory
 	interaction.character_slots.show_vehicle(vehicle)
 	credits = money
 	settings = balance
-	if not stock_initialized:
-		for definition in initial_stock:
-			if definition != null:
-				stock.auto_load([definition.duplicate(true) as CargoItem])
-		stock_initialized = true
+	stock = _stock_for_location(city_id, place_id)
 	interaction.configure(inventory, stock, "Инвентарь торговца · 16×24")
 	popup_centered()
+
+
+func _stock_for_location(city_id: String, place_id: String) -> VehicleInventory:
+	if not stocks_by_city.has(city_id):
+		stocks_by_city[city_id] = {}
+	var city_stocks: Dictionary = stocks_by_city[city_id]
+	if not city_stocks.has(place_id):
+		var inventory := VehicleInventory.new(Vector2i(16, 24))
+		for definition in initial_stock:
+			if definition != null:
+				inventory.auto_load([definition.duplicate(true) as CargoItem])
+		city_stocks[place_id] = inventory
+	return city_stocks[place_id]
 
 
 func _price(item: CargoItem, buying: bool) -> float:

@@ -111,6 +111,8 @@ func _bind_endpoints() -> void:
 			next_endpoints.append(endpoint)
 	# Изменение чужой ветки дерева не требует пересчёта этой дороги.
 	if next_endpoints == _bound_endpoints:
+		# Новая соседняя трасса может превратить въезд в сквозной перекрёсток.
+		queue_redraw()
 		return
 	_disconnect_endpoints()
 	for endpoint in next_endpoints:
@@ -206,6 +208,23 @@ func _get_configuration_warnings() -> PackedStringArray:
 		return ["Выберите два разных узла дороги в From Node и To Node."]
 	return []
 
+# Сквозная трасса остаётся широкой даже на узле, принадлежащем городу.
+# Городские улицы задают свою ширину отдельно в Inspector.
+func _is_narrow_city_access(endpoint: Node2D) -> bool:
+	if endpoint.get("junction"):
+		return false
+	var ancestor := endpoint.get_parent()
+	while ancestor != null and not ancestor.has_method("get_entrance_points"):
+		ancestor = ancestor.get_parent()
+	if ancestor == null:
+		return false
+	for sibling in get_parent().get_children():
+		if sibling == self or not is_instance_of(sibling, get_script()):
+			continue
+		if sibling.intercity and endpoint in sibling.endpoints():
+			return false
+	return true
+
 func _draw() -> void:
 	var ends := endpoints()
 	if ends[0] == null or ends[1] == null:
@@ -216,9 +235,9 @@ func _draw() -> void:
 	var start_width := road_width
 	var finish_width := road_width
 	if intercity:
-		if not ends[0].get("junction"):
+		if _is_narrow_city_access(ends[0]):
 			start_width = lerpf(road_width, 5.0, detail)
-		if not ends[1].get("junction"):
+		if _is_narrow_city_access(ends[1]):
 			finish_width = lerpf(road_width, 5.0, detail)
 	var widths := Vector2(start_width, finish_width)
 	if _draw_mesh == null or _draw_widths != widths:

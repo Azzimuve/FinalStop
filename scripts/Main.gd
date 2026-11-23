@@ -806,9 +806,9 @@ func _open_workshop_trade() -> void:
 	if _is_trip_active():
 		return
 	if _place_type(current_location_id) == "store":
-		store_trade.open(vehicle, money_credits, balance_settings)
+		store_trade.open(vehicle, money_credits, balance_settings, current_city_id, current_location_id)
 	elif _is_workshop_location(current_location_id):
-		workshop_trade.open(vehicle, money_credits, balance_settings)
+		workshop_trade.open(vehicle, money_credits, balance_settings, current_city_id, current_location_id)
 
 
 func _open_workshop_upgrade() -> void:
