@@ -1,5 +1,10 @@
 [gd_scene format=3]
 
+[ext_resource type="Theme" path="res://resources/atlas/AtlasTheme.tres" id="atlas"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PassengerDesk.tscn" id="desk"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/Prologue.tscn" id="prologue"]
+
 [ext_resource type="PackedScene" path="res://scenes/ui/OrderBoard.tscn" id="1"]
 
 [ext_resource type="PackedScene" path="res://scenes/ui/VehicleStatusDialog.tscn" id="2"]
@@ -13,8 +18,12 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/InventoryWindow.tscn" id="6"]
 
 [ext_resource type="PackedScene" path="res://scenes/ui/SleepDialog.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/ui/RefuelDialog.tscn" id="refuel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ActionProgress.tscn" id="action_progress"]
+[ext_resource type="PackedScene" path="res://scenes/ui/RadioBulletin.tscn" id="bulletin"]
 
 [ext_resource type="PackedScene" path="res://scenes/ui/TravelEventWindow.tscn" id="8"]
+[ext_resource type="PackedScene" path="res://scenes/ui/CheckpointDialogue.tscn" id="checkpoint_dialogue"]
 
 [ext_resource type="Script" path="res://scripts/ui/ModalLayers.gd" id="9"]
 
@@ -22,8 +31,32 @@
 [ext_resource type="Resource" path="res://resources/items/cigarettes.tres" id="cigarettes"]
 [ext_resource type="Resource" path="res://resources/items/water_bottle.tres" id="water"]
 
-[sub_resource type="Theme" id="Theme_compact"]
-default_font_size = 12
+[ext_resource type="Texture2D" path="res://resources/atlas/rail_symbols.svg" id="symbols"]
+
+[sub_resource type="AtlasTexture" id="Time"]
+atlas = ExtResource("symbols")
+region = Rect2(0,0,24,24)
+
+[sub_resource type="AtlasTexture" id="Fuel"]
+atlas = ExtResource("symbols")
+region = Rect2(24,0,24,24)
+
+[sub_resource type="AtlasTexture" id="Road"]
+atlas = ExtResource("symbols")
+region = Rect2(48,0,24,24)
+
+[sub_resource type="AtlasTexture" id="Money"]
+atlas = ExtResource("symbols")
+region = Rect2(72,0,24,24)
+
+[sub_resource type="StyleBoxFlat" id="Rail"]
+bg_color = Color(0.15,0.15,0.13,1)
+border_width_top = 2
+border_color = Color(0.53,0.45,0.31,1)
+content_margin_left = 14.0
+content_margin_right = 14.0
+content_margin_top = 5.0
+content_margin_bottom = 5.0
 
 [sub_resource type="ButtonGroup" id="DriveModes"]
 allow_unpress = false
@@ -38,7 +71,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme = SubResource("Theme_compact")
+theme = ExtResource("atlas")
+texture_filter = 2
 
 [node name="BaseHUD" type="Control" parent="UI"]
 anchors_preset = 15
@@ -55,7 +89,7 @@ offset_left = 16.0
 offset_top = 16.0
 offset_right = 256.0
 offset_bottom = 126.0
-scale = Vector2(0.85, 0.85)
+visible = false
 
 [node name="Content" type="VBoxContainer" parent="UI/BaseHUD/OrderPanel"]
 layout_mode = 2
@@ -63,6 +97,9 @@ layout_mode = 2
 [node name="Title" type="Label" parent="UI/BaseHUD/OrderPanel/Content"]
 layout_mode = 2
 text = "Заказы компании"
+
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 21
 
 [node name="OrderText" type="Label" parent="UI/BaseHUD/OrderPanel/Content"]
 custom_maximum_size = Vector2(240, -1)
@@ -80,26 +117,16 @@ autowrap_mode = 2
 layout_mode = 2
 text = "Забрать груз"
 
-[node name="TravelButton" type="Button" parent="UI/BaseHUD/OrderPanel/Content"]
-layout_mode = 2
-disabled = true
-text = "В путь"
-
 [node name="TripTimeLabel" type="Label" parent="UI/BaseHUD/OrderPanel/Content"]
 visible = false
 layout_mode = 2
 text = "В пути: 00:00"
 
-[node name="PauseButton" type="Button" parent="UI/BaseHUD/OrderPanel/Content"]
+[node name="RoadsideFuelButton" type="Button" parent="UI/BaseHUD/OrderPanel/Content"]
 visible = false
 layout_mode = 2
-text = "Остановить"
-
-[node name="CityText" type="Label" parent="UI/BaseHUD/OrderPanel/Content"]
-custom_maximum_size = Vector2(240, -1)
-layout_mode = 2
-text = "Город компании"
-autowrap_mode = 2
+text = "Вызвать подвоз топлива"
+autowrap_mode = 3
 
 [node name="PanelToggleButton" type="Button" parent="UI/BaseHUD/OrderPanel/Content"]
 visible = false
@@ -121,34 +148,8 @@ visible = false
 layout_mode = 2
 text = "Отремонтировать машину"
 
-[node name="GameTimeLabel" type="Label" parent="UI/BaseHUD"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -144.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = 48.0
-grow_horizontal = 0
-theme_override_font_sizes/font_size = 16
-text = "08:00"
-horizontal_alignment = 2
-
-[node name="FuelLabel" type="Label" parent="UI/BaseHUD"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -184.0
-offset_top = 40.0
-offset_right = -16.0
-offset_bottom = 62.0
-grow_horizontal = 0
-text = "Топливо: 60 / 60 л"
-horizontal_alignment = 2
-
 [node name="FatigueLabel" type="Label" parent="UI/BaseHUD"]
+visible = false
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -159,19 +160,6 @@ offset_right = -16.0
 offset_bottom = 106.0
 grow_horizontal = 0
 text = "Усталость: 100"
-horizontal_alignment = 2
-
-[node name="MoneyLabel" type="Label" parent="UI/BaseHUD"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -184.0
-offset_top = 62.0
-offset_right = -16.0
-offset_bottom = 84.0
-grow_horizontal = 0
-text = "Баланс: 0.00 кр."
 horizontal_alignment = 2
 
 [node name="VehicleConditionLabel" type="Label" parent="UI/BaseHUD"]
@@ -188,17 +176,8 @@ grow_horizontal = 0
 text = "Состояние машины: 100%"
 horizontal_alignment = 2
 
-[node name="GarageDiagnosisButton" type="Button" parent="UI/BaseHUD"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -220.0
-offset_top = 150.0
-offset_right = -16.0
-offset_bottom = 176.0
-grow_horizontal = 0
-text = "Диагностика — бесплатно"
+[node name="GarageDiagnosisButton" type="Button" parent="UI/BaseHUD/OrderPanel/Content"]
+text = "Диагностика в гараже"
 
 [node name="TradeButton" type="Button" parent="UI/BaseHUD/OrderPanel/Content"]
 text = "Торговать"
@@ -220,15 +199,8 @@ layout_mode = 2
 text = "Поесть и попить — 50 кр."
 layout_mode = 2
 
-[node name="InventoryButton" type="Button" parent="UI/BaseHUD"]
-text = "Инвентарь машины"
-scale = Vector2(0.85, 0.85)
-offset_left = 16
-offset_top = 132
-offset_right = 256
-offset_bottom = 162
-
 [node name="NeedsLabel" type="Label" parent="UI/BaseHUD"]
+visible = false
 anchor_left = 1.0
 anchor_right = 1.0
 grow_horizontal = 0
@@ -239,35 +211,136 @@ offset_bottom = 144
 horizontal_alignment = 2
 text = "Сытость: 100\nЗапас воды: 100"
 
-[node name="DriveModeControls" type="HBoxContainer" parent="UI/BaseHUD"]
+[node name="StatusRail" type="PanelContainer" parent="UI/BaseHUD"]
 anchor_top = 1.0
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 8
-offset_top = -34
-offset_right = 220
-offset_bottom = -8
-theme_override_constants/separation = 3
+offset_top = -54
+mouse_filter = 1
+theme_override_styles/panel = SubResource("Rail")
 
-[node name="Economy" type="Button" parent="UI/BaseHUD/DriveModeControls"]
+[node name="Bar" type="HBoxContainer" parent="UI/BaseHUD/StatusRail"]
+theme_override_constants/separation = 8
+
+[node name="InventoryButton" type="Button" parent="UI/BaseHUD/StatusRail/Bar"]
+text = "Кузов"
+theme_type_variation = &"RailButton"
+
+
+[node name="SheetButton" type="Button" parent="UI/BaseHUD/StatusRail/Bar"]
+text = "Путевой лист"
+theme_type_variation = &"RailButton"
+toggle_mode = true
+tooltip_text = "Заказ и действия на стоянке"
+
+[node name="CityText" type="Label" parent="UI/BaseHUD/StatusRail/Bar"]
+theme_override_colors/font_color = Color(0.95,0.90,0.77,1)
+text = "Общий вид"
+size_flags_horizontal = 3
+text_overrun_behavior = 3
+
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 19
+mouse_filter = 2
+
+[node name="Distance" type="HBoxContainer" parent="UI/BaseHUD/StatusRail/Bar"]
+visible = false
+
+[node name="Icon" type="TextureRect" parent="UI/BaseHUD/StatusRail/Bar/Distance"]
+custom_minimum_size = Vector2(20,20)
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+texture = SubResource("Road")
+mouse_filter = 2
+
+[node name="Value" type="Label" parent="UI/BaseHUD/StatusRail/Bar/Distance"]
+theme_type_variation = &"AtlasHeading"
+theme_override_colors/font_color = Color(0.95,0.90,0.77,1)
+theme_override_font_sizes/font_size = 19
+
+[node name="TimeIcon" type="TextureRect" parent="UI/BaseHUD/StatusRail/Bar"]
+texture = SubResource("Time")
+custom_minimum_size = Vector2(20,20)
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="GameTimeLabel" type="Label" parent="UI/BaseHUD/StatusRail/Bar"]
+theme_override_colors/font_color = Color(0.95,0.90,0.77,1)
+text = "08:00"
+
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 19
+
+[node name="FuelIcon" type="TextureRect" parent="UI/BaseHUD/StatusRail/Bar"]
+texture = SubResource("Fuel")
+custom_minimum_size = Vector2(20,20)
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="FuelLabel" type="Label" parent="UI/BaseHUD/StatusRail/Bar"]
+theme_override_colors/font_color = Color(0.95,0.90,0.77,1)
+text = "Топливо"
+
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 19
+
+[node name="MoneyIcon" type="TextureRect" parent="UI/BaseHUD/StatusRail/Bar"]
+texture = SubResource("Money")
+custom_minimum_size = Vector2(20,20)
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="MoneyLabel" type="Label" parent="UI/BaseHUD/StatusRail/Bar"]
+theme_override_colors/font_color = Color(0.95,0.90,0.77,1)
+text = "Баланс"
+
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 19
+
+[node name="DriveModeControls" type="HBoxContainer" parent="UI/BaseHUD/StatusRail/Bar"]
+
+[node name="Economy" type="Button" parent="UI/BaseHUD/StatusRail/Bar/DriveModeControls"]
 text = "Эко"
 toggle_mode = true
 button_group = SubResource("DriveModes")
 button_pressed = false
-theme_override_font_sizes/font_size = 12
+theme_type_variation = &"RailButton"
+theme_override_font_sizes/font_size = 15
 
-[node name="Normal" type="Button" parent="UI/BaseHUD/DriveModeControls"]
+[node name="Normal" type="Button" parent="UI/BaseHUD/StatusRail/Bar/DriveModeControls"]
 text = "Обычный"
 toggle_mode = true
 button_group = SubResource("DriveModes")
 button_pressed = true
-theme_override_font_sizes/font_size = 12
+theme_type_variation = &"RailButton"
+theme_override_font_sizes/font_size = 15
 
-[node name="Forced" type="Button" parent="UI/BaseHUD/DriveModeControls"]
+[node name="Forced" type="Button" parent="UI/BaseHUD/StatusRail/Bar/DriveModeControls"]
 text = "Форсаж"
 toggle_mode = true
 button_group = SubResource("DriveModes")
 button_pressed = false
-theme_override_font_sizes/font_size = 12
+theme_type_variation = &"RailButton"
+theme_override_font_sizes/font_size = 15
+
+[node name="TravelButton" type="Button" parent="UI/BaseHUD/StatusRail/Bar"]
+visible = false
+text = "В путь"
+custom_minimum_size = Vector2(100,34)
+theme_type_variation = &"PrimaryButton"
+
+[node name="PauseButton" type="Button" parent="UI/BaseHUD/StatusRail/Bar"]
+visible = false
+text = "Остановить"
+custom_minimum_size = Vector2(100,34)
+theme_type_variation = &"PrimaryButton"
 
 [node name="ModalBackdrop" type="ColorRect" parent="UI"]
 visible = false
@@ -301,9 +374,32 @@ title = "Магазин · Торговля"
 
 [node name="SleepDialog" parent="UI" instance=ExtResource("7")]
 
+[node name="RefuelDialog" parent="UI" instance=ExtResource("refuel")]
+
 
 [node name="TravelEventWindow" parent="UI" instance=ExtResource("8")]
+
+[node name="CheckpointDialogue" parent="UI" instance=ExtResource("checkpoint_dialogue")]
 
 
 [node name="ModalLayers" type="Node" parent="UI"]
 script = ExtResource("9")
+
+[node name="Prologue" parent="UI/BaseHUD" instance=ExtResource("prologue")]
+
+[node name="RadioBulletin" parent="UI/BaseHUD" instance=ExtResource("bulletin")]
+
+[node name="RadioRecall" type="Button" parent="UI/BaseHUD"]
+visible = false
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -154.0
+offset_right = -14.0
+offset_top = 12.0
+offset_bottom = 44.0
+text = "Рация"
+theme_type_variation = &"RailButton"
+
+[node name="PassengerDesk" parent="UI" instance=ExtResource("desk")]
+
+[node name="ActionProgress" parent="UI" instance=ExtResource("action_progress")]

@@ -1,51 +1,448 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/ui/OrderCard.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/ui/OrderCard.gd" id="script"]
+[ext_resource type="Texture2D" path="res://resources/atlas/paper.webp" id="paper"]
+[ext_resource type="Texture2D" path="res://resources/atlas/ural_side.webp" id="truck"]
+[ext_resource type="Texture2D" path="res://resources/atlas/waybill_clip.svg" id="clip"]
+[ext_resource type="FontFile" path="res://resources/fonts/NotoSerif-Bold.ttf" id="serif"]
+[ext_resource type="Theme" path="res://resources/atlas/AtlasTheme.tres" id="theme"]
 
-[node name="OrderCard" type="PanelContainer"]
-script = ExtResource("1")
-custom_minimum_size = Vector2(280, 400)
-size_flags_horizontal = 3
+[sub_resource type="StyleBoxFlat" id="Edge"]
+bg_color = Color(0.83,0.74,0.57,1)
+border_color = Color(0.52,0.44,0.32,1)
+border_width_top = 1
+border_width_bottom = 1
+border_width_left = 1
+border_width_right = 1
+shadow_size = 3
+shadow_offset = Vector2(1,3)
+shadow_color = Color(0.11,0.09,0.06,0.36)
+
+[sub_resource type="StyleBoxFlat" id="Table"]
+draw_center = false
+border_color = Color(0.39,0.36,0.29,1)
+border_width_top = 1
+border_width_bottom = 1
+border_width_left = 1
+border_width_right = 1
+
+[sub_resource type="StyleBoxLine" id="Rule"]
+color = Color(0.43,0.40,0.33,0.85)
+thickness = 1
+
+[sub_resource type="StyleBoxFlat" id="Seal"]
+draw_center = false
+border_color = Color(0.29,0.28,0.42,0.63)
+border_width_top = 2
+border_width_bottom = 2
+border_width_left = 2
+border_width_right = 2
+corner_radius_top_left = 34
+corner_radius_top_right = 34
+corner_radius_bottom_left = 34
+corner_radius_bottom_right = 34
+corner_detail = 10
+
+[node name="OrderCard" type="Control"]
+script = ExtResource("script")
+theme = ExtResource("theme")
+offset_right = 456
+offset_bottom = 446
+mouse_filter = 2
+
+[node name="Sheet" type="Panel" parent="."]
+offset_left = 0
+offset_top = 0
+offset_right = 456
+offset_bottom = 446
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Edge")
+
+[node name="Stock" type="TextureRect" parent="."]
+offset_left = 2
+offset_top = 2
+offset_right = 454
+offset_bottom = 444
+texture = ExtResource("paper")
+expand_mode = 1
+mouse_filter = 2
+texture_filter = 2
+
+[node name="Heading" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = 20
+offset_top = 7
+offset_right = 339
+offset_bottom = 39
+mouse_filter = 2
+text = "Транспортная накладная"
+theme_override_fonts/font = ExtResource("serif")
+theme_override_font_sizes/font_size = 22
+
+[node name="Number" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = 344
+offset_top = 7
+offset_right = 436
+offset_bottom = 39
+mouse_filter = 2
+text = "№ 001"
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.21,0.25,0.35,1)
+
+[node name="Route" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = 20
+offset_top = 40
+offset_right = 337
+offset_bottom = 65
+mouse_filter = 2
+text = "Город компании → Соседний посёлок"
+text_overrun_behavior = 3
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.21,0.25,0.35,1)
+
+[node name="Fee" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = 342
+offset_top = 40
+offset_right = 436
+offset_bottom = 65
+mouse_filter = 2
+horizontal_alignment = 2
+text = "550 кр."
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 18
+
+[node name="HeaderRule" type="ColorRect" parent="."]
+offset_left = 20
+offset_top = 69
+offset_right = 436
+offset_bottom = 70
+color = Color(0.36,0.33,0.27,0.85)
+mouse_filter = 2
+
+[node name="Emblem" type="TextureRect" parent="."]
+offset_left = 20
+offset_top = 80
+offset_right = 103
+offset_bottom = 117
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+texture_filter = 2
+texture = ExtResource("truck")
+self_modulate = Color(0.48,0.45,0.36,1)
+
+[node name="Clip" type="TextureRect" parent="."]
+offset_left = 5
+offset_top = -2
+offset_right = 15
+offset_bottom = 30
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+texture_filter = 2
+texture = ExtResource("clip")
+rotation = 0.08
+
+[node name="OfficeRule" type="ColorRect" parent="."]
+offset_left = 112
+offset_top = 80
+offset_right = 113
+offset_bottom = 117
+color = Color(0.36,0.33,0.27,0.85)
+mouse_filter = 2
+
+[node name="Letterhead" type="Label" parent="."]
+offset_left = 122
+offset_top = 76
+offset_right = 436
+offset_bottom = 99
+mouse_filter = 2
+text = "АВТОТРАНСПОРТНЫЙ УЧАСТОК"
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 14
+
+[node name="Office" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = 122
+offset_top = 97
+offset_right = 436
+offset_bottom = 119
+mouse_filter = 2
+text = "Город компании"
+theme_override_font_sizes/font_size = 16
+text_overrun_behavior = 3
+
+[node name="TableFrame" type="Panel" parent="."]
+offset_left = 19
+offset_top = 126
+offset_right = 437
+offset_bottom = 366
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Table")
+
+[node name="Details" type="ScrollContainer" parent="."]
+offset_left = 20
+offset_top = 127
+offset_right = 436
+offset_bottom = 365
+unique_name_in_owner = true
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+follow_focus = false
+
+[node name="Rows" type="VBoxContainer" parent="Details"]
 size_flags_vertical = 3
-
-[node name="Content" type="VBoxContainer" parent="."]
+mouse_filter = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 0
+
+[node name="FromRow" type="HBoxContainer" parent="Details/Rows"]
+custom_minimum_size = Vector2(0,30)
 size_flags_vertical = 3
-theme_override_constants/separation = 12
+mouse_filter = 2
+theme_override_constants/separation = 6
 
-[node name="Heading" type="Label" parent="Content"]
-text = "Доставка · 0 кр."
-theme_override_font_sizes/font_size = 20
-autowrap_mode = 3
+[node name="FromTitle" type="Label" parent="Details/Rows/FromRow"]
+custom_minimum_size = Vector2(96,0)
+mouse_filter = 2
+theme_type_variation = &"AtlasHeading"
+text = "  Откуда"
 
-[node name="Details" type="VBoxContainer" parent="Content"]
+[node name="Divider" type="ColorRect" parent="Details/Rows/FromRow"]
+custom_minimum_size = Vector2(1,0)
+mouse_filter = 2
+color = Color(0.43,0.40,0.33,0.85)
+
+[node name="From" type="Label" parent="Details/Rows/FromRow"]
+unique_name_in_owner = true
+mouse_filter = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 10
-
-[node name="Cities" type="Label" parent="Content/Details"]
-text = "Город → Город"
 autowrap_mode = 3
 theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.21,0.25,0.35,1)
 
-[node name="Places" type="Label" parent="Content/Details"]
-text = "От: Склад\nДо: Пункт доставки"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 16
+[node name="FromRule" type="HSeparator" parent="Details/Rows"]
+mouse_filter = 2
+theme_override_constants/separation = 1
+theme_override_styles/separator = SubResource("Rule")
 
-[node name="Deadline" type="Label" parent="Content/Details"]
-text = "Срок · Расстояние"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 16
-
-[node name="Load" type="Label" parent="Content/Details"]
-text = "Груз"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 16
-
-[node name="Spacer" type="Control" parent="Content"]
+[node name="ToRow" type="HBoxContainer" parent="Details/Rows"]
+custom_minimum_size = Vector2(0,30)
 size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 6
 
-[node name="Choose" type="Button" parent="Content"]
-text = "Выбрать"
-custom_minimum_size = Vector2(0, 40)
+[node name="ToTitle" type="Label" parent="Details/Rows/ToRow"]
+custom_minimum_size = Vector2(96,0)
+mouse_filter = 2
+theme_type_variation = &"AtlasHeading"
+text = "  Куда"
+
+[node name="Divider" type="ColorRect" parent="Details/Rows/ToRow"]
+custom_minimum_size = Vector2(1,0)
+mouse_filter = 2
+color = Color(0.43,0.40,0.33,0.85)
+
+[node name="To" type="Label" parent="Details/Rows/ToRow"]
+unique_name_in_owner = true
+mouse_filter = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
 theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.21,0.25,0.35,1)
+
+[node name="ToRule" type="HSeparator" parent="Details/Rows"]
+mouse_filter = 2
+theme_override_constants/separation = 1
+theme_override_styles/separator = SubResource("Rule")
+
+[node name="LoadRow" type="HBoxContainer" parent="Details/Rows"]
+custom_minimum_size = Vector2(0,30)
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="LoadTitle" type="Label" parent="Details/Rows/LoadRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96,0)
+mouse_filter = 2
+theme_type_variation = &"AtlasHeading"
+text = "  Груз"
+
+[node name="Divider" type="ColorRect" parent="Details/Rows/LoadRow"]
+custom_minimum_size = Vector2(1,0)
+mouse_filter = 2
+color = Color(0.43,0.40,0.33,0.85)
+
+[node name="Load" type="Label" parent="Details/Rows/LoadRow"]
+unique_name_in_owner = true
+mouse_filter = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.21,0.25,0.35,1)
+
+[node name="LoadRule" type="HSeparator" parent="Details/Rows"]
+mouse_filter = 2
+theme_override_constants/separation = 1
+theme_override_styles/separator = SubResource("Rule")
+
+[node name="QuantityRow" type="HBoxContainer" parent="Details/Rows"]
+custom_minimum_size = Vector2(0,30)
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="QuantityTitle" type="Label" parent="Details/Rows/QuantityRow"]
+custom_minimum_size = Vector2(96,0)
+mouse_filter = 2
+theme_type_variation = &"AtlasHeading"
+text = "  Количество"
+
+[node name="Divider" type="ColorRect" parent="Details/Rows/QuantityRow"]
+custom_minimum_size = Vector2(1,0)
+mouse_filter = 2
+color = Color(0.43,0.40,0.33,0.85)
+
+[node name="Quantity" type="Label" parent="Details/Rows/QuantityRow"]
+unique_name_in_owner = true
+mouse_filter = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.21,0.25,0.35,1)
+
+[node name="QuantityRule" type="HSeparator" parent="Details/Rows"]
+mouse_filter = 2
+theme_override_constants/separation = 1
+theme_override_styles/separator = SubResource("Rule")
+
+[node name="DeadlineRow" type="HBoxContainer" parent="Details/Rows"]
+custom_minimum_size = Vector2(0,30)
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="DeadlineTitle" type="Label" parent="Details/Rows/DeadlineRow"]
+custom_minimum_size = Vector2(96,0)
+mouse_filter = 2
+theme_type_variation = &"AtlasHeading"
+text = "  Срок"
+
+[node name="Divider" type="ColorRect" parent="Details/Rows/DeadlineRow"]
+custom_minimum_size = Vector2(1,0)
+mouse_filter = 2
+color = Color(0.43,0.40,0.33,0.85)
+
+[node name="Deadline" type="Label" parent="Details/Rows/DeadlineRow"]
+unique_name_in_owner = true
+mouse_filter = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.21,0.25,0.35,1)
+
+[node name="DeadlineRule" type="HSeparator" parent="Details/Rows"]
+mouse_filter = 2
+theme_override_constants/separation = 1
+theme_override_styles/separator = SubResource("Rule")
+
+[node name="DistanceRow" type="HBoxContainer" parent="Details/Rows"]
+custom_minimum_size = Vector2(0,30)
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="DistanceTitle" type="Label" parent="Details/Rows/DistanceRow"]
+custom_minimum_size = Vector2(96,0)
+mouse_filter = 2
+theme_type_variation = &"AtlasHeading"
+text = "  Расстояние"
+
+[node name="Divider" type="ColorRect" parent="Details/Rows/DistanceRow"]
+custom_minimum_size = Vector2(1,0)
+mouse_filter = 2
+color = Color(0.43,0.40,0.33,0.85)
+
+[node name="Distance" type="Label" parent="Details/Rows/DistanceRow"]
+unique_name_in_owner = true
+mouse_filter = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.21,0.25,0.35,1)
+
+[node name="DistanceRule" type="HSeparator" parent="Details/Rows"]
+mouse_filter = 2
+theme_override_constants/separation = 1
+theme_override_styles/separator = SubResource("Rule")
+
+[node name="RewardRow" type="HBoxContainer" parent="Details/Rows"]
+custom_minimum_size = Vector2(0,30)
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="RewardTitle" type="Label" parent="Details/Rows/RewardRow"]
+custom_minimum_size = Vector2(96,0)
+mouse_filter = 2
+theme_type_variation = &"AtlasHeading"
+text = "  Оплата"
+
+[node name="Divider" type="ColorRect" parent="Details/Rows/RewardRow"]
+custom_minimum_size = Vector2(1,0)
+mouse_filter = 2
+color = Color(0.43,0.40,0.33,0.85)
+
+[node name="Reward" type="Label" parent="Details/Rows/RewardRow"]
+unique_name_in_owner = true
+mouse_filter = 2
+size_flags_horizontal = 3
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.21,0.25,0.35,1)
+
+[node name="Signature" type="Label" parent="."]
+offset_left = 20
+offset_top = 383
+offset_right = 143
+offset_bottom = 425
+mouse_filter = 2
+text = "Подпись водителя"
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 14
+
+[node name="SignatureLine" type="ColorRect" parent="."]
+offset_left = 143
+offset_top = 411
+offset_right = 300
+offset_bottom = 412
+color = Color(0.36,0.33,0.27,0.85)
+mouse_filter = 2
+
+[node name="Stamp" type="Panel" parent="."]
+offset_left = 344
+offset_top = 371
+offset_right = 410
+offset_bottom = 437
+mouse_filter = 2
+rotation = -0.17
+pivot_offset = Vector2(33,33)
+theme_override_styles/panel = SubResource("Seal")
+
+[node name="Text" type="Label" parent="Stamp"]
+offset_left = 0
+offset_top = 2
+offset_right = 66
+offset_bottom = 64
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "★\nОТДЕЛ\nПЕРЕВОЗОК"
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.29,0.28,0.42,0.65)

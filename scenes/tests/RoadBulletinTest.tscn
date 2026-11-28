@@ -1,0 +1,31 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/Main.tscn" id="game"]
+[ext_resource type="Script" path="res://scripts/tests/RoadBulletinTest.gd" id="test"]
+
+[node name="RoadBulletinTest" type="Node"]
+script = ExtResource("test")
+
+[node name="Game" parent="." instance=ExtResource("game")]
+
+[node name="TestHUD" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Actions" type="VBoxContainer" parent="TestHUD"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -130.0
+offset_right = 334.0
+offset_bottom = -16.0
+alignment = 2
+
+[node name="Hint" type="Label" parent="TestHUD/Actions"]
+text = "Нажмите на ромб события, затем «В путь»."
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
+
+[node name="Repeat" type="Button" parent="TestHUD/Actions"]
+text = "Повторить тест"

@@ -1,0 +1,72 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/TruckInventory.gd" id="fit"]
+[ext_resource type="Texture2D" path="res://resources/atlas/bonnet.webp" id="hood"]
+[ext_resource type="Texture2D" path="res://resources/atlas/chassis.webp" id="frame"]
+[ext_resource type="PackedScene" path="res://scenes/ui/CharacterSlots.tscn" id="seats"]
+[ext_resource type="PackedScene" path="res://scenes/ui/InventoryGrid.tscn" id="grid"]
+
+[node name="TruckInventory" type="Control"]
+script = ExtResource("fit")
+offset_right = 318
+offset_bottom = 568
+mouse_filter = 2
+
+[node name="Diagram" type="Control" parent="."]
+offset_right = 380
+offset_bottom = 760
+mouse_filter = 2
+
+[node name="Bonnet" type="TextureRect" parent="Diagram"]
+offset_right = 380
+offset_bottom = 231
+mouse_filter = 2
+expand_mode = 1
+texture_filter = 4
+texture = ExtResource("hood")
+
+[node name="Body" type="TextureRect" parent="Diagram"]
+offset_top = 231
+offset_right = 380
+offset_bottom = 760
+mouse_filter = 2
+expand_mode = 1
+texture_filter = 4
+texture = ExtResource("frame")
+
+[node name="CharacterSlots" parent="Diagram" instance=ExtResource("seats")]
+offset_left = 98
+offset_top = 243
+offset_right = 282
+offset_bottom = 299
+
+[node name="Hold" type="Control" parent="Diagram"]
+offset_left = 94
+offset_top = 323
+offset_right = 286
+offset_bottom = 707
+mouse_filter = 2
+
+[node name="Grid" parent="Diagram/Hold" instance=ExtResource("grid")]
+
+[node name="CabNote" type="Label" parent="Diagram"]
+offset_left = 0
+offset_top = 243
+offset_right = 61
+offset_bottom = 269
+horizontal_alignment = 2
+text = "Кабина"
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 16
+mouse_filter = 2
+
+[node name="BedNote" type="Label" parent="Diagram"]
+offset_left = 0
+offset_top = 440
+offset_right = 61
+offset_bottom = 466
+horizontal_alignment = 2
+text = "Кузов"
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 16
+mouse_filter = 2

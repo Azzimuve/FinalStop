@@ -1,0 +1,114 @@
+[gd_resource type="Theme" format=3]
+
+[ext_resource type="Texture2D" path="res://resources/atlas/filing_tab.webp" id="paper"]
+[ext_resource type="Texture2D" path="res://resources/atlas/dispatch_patch.webp" id="linen"]
+[ext_resource type="FontFile" path="res://resources/fonts/PTSansNarrow-Bold.ttf" id="bold"]
+
+[sub_resource type="FontVariation" id="PocketPrint"]
+base_font = ExtResource("bold")
+spacing_glyph = 1
+
+[sub_resource type="StyleBoxFlat" id="InkFocus"]
+draw_center = false
+border_color = Color(0.35,0.20,0.10,1)
+border_width_bottom = 2
+expand_margin_bottom = -4.0
+expand_margin_left = -10.0
+expand_margin_right = -10.0
+
+[sub_resource type="StyleBoxTexture" id="PaperDown"]
+texture = ExtResource("paper")
+modulate_color = Color(0.89,0.84,0.73,1)
+texture_margin_left = 34.0
+texture_margin_right = 34.0
+texture_margin_top = 1.0
+texture_margin_bottom = 2.0
+content_margin_left = 21.0
+content_margin_right = 21.0
+content_margin_top = 5.0
+content_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="Linen"]
+texture = ExtResource("linen")
+texture_margin_left = 9.0
+texture_margin_right = 9.0
+texture_margin_top = 6.0
+texture_margin_bottom = 6.0
+content_margin_left = 13.0
+content_margin_right = 13.0
+content_margin_top = 4.0
+content_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="LinenHover"]
+texture = ExtResource("linen")
+modulate_color = Color(1.12,1.10,1.06,1)
+texture_margin_left = 9.0
+texture_margin_right = 9.0
+texture_margin_top = 6.0
+texture_margin_bottom = 6.0
+content_margin_left = 13.0
+content_margin_right = 13.0
+content_margin_top = 4.0
+content_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="Ochre"]
+texture = ExtResource("linen")
+modulate_color = Color(0.98,0.72,0.47,1)
+texture_margin_left = 9.0
+texture_margin_right = 9.0
+texture_margin_top = 6.0
+texture_margin_bottom = 6.0
+content_margin_left = 13.0
+content_margin_right = 13.0
+content_margin_top = 4.0
+content_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="OchreHover"]
+texture = ExtResource("linen")
+modulate_color = Color(1.08,0.83,0.58,1)
+texture_margin_left = 9.0
+texture_margin_right = 9.0
+texture_margin_top = 6.0
+texture_margin_bottom = 6.0
+content_margin_left = 13.0
+content_margin_right = 13.0
+content_margin_top = 4.0
+content_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="Muted"]
+texture = ExtResource("linen")
+modulate_color = Color(0.68,0.66,0.60,1)
+texture_margin_left = 9.0
+texture_margin_right = 9.0
+texture_margin_top = 6.0
+texture_margin_bottom = 6.0
+content_margin_left = 13.0
+content_margin_right = 13.0
+content_margin_top = 4.0
+content_margin_bottom = 3.0
+
+[resource]
+default_font = ExtResource("bold")
+Button/colors/font_color = Color(0.21,0.18,0.14,1)
+Button/colors/font_hover_color = Color(0.17,0.13,0.09,1)
+Button/colors/font_focus_color = Color(0.17,0.13,0.09,1)
+Button/colors/font_pressed_color = Color(0.23,0.17,0.10,1)
+Button/colors/font_hover_pressed_color = Color(0.23,0.17,0.10,1)
+Button/colors/font_disabled_color = Color(0.29,0.26,0.22,1)
+Button/fonts/font = ExtResource("bold")
+Button/styles/focus = SubResource("InkFocus")
+Button/styles/disabled = SubResource("Muted")
+FolderAction/base_type = &"Button"
+FolderAction/styles/normal = SubResource("Linen")
+FolderAction/styles/hover = SubResource("LinenHover")
+FolderAction/styles/pressed = SubResource("PaperDown")
+FolderAction/styles/hover_pressed = SubResource("PaperDown")
+TakeWaybill/base_type = &"Button"
+TakeWaybill/styles/normal = SubResource("Ochre")
+TakeWaybill/styles/hover = SubResource("OchreHover")
+TakeWaybill/styles/pressed = SubResource("Ochre")
+TakeWaybill/styles/hover_pressed = SubResource("Ochre")
+PocketMark/base_type = &"Label"
+PocketMark/fonts/font = SubResource("PocketPrint")
+PocketMark/colors/font_color = Color(0.21,0.20,0.15,1)
+PocketMark/styles/normal = SubResource("Linen")

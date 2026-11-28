@@ -1,5 +1,8 @@
 [gd_scene format=3]
 
+[ext_resource type="Texture2D" path="res://resources/atlas/town_blocks.svg" id="town_ink"]
+[ext_resource type="StyleBox" path="res://resources/atlas/MapCaption.tres" id="city_label"]
+[ext_resource type="FontFile" path="res://resources/fonts/PTSansNarrow-Bold.ttf" id="map_bold"]
 [ext_resource type="Script" path="res://scripts/world/MapCity.gd" id="1"]
 
 [ext_resource type="PackedScene" path="res://scenes/world/RoadPoint.tscn" id="2"]
@@ -23,13 +26,20 @@ color = Color(0.76, 0.81, 0.78, 1)
 polygon = PackedVector2Array(8.0, 0.0, 7.84628, 1.56072, 7.39104, 3.06147, 6.65176, 4.44456, 5.65685, 5.65685, 4.44456, 6.65176, 3.06147, 7.39104, 1.56072, 7.84628, 0.0, 8.0, -1.56072, 7.84628, -3.06147, 7.39104, -4.44456, 6.65176, -5.65685, 5.65685, -6.65176, 4.44456, -7.39104, 3.06147, -7.84628, 1.56072, -8.0, 0.0, -7.84628, -1.56072, -7.39104, -3.06147, -6.65176, -4.44456, -5.65685, -5.65685, -4.44456, -6.65176, -3.06147, -7.39104, -1.56072, -7.84628, -0.0, -8.0, 1.56072, -7.84628, 3.06147, -7.39104, 4.44456, -6.65176, 5.65685, -5.65685, 6.65176, -4.44456, 7.39104, -3.06147, 7.84628, -1.56072)
 color = Color(0.055, 0.078, 0.086, 1)
 
+[node name="Buildings" type="Sprite2D" parent="Marker"]
+texture = ExtResource("town_ink")
+texture_filter = 4
+show_behind_parent = true
+
 [node name="Caption" type="Label" parent="."]
+theme_override_styles/normal = ExtResource("city_label")
+theme_override_fonts/font = ExtResource("map_bold")
 offset_left = -80
 offset_top = 24
 text = "Город компании"
 theme_override_font_sizes/font_size = 24
 mouse_filter = 2
-theme_override_colors/font_color = Color(0.76, 0.81, 0.78, 1)
+theme_override_colors/font_color = Color(0.17, 0.17, 0.14, 1)
 
 [node name="DetailCaption" type="Label" parent="."]
 offset_left = -70
@@ -37,7 +47,7 @@ offset_top = -121
 text = "Город компании"
 theme_override_font_sizes/font_size = 16
 mouse_filter = 2
-theme_override_colors/font_color = Color(0.76, 0.81, 0.78, 1)
+theme_override_colors/font_color = Color(0.17, 0.17, 0.14, 1)
 
 [node name="Layout" type="Node2D" parent="."]
 

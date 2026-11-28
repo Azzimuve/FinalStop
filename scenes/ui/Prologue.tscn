@@ -1,0 +1,109 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://resources/atlas/dispatcher.webp" id="portrait"]
+[ext_resource type="Script" path="res://scripts/ui/Prologue.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="RadioPanel"]
+content_margin_left = 18.0
+content_margin_top = 12.0
+content_margin_right = 18.0
+content_margin_bottom = 12.0
+bg_color = Color(0.93,0.87,0.73,1)
+border_width_top = 3
+border_color = Color(0.52,0.41,0.27,1)
+
+[node name="Prologue" type="PanelContainer"]
+process_mode = 3
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -432
+offset_right = 432
+offset_top = -224
+offset_bottom = -14
+grow_vertical = 0
+theme_override_styles/panel = SubResource("RadioPanel")
+script = ExtResource("1")
+radio_lines = Dictionary[String, String]({
+"OFFICE": "Приём. В Соседнем ждут коробку. Выбери офис на карте и приезжай за накладной. Аванс на рейс уже у тебя.",
+"CARGO_OFFER": "Видишь накладную? За коробку заплатят %d кр., если привезёшь до %s. Глянь, где забирать и кому везти. Всё сходится? Жми «Взять заказ».",
+"LOAD": "Вижу твою подпись. Теперь на склад компании. Там жми «Забрать груз», переложи коробку в машину и закрой инвентарь.",
+"FUEL": "Посмотри на бак. Заедь на нашу АЗС и заправься перед трассой.",
+"DELIVERY": "Вези коробку в пункт доставки Соседнего. Если что случится, прикинь, чем рискуешь, прежде чем выбирать.",
+"AFTER_CHECKPOINT": "Пропустили? Добро. Сунут тебе когда-нибудь свёрток без накладной, пообещают вторую ставку за рейс. А на таком посту кто за него отвечать будет? Ты. Дураком надо быть, чтобы польститься. Ладно, вези коробку на разгрузку.",
+"SHOP": "Разгрузился? Купи мне пачку сигарет в местном магазине. В гараже рассчитаемся.",
+"SECOND_ORDER": "Глянь на остаток топлива. Если нужно, здесь есть АЗС. Потом возвращайся в офис за пассажирской заявкой.",
+"PASSENGER_OFFER": "Теперь повезёшь человека. В заявке записан %s. Ему нужно одно свободное место. За рейс получишь %d кр. после высадки. Берёшь? Жми «Взять заказ».",
+"BOARD": "Записал рейс на тебя. Серов ждёт на автостанции компании. Нажми «Проверить документы». Сверь имя и номер с заявкой, нажми на скрепку слева вверху и сверься с розыском и чёрным списком. Кого впустить — решаешь ты.",
+"RECHECK_PASSENGER": "Посмотри ещё раз. Сверь имя и номер с заявкой и обеими сводками. Это наш Серов.",
+"DROPOFF": "Высади Серова на автостанции Северного посёлка.",
+"INSPECT": "Серов сказал, на поворотах что-то стучит. Поезжай в мастерскую Северного. Оплати осмотр, посмотри смету и свяжись со мной.",
+"CHOICE": "Ремонт на %.0f кр.? Смету вижу. Всё, хватит. Чинить её я не буду. Это твоя последняя смена. Верни машину в гараж до %s.",
+"OFFER": "Оформим сейчас, всю сумму отдашь позже. Цена %d кр., срок — %d дн. Согласен?",
+"RETURN": "Жду машину в гараже компании до %s. Если не вернёшь вовремя, заявлю об угоне.",
+"AGENCY": "Серов дал твой позывной. Слышал, ты сдал ключи. У нас Урал в кредит за %d кр. Платёж %d кр. каждые %d дн. Первый — %s."
+})
+checkpoint_event = {
+"title": "Военный пост на въезде",
+"description": "Водитель, заглушите мотор. Ищем запрещённый груз. Покажите накладную и откройте кузов, пожалуйста.",
+"actions": [{
+	"text": "Вот накладная. Сейчас открою кузов.",
+	"outcomes": [{"text": "Чисто. Коробка по накладной, в кабине тоже порядок. Забирайте документы и проезжайте."}]
+}]
+}
+
+[node name="Row" type="HBoxContainer" parent="."]
+theme_override_constants/separation = 20
+
+[node name="Portrait" type="ColorRect" parent="Row"]
+custom_minimum_size = Vector2(128, 160)
+size_flags_vertical = 4
+color = Color(0.86,0.81,0.68,1)
+mouse_filter = 2
+
+[node name="Boss" type="TextureRect" parent="Row/Portrait"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("portrait")
+expand_mode = 1
+stretch_mode = 6
+texture_filter = 2
+mouse_filter = 2
+
+[node name="Text" type="VBoxContainer" parent="Row"]
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Speaker" type="Label" parent="Row/Text"]
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 23
+theme_override_colors/font_color = Color(0.17, 0.17, 0.14, 1)
+text = "Босс · рация"
+
+[node name="Line" type="Label" parent="Row/Text"]
+autowrap_mode = 3
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 21
+
+[node name="Actions" type="HBoxContainer" parent="Row/Text"]
+theme_override_constants/separation = 10
+[node name="First" type="Button" parent="Row/Text/Actions"]
+custom_minimum_size = Vector2(0, 36)
+theme_override_font_sizes/font_size = 17
+[node name="Second" type="Button" parent="Row/Text/Actions"]
+custom_minimum_size = Vector2(0, 36)
+theme_override_font_sizes/font_size = 17
+
+[node name="Dismiss" type="Button" parent="Row/Text/Actions"]
+custom_minimum_size = Vector2(0, 36)
+theme_override_font_sizes/font_size = 17
+text = "Продолжить"
+
+[node name="Agency" type="Label" parent="Row/Portrait"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "АГЕНТСТВО"

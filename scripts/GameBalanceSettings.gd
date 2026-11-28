@@ -30,6 +30,11 @@ const CargoItem = preload("res://scripts/simulation/CargoItem.gd")
 @export var fuel_price_per_liter_credits: float = 15.0
 @export var refuel_time_game_minutes: float = 5.0
 
+@export_group("Подвоз топлива")
+@export_range(0.1, 1000.0, 0.1, "or_greater", "suffix:л") var roadside_fuel_liters := 10.0
+@export_range(0.0, 10000.0, 0.01, "or_greater", "suffix:кр.") var roadside_fuel_cost := 250.0
+@export_range(1.0, 1440.0, 1.0, "or_greater", "suffix:мин") var roadside_fuel_minutes := 60.0
+
 @export_group("Режимы движения")
 @export_range(0.01, 5.0) var economy_speed_multiplier: float = 0.8
 @export_range(0.01, 5.0) var economy_fuel_multiplier: float = 0.8

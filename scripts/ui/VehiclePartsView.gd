@@ -46,7 +46,7 @@ func show_vehicle(model: VehicleState) -> void:
 func _draw() -> void:
 	if vehicle == null and not Engine.is_editor_hint():
 		return
-	var font := ThemeDB.fallback_font
+	var font := get_theme_default_font()
 	for slot in get_children():
 		if not slot is PartSlot:
 			continue
@@ -54,21 +54,21 @@ func _draw() -> void:
 		var part: VehiclePart = vehicle.get_part(id) if vehicle != null else null
 		var origin: Vector2 = slot.position
 		var slot_size: Vector2i = slot.footprint
-		draw_string(font, origin - Vector2(0, 7), slot.display_name, HORIZONTAL_ALIGNMENT_LEFT, 76, 9)
+		draw_string(font, origin - Vector2(0, 7), slot.display_name, HORIZONTAL_ALIGNMENT_LEFT, 76, 9, Color("#302e25"))
 		# Фон — место установки. Заполненная область — существующая деталь.
-		draw_rect(Rect2(origin, Vector2(slot_size) * CELL), Color(0.12, 0.16, 0.17))
+		draw_rect(Rect2(origin, Vector2(slot_size) * CELL), Color("#dccda9"))
 		if part != null:
 			var part_rect := Rect2(origin + Vector2.ONE, Vector2(part.size) * CELL - Vector2.ONE * 2)
-			var textured := InventoryGrid.draw_item(self, part, part_rect, false, Color(0.85, 0.7, 0.3) if selected == part else Color(0.26, 0.52, 0.46))
+			var textured := InventoryGrid.draw_item(self, part, part_rect, false, Color(0.85, 0.7, 0.3) if selected == part else Color("#838664"))
 			if textured and selected == part:
 				draw_rect(part_rect, Color(0.85, 0.7, 0.3), false)
 		for y in range(slot_size.y):
 			for x in range(slot_size.x):
-				draw_rect(Rect2(origin + Vector2(x, y) * CELL, Vector2.ONE * CELL), Color(0.65, 0.75, 0.72), false)
+				draw_rect(Rect2(origin + Vector2(x, y) * CELL, Vector2.ONE * CELL), Color("#69664f"), false)
 		if part != null:
 			if show_condition:
-				draw_string(font, origin + Vector2(0, slot_size.y * CELL + 11), "%.1f%%" % part.condition_percent, HORIZONTAL_ALIGNMENT_LEFT, 76, 9)
-			draw_string(font, origin + Vector2(0, slot_size.y * CELL + 23), part.model_name, HORIZONTAL_ALIGNMENT_LEFT, 76, 9)
+				draw_string(font, origin + Vector2(0, slot_size.y * CELL + 11), "%.1f%%" % part.condition_percent, HORIZONTAL_ALIGNMENT_LEFT, 76, 9, Color("#302e25"))
+			draw_string(font, origin + Vector2(0, slot_size.y * CELL + 23), part.model_name, HORIZONTAL_ALIGNMENT_LEFT, 76, 9, Color("#302e25"))
 		if editable and selected != null and Rect2(origin, Vector2(slot_size) * CELL).has_point(get_local_mouse_position()):
 			var fits := part == null and selected.slot_type == VehicleState.slot_type(id) and selected.size == slot_size
 			var preview_rect := Rect2(origin, Vector2(selected.size) * CELL)

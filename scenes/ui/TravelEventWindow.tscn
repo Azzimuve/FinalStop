@@ -25,16 +25,20 @@ offset_bottom = 145
 
 
 [node name="Heading" type="Label" parent="Panel/Layout"]
+unique_name_in_owner = true
 text = "Событие"
 autowrap_mode = 3
 
 [node name="Description" type="Label" parent="Panel/Layout"]
+unique_name_in_owner = true
 text = ""
 autowrap_mode = 3
 size_flags_vertical = 3
 
 [node name="Actions" type="VBoxContainer" parent="Panel/Layout"]
+unique_name_in_owner = true
 
 
 [node name="Continue" type="Button" parent="Panel/Layout"]
+unique_name_in_owner = true
 text = "Продолжить путь"

@@ -1,49 +1,63 @@
 [gd_scene format=3]
 
-[node name="ItemCard" type="PanelContainer"]
+[ext_resource type="Theme" path="res://resources/atlas/AtlasTheme.tres" id="theme"]
+
+[node name="ItemCard" type="Panel"]
 visible = false
 mouse_filter = 2
-custom_minimum_size = Vector2(320, 0)
-theme_override_font_sizes/font_size = 16
-z_index = 10
+theme = ExtResource("theme")
 
 [node name="Layout" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16
+offset_top = 12
+offset_right = -16
+offset_bottom = -12
 mouse_filter = 2
-theme_override_constants/separation = 10
-
-[node name="Title" type="Label" parent="Layout"]
-text = "Предмет"
-mouse_filter = 2
-theme_override_font_sizes/font_size = 20
-autowrap_mode = 3
-
-[node name="Shape" type="ColorRect" parent="Layout"]
-mouse_filter = 2
-color = Color(0.3, 0.65, 0.55, 1)
-size_flags_horizontal = 0
-custom_minimum_size = Vector2(40, 40)
+theme_override_constants/separation = 7
 
 [node name="Texture" type="TextureRect" parent="Layout"]
 mouse_filter = 2
-custom_minimum_size = Vector2(160, 140)
+custom_minimum_size = Vector2(0,112)
+size_flags_vertical = 3
 expand_mode = 1
 stretch_mode = 5
+texture_filter = 4
 
-[node name="Description" type="Label" parent="Layout"]
-text = ""
+[node name="Shape" type="ColorRect" parent="Layout"]
 mouse_filter = 2
-custom_minimum_size = Vector2(320, 100)
+size_flags_horizontal = 4
+color = Color(0.53,0.53,0.39,1)
+
+[node name="Title" type="Label" parent="Layout"]
+mouse_filter = 2
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 24
 autowrap_mode = 3
+
+[node name="Rule" type="HSeparator" parent="Layout"]
+mouse_filter = 2
 
 [node name="Footer" type="HBoxContainer" parent="Layout"]
 mouse_filter = 2
+theme_override_constants/separation = 12
 
+[node name="Dimensions" type="Label" parent="Layout/Footer"]
+mouse_filter = 2
 [node name="Weight" type="Label" parent="Layout/Footer"]
-text = ""
 mouse_filter = 2
 size_flags_horizontal = 3
-
 [node name="Price" type="Label" parent="Layout/Footer"]
-text = ""
 mouse_filter = 2
-horizontal_alignment = 2
+
+[node name="Notes" type="ScrollContainer" parent="Layout"]
+custom_minimum_size = Vector2(0,85)
+horizontal_scroll_mode = 0
+mouse_filter = 1
+
+[node name="Description" type="Label" parent="Layout/Notes"]
+mouse_filter = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+autowrap_mode = 3

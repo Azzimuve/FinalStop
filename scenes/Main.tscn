@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://m1atvos1pfng" path="res://scripts/Main.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/Map.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="3"]
+[ext_resource type="Script" path="res://scripts/events/RoadBulletins.gd" id="bulletins"]
 [ext_resource type="Resource" uid="uid://b5dvbrrctl65l" path="res://resources/GameBalanceSettings.tres" id="4"]
 
 [node name="Main" type="Node2D" unique_id=1713346447]
@@ -13,3 +14,6 @@ balance_settings = ExtResource("4")
 position = Vector2(-177, -193)
 
 [node name="HUD" parent="." unique_id=1420793572 instance=ExtResource("3")]
+
+[node name="RoadBulletins" type="Node" parent="."]
+script = ExtResource("bulletins")

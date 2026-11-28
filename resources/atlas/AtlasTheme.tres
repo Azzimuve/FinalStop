@@ -1,0 +1,177 @@
+[gd_resource type="Theme" format=3]
+
+[ext_resource type="Texture2D" path="res://resources/atlas/paper.webp" id="paper"]
+
+[ext_resource type="FontFile" path="res://resources/fonts/PTSansNarrow-Regular.ttf" id="regular"]
+[ext_resource type="FontFile" path="res://resources/fonts/PTSansNarrow-Bold.ttf" id="bold"]
+
+[sub_resource type="StyleBoxTexture" id="Sheet"]
+texture = ExtResource("paper")
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+content_margin_left = 12.0
+content_margin_right = 12.0
+content_margin_top = 9.0
+content_margin_bottom = 9.0
+
+[sub_resource type="StyleBoxFlat" id="Button"]
+bg_color = Color(0.94, 0.89, 0.77, 1)
+border_color = Color(0.47, 0.44, 0.35, 1)
+border_width_left = 1
+content_margin_left = 10.0
+border_width_right = 1
+content_margin_right = 10.0
+border_width_top = 1
+content_margin_top = 5.0
+border_width_bottom = 1
+content_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxFlat" id="Hover"]
+bg_color = Color(0.90, 0.81, 0.63, 1)
+border_color = Color(0.47, 0.44, 0.35, 1)
+border_width_left = 1
+content_margin_left = 10.0
+border_width_right = 1
+content_margin_right = 10.0
+border_width_top = 1
+content_margin_top = 5.0
+border_width_bottom = 1
+content_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxFlat" id="Down"]
+bg_color = Color(0.82, 0.72, 0.53, 1)
+border_color = Color(0.47, 0.44, 0.35, 1)
+border_width_left = 1
+content_margin_left = 10.0
+border_width_right = 1
+content_margin_right = 10.0
+border_width_top = 1
+content_margin_top = 5.0
+border_width_bottom = 1
+content_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxFlat" id="Muted"]
+bg_color = Color(0.84, 0.80, 0.70, 1)
+border_color = Color(0.47, 0.44, 0.35, 1)
+border_width_left = 1
+content_margin_left = 10.0
+border_width_right = 1
+content_margin_right = 10.0
+border_width_top = 1
+content_margin_top = 5.0
+border_width_bottom = 1
+content_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxFlat" id="Accent"]
+bg_color = Color(0.76, 0.39, 0.18, 1)
+border_color = Color(0.47, 0.44, 0.35, 1)
+border_width_left = 1
+content_margin_left = 10.0
+border_width_right = 1
+content_margin_right = 10.0
+border_width_top = 1
+content_margin_top = 5.0
+border_width_bottom = 1
+content_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxFlat" id="Dark"]
+bg_color = Color(0.17, 0.17, 0.14, 1)
+border_color = Color(0.47, 0.44, 0.35, 1)
+border_width_left = 0
+content_margin_left = 10.0
+border_width_right = 0
+content_margin_right = 10.0
+border_width_top = 0
+content_margin_top = 5.0
+border_width_bottom = 0
+content_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxFlat" id="Track"]
+bg_color = Color(0.84, 0.80, 0.70, 1)
+border_color = Color(0.47, 0.44, 0.35, 1)
+border_width_left = 1
+content_margin_left = 2.0
+border_width_right = 1
+content_margin_right = 2.0
+border_width_top = 1
+content_margin_top = 3.0
+border_width_bottom = 1
+content_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxFlat" id="Fill"]
+bg_color = Color(0.76, 0.39, 0.18, 1)
+border_color = Color(0.47, 0.44, 0.35, 1)
+border_width_left = 0
+content_margin_left = 2.0
+border_width_right = 0
+content_margin_right = 2.0
+border_width_top = 0
+content_margin_top = 3.0
+border_width_bottom = 0
+content_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxFlat" id="Focus"]
+bg_color = Color(0.94, 0.89, 0.77, 1)
+border_color = Color(0.76, 0.39, 0.18, 1)
+border_width_left = 2
+content_margin_left = 0.0
+border_width_right = 2
+content_margin_right = 0.0
+border_width_top = 2
+content_margin_top = 0.0
+border_width_bottom = 2
+content_margin_bottom = 0.0
+draw_center = false
+
+[resource]
+default_font = ExtResource("regular")
+default_font_size = 16
+Panel/styles/panel = SubResource("Sheet")
+PanelContainer/styles/panel = SubResource("Sheet")
+AcceptDialog/styles/panel = SubResource("Sheet")
+PopupMenu/styles/panel = SubResource("Button")
+PopupMenu/styles/hover = SubResource("Hover")
+Label/colors/font_color = Color(0.17, 0.17, 0.14, 1)
+Button/colors/font_color = Color(0.17, 0.17, 0.14, 1)
+PopupMenu/colors/font_color = Color(0.17, 0.17, 0.14, 1)
+CheckButton/colors/font_color = Color(0.17, 0.17, 0.14, 1)
+CheckBox/colors/font_color = Color(0.17, 0.17, 0.14, 1)
+TabBar/colors/font_color = Color(0.17, 0.17, 0.14, 1)
+TabContainer/colors/font_color = Color(0.17, 0.17, 0.14, 1)
+Button/colors/font_hover_color = Color(0.17, 0.17, 0.14, 1)
+Button/colors/font_pressed_color = Color(0.17, 0.17, 0.14, 1)
+Button/colors/font_focus_color = Color(0.17, 0.17, 0.14, 1)
+Button/colors/font_hover_pressed_color = Color(0.17, 0.17, 0.14, 1)
+Button/colors/font_disabled_color = Color(0.34, 0.33, 0.27, 1)
+PopupMenu/colors/font_hover_color = Color(0.17, 0.17, 0.14, 1)
+Button/styles/normal = SubResource("Button")
+Button/styles/hover = SubResource("Hover")
+Button/styles/pressed = SubResource("Down")
+Button/styles/disabled = SubResource("Muted")
+Button/styles/focus = SubResource("Focus")
+Button/styles/hover_pressed = SubResource("Down")
+PrimaryButton/base_type = &"Button"
+PrimaryButton/styles/normal = SubResource("Accent")
+ProgressBar/styles/background = SubResource("Track")
+ProgressBar/styles/fill = SubResource("Fill")
+ProgressBar/colors/font_color = Color(0.17, 0.17, 0.14, 1)
+HSlider/styles/slider = SubResource("Track")
+HSlider/styles/grabber_area = SubResource("Fill")
+HSlider/styles/grabber_area_highlight = SubResource("Fill")
+TabContainer/styles/panel = SubResource("Button")
+TabContainer/styles/tab_selected = SubResource("Down")
+TabContainer/styles/tab_unselected = SubResource("Button")
+TabContainer/styles/tab_hovered = SubResource("Hover")
+TabContainer/colors/font_selected_color = Color(0.17,0.17,0.14,1)
+TabContainer/colors/font_hovered_color = Color(0.17,0.17,0.14,1)
+TabContainer/colors/font_unselected_color = Color(0.34,0.33,0.27,1)
+
+AtlasHeading/base_type = &"Label"
+AtlasHeading/fonts/font = ExtResource("bold")
+Button/fonts/font = ExtResource("bold")
+Window/fonts/title_font = ExtResource("bold")
+RailButton/base_type = &"Button"
+RailButton/styles/normal = SubResource("Dark")
+RailButton/colors/font_color = Color(0.94,0.89,0.76,1)
+RailButton/colors/font_focus_color = Color(0.87,0.64,0.36,1)
+RailButton/styles/pressed = SubResource("Down")

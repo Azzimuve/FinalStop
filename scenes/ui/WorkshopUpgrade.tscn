@@ -1,14 +1,16 @@
 [gd_scene format=3]
 
+[ext_resource type="Theme" path="res://resources/atlas/AtlasTheme.tres" id="atlas"]
 [ext_resource type="Script" path="res://scripts/ui/WorkshopUpgrade.gd" id="1"]
 
-[ext_resource type="PackedScene" path="res://scenes/ui/CharacterSlots.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/TruckInventory.tscn" id="2"]
 
 [ext_resource type="PackedScene" path="res://scenes/ui/VehiclePartsView.tscn" id="3"]
 
-[ext_resource type="PackedScene" path="res://scenes/ui/InventoryGrid.tscn" id="4"]
+
 
 [node name="WorkshopUpgrade" type="ConfirmationDialog"]
+theme = ExtResource("atlas")
 script = ExtResource("1")
 title = "Мастерская · Улучшить"
 size = Vector2i(1084, 612)
@@ -17,53 +19,35 @@ cancel_button_text = "Отмена"
 dialog_hide_on_ok = false
 
 [node name="Content" type="Control" parent="."]
-custom_minimum_size = Vector2(1064, 562)
+custom_minimum_size = Vector2(1064, 598)
 
-[node name="InventoryTitle" type="Label" parent="Content"]
-text = "Мой инвентарь · 6×12"
-offset_left = 12
-offset_top = 8
-offset_right = 204
-offset_bottom = 28
-theme_override_font_sizes/font_size = 12
-
-[node name="CharacterSlots" parent="Content" instance=ExtResource("2")]
-offset_left = 16
-offset_top = 32
-offset_right = 200
-offset_bottom = 88
+[node name="Truck" parent="Content" instance=ExtResource("2")]
 
 [node name="PartsTitle" type="Label" parent="Content"]
 text = "Детали автомобиля"
-offset_left = 228
+offset_left = 355
 offset_top = 8
-offset_right = 468
+offset_right = 595
 offset_bottom = 28
 theme_override_font_sizes/font_size = 12
 
 [node name="PartsView" parent="Content" instance=ExtResource("3")]
-offset_left = 228
+offset_left = 355
 offset_top = 32
-offset_right = 468
+offset_right = 595
 offset_bottom = 320
 editable = true
 
-[node name="Grid" parent="Content" instance=ExtResource("4")]
-offset_left = 12
-offset_top = 112
-offset_right = 204
-offset_bottom = 496
-
 [node name="Diagnosis" type="Button" parent="Content"]
 text = "Диагностика"
-offset_left = 228
+offset_left = 355
 offset_top = 340
-offset_right = 468
+offset_right = 595
 offset_bottom = 370
 
 [node name="Info" type="Label" parent="Content"]
 text = ""
-offset_left = 500
+offset_left = 630
 offset_top = 40
 offset_right = 1040
 offset_bottom = 540

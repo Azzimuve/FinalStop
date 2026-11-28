@@ -1,5 +1,6 @@
 [gd_scene format=3]
 
+[ext_resource type="Theme" path="res://resources/atlas/AtlasTheme.tres" id="atlas"]
 [ext_resource type="Script" path="res://scripts/ui/WorkshopTrade.gd" id="1"]
 
 [ext_resource type="PackedScene" path="res://scenes/ui/InventoryInteraction.tscn" id="2"]
@@ -8,6 +9,7 @@
 [ext_resource type="Resource" path="res://resources/items/upgraded_engine.tres" id="engine"]
 
 [node name="WorkshopTrade" type="AcceptDialog"]
+theme = ExtResource("atlas")
 script = ExtResource("1")
 initial_stock = Array[ExtResource("cargo")]([ExtResource("engine")])
 title = "Мастерская · Торговля"

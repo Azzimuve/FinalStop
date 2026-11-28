@@ -18,6 +18,7 @@ var loading: bool = false
 
 
 func _ready() -> void:
+	resized.connect(_fit_interaction)
 	interaction.transfer_check = _check_pickup_transfer
 	interaction.discarded.connect(func(item: CargoItem): discarded.emit(item))
 	interaction.used.connect(func(item: CargoItem): used.emit(item))
@@ -35,12 +36,19 @@ func open(vehicle: VehicleState, order_cargo: Array[CargoItem], allow_loading: b
 		for item in pickup_cargo:
 			if not model.contains(item):
 				warehouse.auto_load([item])
-	size = Vector2(interaction.dual_inventory_width if loading else interaction.single_inventory_width, size.y)
 	auto_button.visible = loading
 	interaction.cargo_capacity_kg = capacity_kg
 	interaction.configure(model, warehouse if loading else null, "Инвентарь склада · 16×24")
-	position = (get_viewport_rect().size - size) / 2.0
+	_fit_interaction()
 	show()
+
+
+func _fit_interaction() -> void:
+	if not is_node_ready():
+		return
+	var width := interaction.custom_minimum_size.x
+	interaction.size = Vector2(width, size.y - 62.0)
+	interaction.position = Vector2(roundf((size.x - width) * 0.5), 6.0)
 
 
 func _check_pickup_transfer(item: CargoItem, from_warehouse: bool) -> String:

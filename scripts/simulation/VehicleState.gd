@@ -10,10 +10,10 @@ enum DriveMode { ECONOMY, NORMAL, FORCED }
 var inventory: VehicleInventory
 const PASSENGER_CAPACITY: int = 2
 signal passengers_changed
-var _passenger_count: int = 0
+var passenger_portraits: Array[Texture2D] = []
 var passenger_count: int:
 	get:
-		return _passenger_count
+		return passenger_portraits.size()
 
 var fuel_liters: float
 const VehiclePart = preload("res://scripts/simulation/VehiclePart.gd")
@@ -65,27 +65,31 @@ func _ready() -> void:
 		index += 1
 
 
-func affordable_refuel_liters(credits: float) -> float:
+func affordable_refuel_liters(credits: float, unit_price: float = settings.fuel_price_per_liter_credits) -> float:
 	var missing_liters := maxf(0.0, settings.fuel_tank_capacity_liters - fuel_liters)
-	return minf(missing_liters, credits / settings.fuel_price_per_liter_credits)
+	if unit_price <= 0.0:
+		return missing_liters if unit_price == 0.0 else 0.0
+	return minf(missing_liters, maxf(credits, 0.0) / unit_price)
 
 
 func free_passenger_seats() -> int:
-	return PASSENGER_CAPACITY - _passenger_count
+	return PASSENGER_CAPACITY - passenger_count
 
 
-func board_passengers(count: int) -> bool:
+func board_passengers(count: int, portrait: Texture2D = null) -> bool:
 	if count <= 0 or count > free_passenger_seats():
 		return false
-	_passenger_count += count
+	for i in count:
+		passenger_portraits.append(portrait)
 	passengers_changed.emit()
 	return true
 
 
 func disembark_passengers(count: int) -> bool:
-	if count <= 0 or count > _passenger_count:
+	if count <= 0 or count > passenger_count:
 		return false
-	_passenger_count -= count
+	for i in count:
+		passenger_portraits.pop_front()
 	passengers_changed.emit()
 	return true
 

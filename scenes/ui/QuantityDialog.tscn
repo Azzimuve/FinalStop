@@ -1,0 +1,32 @@
+[gd_scene format=3]
+
+[ext_resource type="Theme" path="res://resources/atlas/AtlasTheme.tres" id="atlas"]
+[ext_resource type="Script" path="res://scripts/ui/QuantityDialog.gd" id="1"]
+
+[node name="QuantityDialog" type="ConfirmationDialog"]
+script = ExtResource("1")
+theme = ExtResource("atlas")
+cancel_button_text = "Отмена"
+
+[node name="Body" type="HBoxContainer" parent="."]
+theme_override_constants/separation = 20
+
+[node name="Illustration" type="TextureRect" parent="Body"]
+custom_minimum_size = Vector2(212,132)
+texture_filter = 2
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="Content" type="VBoxContainer" parent="Body"]
+custom_minimum_size = Vector2(340, 0)
+theme_override_constants/separation = 10
+
+[node name="Selection" type="Label" parent="Body/Content"]
+
+[node name="Slider" type="HSlider" parent="Body/Content"]
+custom_minimum_size = Vector2(0, 28)
+tick_count = 12
+ticks_on_borders = true
+
+[node name="Details" type="Label" parent="Body/Content"]

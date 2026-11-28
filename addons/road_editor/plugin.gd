@@ -650,6 +650,9 @@ func _split_road(hit: Dictionary) -> MapPoint:
 	undo.add_do_method(roads_parent, "add_child", continuation, true)
 	undo.add_do_property(continuation, "owner", scope)
 	undo.add_do_reference(continuation)
+	for post in road.checkpoints():
+		undo.add_do_method(self, "_move_split_checkpoint", post, road, continuation, post.position, scope)
+		undo.add_undo_method(self, "_attach_checkpoint", post, road, post.road_position, scope)
 	undo.add_undo_property(road, "to_node", road.to_node)
 	undo.add_undo_property(road, "curve", road.curve)
 	undo.add_undo_method(roads_parent, "remove_child", continuation)
@@ -657,6 +660,22 @@ func _split_road(hit: Dictionary) -> MapPoint:
 	undo.commit_action()
 	selected_point = -1
 	return point
+
+
+func _move_split_checkpoint(post: Node2D, first_road: MapRoad, second_road: MapRoad, previous_position: Vector2, scope: Node) -> void:
+	var first := first_road.closest_road_position(previous_position)
+	var second := second_road.closest_road_position(previous_position)
+	if not second.is_empty() and (first.is_empty() or second.distance_squared < first.distance_squared):
+		_attach_checkpoint(post, second_road, second.fraction, scope)
+	elif not first.is_empty():
+		_attach_checkpoint(post, first_road, first.fraction, scope)
+
+
+func _attach_checkpoint(post: MapRoad.MilitaryCheckpoint, road: MapRoad, fraction: float, scope: Node) -> void:
+	if post.get_parent() != road:
+		post.reparent(road, false)
+		post.owner = scope
+	post.road_position = fraction
 
 
 func _insert_curve_point(screen: Vector2) -> void:

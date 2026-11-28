@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/tests/FuelStationTest.gd" id="setup"]
+[ext_resource type="PackedScene" path="res://scenes/Main.tscn" id="game"]
+
+[node name="FuelStationTest" type="Node"]
+script = ExtResource("setup")
+start_city = "company_city"
+start_place = "company_fuel_station"
+
+[node name="Game" parent="." instance=ExtResource("game")]

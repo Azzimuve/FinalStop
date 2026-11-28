@@ -8,6 +8,7 @@ const MapPlace = preload("res://scripts/world/MapPlace.gd")
 const WorldData = preload("res://scripts/WorldMapData.gd")
 const POINT_SCENE = preload("res://scenes/world/RoadPoint.tscn")
 const PLACE_SCENE = preload("res://scenes/world/PointOfInterest.tscn")
+const CHECKPOINT_SCENE = preload("res://scenes/world/MilitaryCheckpoint.tscn")
 const TEMPLATE_PATH := "res://scenes/world/CityTemplate.tscn"
 
 var plugin: EditorPlugin
@@ -37,6 +38,7 @@ func setup(editor_plugin: EditorPlugin, control: Control) -> void:
 	toolbar.get_node("Content/MapTools/AddEntrance").pressed.connect(_request_entrance)
 	toolbar.get_node("Content/MapTools/Connect").pressed.connect(_start_connect)
 	toolbar.get_node("Content/MapTools/AddPlace").pressed.connect(_add_place)
+	toolbar.get_node("Content/MapTools/AddCheckpoint").pressed.connect(_request_checkpoint)
 	dialog.confirmed.connect(_confirm_name)
 	dialog.canceled.connect(cancel)
 	name_input.text_changed.connect(func(text: String): dialog.get_ok_button().disabled = text.strip_edges().is_empty())
@@ -76,6 +78,7 @@ func refresh() -> void:
 	toolbar.get_node("Content/MapTools/AddEntrance").disabled = preview or _selected_city() == null
 	toolbar.get_node("Content/MapTools/Connect").disabled = preview or scope == null
 	toolbar.get_node("Content/MapTools/AddPlace").disabled = preview or _selected_city_point() == null
+	toolbar.get_node("Content/MapTools/AddCheckpoint").disabled = preview or scope == null
 	for child in toolbar.get_node("Content/Tools").get_children():
 		if child is BaseButton:
 			child.disabled = preview
@@ -143,6 +146,51 @@ func _add_place() -> void:
 	undo.commit_action()
 	plugin._select_node(place)
 	plugin._set_hint("Точка интереса добавлена и привязана к узлу. В Inspector выберите Object Type и задайте Display Name.")
+
+func _request_checkpoint() -> void:
+	plugin._set_mode(0)
+	placement = "checkpoint"
+	plugin._set_hint("Щёлкните на трассе или улице. Стрелка показывает въезд. После установки направление можно развернуть в инспекторе. Esc — отмена.")
+
+func _checkpoint_hit(screen: Vector2) -> Dictionary:
+	var road := plugin._pick_road(screen) as MapRoad
+	if road == null:
+		return {}
+	# При наложении линий предпочитаем явно выбранную дорогу в пределах привязки.
+	var selected := plugin.selected_road as MapRoad
+	if is_instance_valid(selected) and selected != road:
+		var nearest := selected.closest_road_position(plugin._local_position(selected, screen))
+		if not nearest.is_empty() and screen.distance_to(plugin._screen_position(selected, nearest.point)) <= plugin.PICK_RADIUS:
+			road = selected
+	var ends := road.endpoints()
+	if not ends[0] is MapPoint or not ends[1] is MapPoint:
+		return {}
+	var hit := road.closest_road_position(plugin._local_position(road, screen))
+	if not hit.is_empty():
+		hit.road = road
+		hit.screen = plugin._screen_position(road, hit.point)
+		hit.direction = Vector2(hit.screen).direction_to(plugin._screen_position(road, hit.point + hit.direction))
+	return hit
+
+func _place_checkpoint(hit: Dictionary) -> void:
+	if hit.is_empty():
+		plugin._set_hint("Щёлкните ближе к линии проезжей дороги.")
+		return
+	var road: MapRoad = hit.road
+	var scope: Node2D = plugin._scope()
+	var post := CHECKPOINT_SCENE.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE) as MapRoad.MilitaryCheckpoint
+	post.name = plugin._unique_name(road, "MilitaryCheckpoint")
+	post.road_position = hit.fraction
+	var undo := plugin.get_undo_redo()
+	undo.create_action("Поставить блокпост", UndoRedo.MERGE_DISABLE, scope)
+	undo.add_do_method(road, "add_child", post, true)
+	undo.add_do_property(post, "owner", scope)
+	undo.add_do_reference(post)
+	undo.add_undo_method(road, "remove_child", post)
+	undo.commit_action()
+	cancel()
+	plugin._select_node(post)
+	plugin._set_hint("Стрелка показывает въезд. Reverse Entry разворачивает стрелку. Stop Direction задаёт, кого останавливать.")
 
 func _open_city() -> void:
 	var city := _selected_city()
@@ -213,6 +261,18 @@ func handle_input(event: InputEvent) -> bool:
 	if connect_only and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
 		plugin._set_mode(0)
 		return true
+	if placement == "checkpoint":
+		if event is InputEventMouseMotion:
+			plugin.mouse_position = event.position
+			plugin.update_overlays()
+		if event is InputEventMouseButton and event.pressed:
+			if event.button_index == MOUSE_BUTTON_RIGHT:
+				plugin._set_mode(0)
+				return true
+			if event.button_index == MOUSE_BUTTON_LEFT and not event.alt_pressed and not Input.is_key_pressed(KEY_SPACE):
+				_place_checkpoint(_checkpoint_hit(event.position))
+				return true
+		return false
 	if placement_name.is_empty():
 		if plugin.mode == 0 and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and not event.alt_pressed and not Input.is_key_pressed(KEY_SPACE):
 			var city := _pick_city(event.position)
@@ -421,5 +481,14 @@ func draw_overlay(overlay: Control) -> void:
 			overlay.draw_circle(position, 7.0, color, false, 2.0)
 			var title := point.entrance_name if not point.entrance_name.is_empty() else point.point_id
 			overlay.draw_string(ThemeDB.fallback_font, position + Vector2(10, -8), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, color)
+	if placement == "checkpoint":
+		var hit := _checkpoint_hit(plugin.mouse_position)
+		if not hit.is_empty():
+			var tip: Vector2 = hit.screen + hit.direction * 22.0
+			var back: Vector2 = tip - hit.direction * 7.0
+			var side: Vector2 = hit.direction.orthogonal() * 4.0
+			overlay.draw_circle(hit.screen, 5.0, Color.GOLD)
+			overlay.draw_line(hit.screen, tip, Color.GOLD, 2.0)
+			overlay.draw_colored_polygon(PackedVector2Array([tip, back + side, back - side]), Color.GOLD)
 	if not placement_name.is_empty():
 		overlay.draw_circle(plugin.mouse_position, 20.0 if placement == "city" else 7.0, Color(0.3, 0.88, 0.85), false, 2.0)

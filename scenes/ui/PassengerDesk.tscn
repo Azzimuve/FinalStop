@@ -1,0 +1,317 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/PassengerDesk.gd" id="desk"]
+[ext_resource type="Script" path="res://scripts/orders/PassengerProfile.gd" id="profile"]
+
+[ext_resource type="Texture2D" path="res://resources/atlas/traveller_1.webp" id="face0"]
+[ext_resource type="Texture2D" path="res://resources/atlas/traveller_2.webp" id="face1"]
+[ext_resource type="Texture2D" path="res://resources/atlas/traveller_3.webp" id="face2"]
+[ext_resource type="Texture2D" path="res://resources/atlas/traveller_4.webp" id="face3"]
+[ext_resource type="Texture2D" path="res://resources/atlas/traveller_5.webp" id="face4"]
+[ext_resource type="Texture2D" path="res://resources/atlas/traveller_6.webp" id="face5"]
+[ext_resource type="Texture2D" path="res://resources/atlas/traveller_7.webp" id="face6"]
+[ext_resource type="Texture2D" path="res://resources/atlas/paperclip.svg" id="clip"]
+[ext_resource type="Theme" path="res://resources/atlas/AtlasTheme.tres" id="theme"]
+
+[sub_resource type="Resource" id="p0"]
+script = ExtResource("profile")
+portrait = ExtResource("face0")
+booked_name = "Илья Серов"
+booked_number = "4018"
+coat_color = Color(0.34,0.51,0.52,1)
+glasses = true
+
+[sub_resource type="Resource" id="p1"]
+script = ExtResource("profile")
+portrait = ExtResource("face1")
+booked_name = "Анна Белова"
+booked_number = "7321"
+coat_color = Color(0.62,0.37,0.26,1)
+
+[sub_resource type="Resource" id="p2"]
+script = ExtResource("profile")
+portrait = ExtResource("face2")
+booked_name = "Павел Орлов"
+booked_number = "6074"
+coat_color = Color(0.35,0.39,0.6,1)
+
+[sub_resource type="Resource" id="p3"]
+script = ExtResource("profile")
+portrait = ExtResource("face3")
+booked_name = "Алина Котова"
+booked_number = "5182"
+coat_color = Color(0.57,0.38,0.49,1)
+glasses = true
+presented_name = "Алина Козлова"
+
+[sub_resource type="Resource" id="p4"]
+script = ExtResource("profile")
+portrait = ExtResource("face4")
+booked_name = "Егор Миронов"
+booked_number = "8439"
+coat_color = Color(0.27,0.46,0.36,1)
+presented_number = "8493"
+
+[sub_resource type="Resource" id="p5"]
+script = ExtResource("profile")
+portrait = ExtResource("face5")
+booked_name = "Елена Громова"
+booked_number = "3951"
+coat_color = Color(0.46,0.41,0.31,1)
+
+[sub_resource type="Resource" id="p6"]
+script = ExtResource("profile")
+portrait = ExtResource("face6")
+booked_name = "Никита Левин"
+booked_number = "1637"
+coat_color = Color(0.44,0.46,0.54,1)
+glasses = true
+
+[node name="PassengerDesk" type="Control"]
+theme = ExtResource("theme")
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("desk")
+tutorial_passenger = SubResource("p0")
+applicants = Array[ExtResource("profile")]([SubResource("p0"), SubResource("p1"), SubResource("p2"), SubResource("p3"), SubResource("p4"), SubResource("p5"), SubResource("p6")])
+wanted = Dictionary[String, String]({"6074":"Павел Орлов","5290":"Марк Данилов"})
+blacklist = Dictionary[String, String]({"3951":"Елена Громова","6203":"Олег Белов"})
+
+
+[node name="Panel" type="Panel" parent="." ]
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -480
+offset_top = -240
+offset_right = 480
+offset_bottom = 240
+
+[node name="Heading" type="Label" parent="Panel" ]
+unique_name_in_owner = true
+offset_left = 84
+offset_top = 16
+offset_right = 824
+offset_bottom = 56
+mouse_filter = 2
+text = "Посадка"
+theme_override_font_sizes/font_size = 25
+
+[node name="Portrait" type="Control" parent="Panel" ]
+offset_left = 20
+offset_top = 78
+offset_right = 324
+offset_bottom = 370
+mouse_filter = 2
+clip_contents = true
+
+[node name="Person" type="Node2D" parent="Panel/Portrait" ]
+unique_name_in_owner = true
+
+[node name="Silhouette" type="Polygon2D" parent="Panel/Portrait/Person"]
+unique_name_in_owner = true
+polygon = PackedVector2Array(32,292,48,224,108,186,190,186,252,224,272,292)
+
+[node name="Face" type="Polygon2D" parent="Panel/Portrait/Person/Silhouette"]
+polygon = PackedVector2Array(98,98,119,65,172,59,204,98,196,162,165,190,131,190,104,161)
+color = Color(0.78,0.67,0.49,1)
+
+[node name="Hair" type="Polygon2D" parent="Panel/Portrait/Person/Silhouette"]
+unique_name_in_owner = true
+polygon = PackedVector2Array(96,130,95,91,114,64,160,55,192,66,206,104,167,84,121,98)
+
+[node name="Glasses" type="Line2D" parent="Panel/Portrait/Person/Silhouette"]
+unique_name_in_owner = true
+width = 4.0
+default_color = Color(0.2,0.2,0.17,1)
+points = PackedVector2Array(101,116,139,116,135,130,111,130,105,116,154,116,162,130,186,130,192,116,154,116)
+
+[node name="Illustration" type="TextureRect" parent="Panel/Portrait/Person" ]
+unique_name_in_owner = true
+offset_left = 0
+offset_top = 0
+offset_right = 304
+offset_bottom = 292
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+texture_filter = 2
+
+[node name="Speech" type="Label" parent="Panel" ]
+unique_name_in_owner = true
+offset_left = 20
+offset_top = 370
+offset_right = 326
+offset_bottom = 430
+mouse_filter = 2
+text = ""
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 3
+
+[node name="Booking" type="Panel" parent="Panel" ]
+offset_left = 346
+offset_top = 88
+offset_right = 628
+offset_bottom = 332
+
+[node name="RosterTitle" type="Label" parent="Panel/Booking" ]
+unique_name_in_owner = true
+offset_left = 16
+offset_top = 12
+offset_right = 258
+offset_bottom = 42
+mouse_filter = 2
+text = "Заявка"
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 22
+
+[node name="Rule" type="HSeparator" parent="Panel/Booking" ]
+offset_left = 16
+offset_top = 48
+offset_right = 266
+offset_bottom = 50
+
+[node name="Roster" type="Label" parent="Panel/Booking" ]
+unique_name_in_owner = true
+offset_left = 16
+offset_top = 58
+offset_right = 266
+offset_bottom = 224
+mouse_filter = 2
+text = ""
+theme_override_font_sizes/font_size = 17
+autowrap_mode = 3
+vertical_alignment = 0
+
+[node name="Identity" type="Panel" parent="Panel" ]
+unique_name_in_owner = true
+offset_left = 642
+offset_top = 88
+offset_right = 940
+offset_bottom = 332
+
+[node name="IdTitle" type="Label" parent="Panel/Identity" ]
+unique_name_in_owner = true
+offset_left = 16
+offset_top = 12
+offset_right = 276
+offset_bottom = 44
+mouse_filter = 2
+text = "Удостоверение"
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 22
+
+[node name="Rule" type="HSeparator" parent="Panel/Identity" ]
+offset_left = 16
+offset_top = 48
+offset_right = 280
+offset_bottom = 50
+
+[node name="IdPhoto" type="TextureRect" parent="Panel/Identity" ]
+unique_name_in_owner = true
+offset_left = 16
+offset_top = 68
+offset_right = 101
+offset_bottom = 172
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+texture_filter = 2
+
+[node name="Document" type="Label" parent="Panel/Identity" ]
+unique_name_in_owner = true
+offset_left = 113
+offset_top = 64
+offset_right = 287
+offset_bottom = 190
+mouse_filter = 2
+text = ""
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="Refuse" type="Button" parent="Panel" ]
+unique_name_in_owner = true
+offset_left = 535
+offset_top = 391
+offset_right = 719
+offset_bottom = 439
+text = "Отказать"
+
+[node name="Allow" type="Button" parent="Panel" ]
+unique_name_in_owner = true
+offset_left = 734
+offset_top = 391
+offset_right = 939
+offset_bottom = 439
+text = "Посадить"
+
+[node name="Drawer" type="Control" parent="Panel" ]
+unique_name_in_owner = true
+offset_left = 16
+offset_top = 63
+offset_right = 334
+offset_bottom = 393
+mouse_filter = 2
+visible = false
+clip_contents = true
+
+[node name="Sheet" type="Panel" parent="Panel/Drawer" ]
+unique_name_in_owner = true
+offset_left = 0
+offset_top = 0
+offset_right = 318
+offset_bottom = 326
+
+[node name="SheetTitle" type="Label" parent="Panel/Drawer/Sheet" ]
+unique_name_in_owner = true
+offset_left = 14
+offset_top = 10
+offset_right = 299
+offset_bottom = 42
+mouse_filter = 2
+text = "Справочные бумаги"
+theme_type_variation = &"AtlasHeading"
+theme_override_font_sizes/font_size = 20
+
+[node name="Tabs" type="TabContainer" parent="Panel/Drawer/Sheet" ]
+unique_name_in_owner = true
+offset_left = 10
+offset_top = 52
+offset_right = 308
+offset_bottom = 312
+
+[node name="Розыск" type="ScrollContainer" parent="Panel/Drawer/Sheet/Tabs" ]
+horizontal_scroll_mode = 0
+
+[node name="Wanted" type="Label" parent="Panel/Drawer/Sheet/Tabs/Розыск" ]
+unique_name_in_owner = true
+size_flags_horizontal = 3
+size_flags_vertical = 0
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
+
+[node name="Чёрный список" type="ScrollContainer" parent="Panel/Drawer/Sheet/Tabs" ]
+horizontal_scroll_mode = 0
+
+[node name="Blacklist" type="Label" parent="Panel/Drawer/Sheet/Tabs/Чёрный список" ]
+unique_name_in_owner = true
+size_flags_horizontal = 3
+size_flags_vertical = 0
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
+
+[node name="Clip" type="Button" parent="Panel" ]
+unique_name_in_owner = true
+offset_left = 16
+offset_top = 8
+offset_right = 68
+offset_bottom = 58
+text = ""
+icon = ExtResource("clip")
+icon_alignment = 1
+toggle_mode = true
+flat = true
+accessibility_name = "Справочные бумаги"
+tooltip_text = "Достать или убрать бумаги розыска и чёрного списка"

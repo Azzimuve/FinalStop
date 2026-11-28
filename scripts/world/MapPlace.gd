@@ -36,7 +36,7 @@ const OBJECT_TYPES := {
 				if is_instance_valid(point):
 					global_position = point.global_position
 			update_configuration_warnings()
-@export var marker_color := Color(0.88, 0.83, 0.62):
+@export var marker_color := Color("#777a52"):
 	set(value):
 		marker_color = value
 		_update_editor_view()
@@ -75,7 +75,7 @@ func _update_editor_view() -> void:
 
 func set_view(selected: bool, interactive: bool, opacity: float) -> void:
 	$Caption.text = display_name
-	$Marker.color = Color(0.96, 0.20, 0.18) if selected else (marker_color if interactive else Color(0.76, 0.81, 0.78))
+	$Marker.color = Color("#c5733a") if selected else (marker_color if interactive else Color("#79795d"))
 	$Marker.scale = Vector2.ONE * (10.0 / 7.0 if selected else 1.0)
 	modulate.a = opacity
 

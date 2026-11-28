@@ -10,6 +10,8 @@
 [ext_resource type="PackedScene" uid="uid://dimw7xa4vbhel" path="res://scenes/world/cities/City1.tscn" id="6_yr1n6"]
 [ext_resource type="Script" uid="uid://bajmann0p88am" path="res://scripts/world/MapRoad.gd" id="8_yr1n6"]
 
+[ext_resource type="PackedScene" path="res://scenes/world/MilitaryCheckpoint.tscn" id="checkpoint"]
+
 [sub_resource type="Curve2D" id="Curve2D_l5ull"]
 resource_local_to_scene = true
 _data = {
@@ -71,6 +73,7 @@ point_id = "junction_5"
 z_index = -1
 
 [node name="Highway1" parent="Roads" unique_id=1624766804 instance=ExtResource("2")]
+radio_name = "Город компании — западная развилка"
 from_node = NodePath("../../Cities/company_city/Layout/Points/company_start")
 to_node = NodePath("../../Junctions/Point1")
 road_width = 12.0
@@ -78,12 +81,18 @@ intercity = true
 curve = SubResource("Curve2D_l5ull")
 
 [node name="Highway2" parent="Roads" unique_id=1816567299 instance=ExtResource("2")]
+radio_name = "Центральная развилка — Соседний посёлок"
 from_node = NodePath("../../Junctions/central_road_junction")
 to_node = NodePath("../../Cities/nearby_settlement/Layout/Points/settlement_west")
 road_width = 12.0
 intercity = true
 
+[node name="MilitaryCheckpoint" parent="Roads/Highway2" instance=ExtResource("checkpoint")]
+road_position = 0.85
+tutorial_checkpoint = true
+
 [node name="Highway3" parent="Roads" unique_id=607084529 instance=ExtResource("2")]
+radio_name = "Центральная развилка — Северный посёлок"
 from_node = NodePath("../../Junctions/central_road_junction")
 to_node = NodePath("../../Cities/northern_settlement/Layout/Points/northern_settlement_entry")
 road_width = 12.0
@@ -91,11 +100,13 @@ intercity = true
 
 [node name="Highway4" parent="Roads" unique_id=1609915535 instance=ExtResource("2")]
 from_node = NodePath("../../Cities/nearby_settlement/Layout/Points/settlement_north")
+radio_name = "Соседний посёлок — Северный посёлок"
 to_node = NodePath("../../Cities/northern_settlement/Layout/Points/northern_settlement_east")
 road_width = 12.0
 intercity = true
 
 [node name="Road1" parent="Roads" unique_id=954356744 instance=ExtResource("2")]
+radio_name = "Западная развилка — центральная развилка"
 from_node = NodePath("../../Junctions/Point1")
 to_node = NodePath("../../Junctions/central_road_junction")
 road_width = 12.0
@@ -105,6 +116,7 @@ curve = SubResource("Curve2D_16fjv")
 [node name="Road4" parent="Roads" unique_id=21782728 instance=ExtResource("2")]
 from_node = NodePath("../../Junctions/Point1")
 to_node = NodePath("../../Cities/City1/Layout/Points/Entry")
+radio_name = "Западная развилка — Даунтаун"
 road_width = 12.1
 intercity = true
 curve = SubResource("Curve2D_ckp8c")
@@ -113,5 +125,6 @@ curve = SubResource("Curve2D_ckp8c")
 script = ExtResource("8_yr1n6")
 from_node = NodePath("../../Cities/City1/Layout/Points/Entry")
 to_node = NodePath("../../Cities/City2/Layout/Points/Entry")
+radio_name = "Даунтаун — Нижние залупки"
 road_width = 12.1
 intercity = true

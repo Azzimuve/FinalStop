@@ -11,8 +11,8 @@ signal accepted(cost: float)
 signal credits_changed(delta: float)
 var vehicle: VehicleState
 @onready var parts_view: VehiclePartsView = $Content/PartsView
-@onready var grid: InventoryGrid = $Content/Grid
-@onready var character_slots: CharacterSlots = $Content/CharacterSlots
+@onready var grid: InventoryGrid = $Content/Truck/Diagram/Hold/Grid
+@onready var character_slots: CharacterSlots = $Content/Truck/Diagram/CharacterSlots
 @onready var info: Label = $Content/Info
 var selected: VehiclePart
 var selected_slot: String = ""

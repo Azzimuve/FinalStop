@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/tests/InventoryDeskTest.gd" id="setup"]
+[ext_resource type="PackedScene" path="res://scenes/Main.tscn" id="game"]
+
+[node name="InventoryDeskTest" type="Node"]
+script = ExtResource("setup")
+
+[node name="Game" parent="." instance=ExtResource("game")]

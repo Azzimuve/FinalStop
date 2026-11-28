@@ -1,8 +1,12 @@
 @tool
 extends Node2D
 
+const MilitaryCheckpoint = preload("res://scripts/world/MilitaryCheckpoint.gd")
+
 signal geometry_changed
 
+## Название межгородского участка в эфире. Пустое поле исключает дорогу из сводок.
+@export var radio_name := ""
 @export_node_path("Node2D") var from_node: NodePath:
 	set(value):
 		from_node = value
@@ -18,7 +22,7 @@ signal geometry_changed
 		road_width = value
 		_draw_mesh = null
 		queue_redraw()
-@export var road_color := Color(0.20, 0.28, 0.29):
+@export var road_color := Color("#504d3b"):
 	set(value):
 		road_color = value
 		queue_redraw()
@@ -31,9 +35,18 @@ signal geometry_changed
 	set(value):
 		surface = value
 		queue_redraw()
-@export var dirt_color := Color(0.47, 0.34, 0.21):
+@export var dirt_color := Color("#8c7856"):
 	set(value):
 		dirt_color = value
+		queue_redraw()
+## Картографические ленты. По горизонтали — повтор вдоль дороги, по вертикали — от края до края.
+@export var asphalt_skin: Texture2D = preload("res://resources/atlas/road_asphalt.svg"):
+	set(value):
+		asphalt_skin = value
+		queue_redraw()
+@export var dirt_skin: Texture2D = preload("res://resources/atlas/road_dirt.svg"):
+	set(value):
+		dirt_skin = value
 		queue_redraw()
 ## Опорные точки и независимые направляющие редактируются инструментом «Дороги».
 ## Концы кривой привязаны к From Node и To Node.
@@ -72,6 +85,8 @@ var _bound_endpoints: Array[Node2D] = []
 var _binding_pending := false
 
 func _enter_tree() -> void:
+	texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	set_notify_transform(true)
 	if Engine.is_editor_hint():
 		get_tree().tree_changed.connect(_queue_endpoint_binding)
@@ -202,6 +217,46 @@ func path_points(reference: Node2D = null) -> Array[Vector2]:
 		return _reference_points.duplicate()
 	return _cached_points.duplicate()
 
+func closest_road_position(local_point: Vector2) -> Dictionary:
+	_ensure_geometry()
+	var best := INF
+	var hit := {}
+	var travelled := 0.0
+	for i in range(_cached_points.size() - 1):
+		var a := _cached_points[i]
+		var b := _cached_points[i + 1]
+		var length := a.distance_to(b)
+		if length <= 0.0001:
+			continue
+		var snapped := Geometry2D.get_closest_point_to_segment(local_point, a, b)
+		var distance := snapped.distance_squared_to(local_point)
+		if distance < best:
+			best = distance
+			var along := a.distance_to(snapped)
+			hit = {"point": snapped, "direction": a.direction_to(b), "distance_squared": distance,
+				"fraction": (i + along / length) / (_cached_points.size() - 1),
+				"along": travelled + along}
+		travelled += length
+	return hit
+
+func pick(global_point: Vector2) -> Dictionary:
+	if not is_visible_in_tree():
+		return {}
+	var hit := closest_road_position(to_local(global_point))
+	if hit.is_empty() or hit.distance_squared > pow(maxf(road_width, 5.0) * 0.5, 2):
+		return {}
+	var widths := _endpoint_widths(endpoints())
+	var transition := minf(60.0, _cached_length / 3.0) if intercity else 0.0
+	var width := _width_at(hit.along, _cached_length, transition, widths.x, widths.y)
+	return hit if hit.distance_squared <= width * width * 0.25 else {}
+
+func checkpoints() -> Array[MilitaryCheckpoint]:
+	var result: Array[MilitaryCheckpoint] = []
+	for child in get_children():
+		if child is MilitaryCheckpoint:
+			result.append(child)
+	return result
+
 func _get_configuration_warnings() -> PackedStringArray:
 	var ends := endpoints()
 	if ends[0] == null or ends[1] == null or ends[0] == ends[1]:
@@ -225,13 +280,7 @@ func _is_narrow_city_access(endpoint: Node2D) -> bool:
 			return false
 	return true
 
-func _draw() -> void:
-	var ends := endpoints()
-	if ends[0] == null or ends[1] == null:
-		return
-	_ensure_geometry()
-	if _cached_length <= 0.0001:
-		return
+func _endpoint_widths(ends: Array[Node2D]) -> Vector2:
 	var start_width := road_width
 	var finish_width := road_width
 	if intercity:
@@ -239,11 +288,23 @@ func _draw() -> void:
 			start_width = lerpf(road_width, 5.0, detail)
 		if _is_narrow_city_access(ends[1]):
 			finish_width = lerpf(road_width, 5.0, detail)
-	var widths := Vector2(start_width, finish_width)
+	return Vector2(start_width, finish_width)
+
+func _draw() -> void:
+	var ends := endpoints()
+	if ends[0] == null or ends[1] == null:
+		return
+	_ensure_geometry()
+	if _cached_length <= 0.0001:
+		return
+	var widths := _endpoint_widths(ends)
 	if _draw_mesh == null or _draw_widths != widths:
-		_draw_mesh = _build_draw_mesh(start_width, finish_width)
+		_draw_mesh = _build_draw_mesh(widths.x, widths.y)
 		_draw_widths = widths
 	draw_mesh(_draw_mesh, null, Transform2D.IDENTITY, road_color if surface == 0 else dirt_color)
+	var skin := asphalt_skin if surface == 0 else dirt_skin
+	if skin != null:
+		draw_mesh(_draw_mesh, skin)
 
 # Один меш на дорогу вместо тысяч отдельных полигонов и кругов.
 # Отсчёты кривой и граф маршрутов остаются прежними; дополнительные
@@ -271,28 +332,48 @@ func _build_draw_mesh(start_width: float, finish_width: float) -> ArrayMesh:
 	for distance in distances:
 		widths.append(_width_at(distance, total, transition, start_width, finish_width))
 	var vertices := PackedVector2Array()
+	var uvs := PackedVector2Array()
 	var indices := PackedInt32Array()
-	for index in range(points.size() - 1):
-		var normal := points[index].direction_to(points[index + 1]).orthogonal()
-		var offset := vertices.size()
-		vertices.append(points[index] + normal * widths[index] / 2.0)
-		vertices.append(points[index + 1] + normal * widths[index + 1] / 2.0)
-		vertices.append(points[index + 1] - normal * widths[index + 1] / 2.0)
-		vertices.append(points[index] - normal * widths[index] / 2.0)
-		indices.append_array(PackedInt32Array([offset, offset + 1, offset + 2, offset, offset + 2, offset + 3]))
-	# Круглые стыки и концы входят в тот же вызов рисования.
-	const CAP_STEPS := 24
-	for index in range(points.size()):
+	# Одна непрерывная лента. Длина повтора привязана к длине пути, а не к числу точек кривой.
+	var repeat_length := maxf(road_width * 4.0, 4.0)
+	for i in points.size():
+		var before := points[maxi(i - 1, 0)].direction_to(points[i])
+		var after := points[i].direction_to(points[mini(i + 1, points.size() - 1)])
+		var tangent := (before + after).normalized()
+		if tangent.is_zero_approx():
+			tangent = after if not after.is_zero_approx() else before
+		var normal := tangent.orthogonal()
+		var edge := normal * widths[i] * 0.5 / maxf(absf(tangent.dot(after if i + 1 < points.size() else before)), 0.5)
+		var u := distances[i] / repeat_length
+		vertices.append(points[i] + edge)
+		vertices.append(points[i] - edge)
+		uvs.append(Vector2(u, 0))
+		uvs.append(Vector2(u, 1))
+		if i > 0:
+			var v := 2 * i
+			indices.append_array(PackedInt32Array([v - 2, v, v - 1, v, v + 1, v - 1]))
+	# Полукруги добавляются только на концах. В поворотах разметка следует общей кромке.
+	const CAP_STEPS := 12
+	for i: int in [0, points.size() - 1]:
+		var neighbor := 1 if i == 0 else i - 1
+		var outward := points[neighbor].direction_to(points[i])
+		var normal := outward.orthogonal() * (-1.0 if i == 0 else 1.0)
 		var center := vertices.size()
-		vertices.append(points[index])
-		for step in range(CAP_STEPS):
-			vertices.append(points[index] + Vector2.from_angle(TAU * step / CAP_STEPS) * widths[index] / 2.0)
-		for step in range(CAP_STEPS):
-			indices.append_array(PackedInt32Array([center, center + 1 + step, center + 1 + (step + 1) % CAP_STEPS]))
+		var u := distances[i] / repeat_length
+		vertices.append(points[i])
+		uvs.append(Vector2(u, 0.5))
+		for step in range(CAP_STEPS + 1):
+			var angle := PI * float(step) / CAP_STEPS
+			var delta := (normal * cos(angle) + outward * sin(angle)) * widths[i] * 0.5
+			vertices.append(points[i] + delta)
+			uvs.append(Vector2(u + delta.dot(outward) * (-1.0 if i == 0 else 1.0) / repeat_length, (1.0 - cos(angle)) * 0.5))
+			if step > 0:
+				indices.append_array(PackedInt32Array([center, center + step, center + step + 1]))
 	var arrays: Array = []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = vertices
 	arrays[Mesh.ARRAY_INDEX] = indices
+	arrays[Mesh.ARRAY_TEX_UV] = uvs
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	return mesh

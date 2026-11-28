@@ -1,7 +1,10 @@
 extends Node
 
+const OrderBoard = preload("res://scripts/ui/OrderBoard.gd")
+
 # Обычный HUD скрывается целиком, сохраняя видимость отдельных кнопок.
 var hud: Control
+var default_shade: Color
 var backdrop: ColorRect
 var windows: Array[Node] = []
 var opened: Array[Node] = []
@@ -13,6 +16,7 @@ func setup(root: Control, modal_windows: Array[Node], map: Node) -> void:
 	map_view = map
 	hud = root.get_node("BaseHUD")
 	backdrop = root.get_node("ModalBackdrop")
+	default_shade = backdrop.color
 	for window in windows:
 		if window is Control:
 			window.z_index = 100
@@ -37,6 +41,7 @@ func _refresh() -> void:
 	hud.visible = not modal_open
 	backdrop.visible = modal_open
 	var top: Node = opened.back() if modal_open else null
+	backdrop.color = top.map_shade if top is OrderBoard else default_shade
 	for window in windows:
 		if window is Control:
 			window.set_process_input(window == top)

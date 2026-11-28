@@ -84,8 +84,8 @@ func _draw() -> void:
 	var dimensions := model.dimensions if model != null else preview_dimensions
 	var placements: Array = model.placements if model != null else []
 	var grid_size := Vector2(dimensions) * CELL
-	var grid_color := Color(0.4, 0.52, 0.52)
-	draw_rect(Rect2(Vector2.ZERO, grid_size), Color(0.10, 0.14, 0.15))
+	var grid_color := Color(0.47, 0.39, 0.27)
+	draw_rect(Rect2(Vector2.ZERO, grid_size), Color(0.90, 0.82, 0.64, 0.87))
 	for y in range(1, dimensions.y):
 		draw_line(Vector2(0, y * CELL), Vector2(grid_size.x, y * CELL), grid_color, 1.0)
 	for x in range(1, dimensions.x):
@@ -93,11 +93,11 @@ func _draw() -> void:
 	for index in range(placements.size()):
 		var placement: Dictionary = placements[index]
 		var rect := Rect2(Vector2(placement.cell) * CELL + Vector2.ONE, Vector2(placement.extent) * CELL - Vector2.ONE * 2)
-		var textured := draw_item(self, placement.item, rect, placement.rotated, Color(0.85, 0.7, 0.3) if selected == placement.item else Color(0.3, 0.65, 0.55))
+		var textured := draw_item(self, placement.item, rect, placement.rotated, Color(0.85, 0.7, 0.3) if selected == placement.item else Color(0.46, 0.48, 0.34))
 		if textured and selected == placement.item:
 			draw_rect(rect, Color(0.85, 0.7, 0.3), false)
 		if not textured:
-			draw_string(ThemeDB.fallback_font, rect.position + Vector2(1, 9), str(index + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 9)
+			draw_string(get_theme_default_font(), rect.position + Vector2(1, 9), str(index + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 9)
 	if selected != null:
 		var mouse := get_local_mouse_position()
 		if Rect2(Vector2.ZERO, grid_size).has_point(mouse):
@@ -110,7 +110,7 @@ func _draw() -> void:
 	# Четыре заполненные полосы дают одинаковую толщину без смещения обводки.
 	# При масштабе 150% две логические единицы равны трём экранным пикселям.
 	var border_width := 2.0
-	var border_color := Color(0.65, 0.78, 0.76)
+	var border_color := Color(0.29, 0.28, 0.21)
 	draw_rect(Rect2(Vector2.ZERO, Vector2(grid_size.x, border_width)), border_color)
 	draw_rect(Rect2(Vector2(0, grid_size.y - border_width), Vector2(grid_size.x, border_width)), border_color)
 	draw_rect(Rect2(Vector2(0, border_width), Vector2(border_width, grid_size.y - border_width * 2.0)), border_color)

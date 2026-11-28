@@ -39,8 +39,8 @@ func _notification(what: int) -> void:
 
 func _draw() -> void:
 	if junction:
-		draw_circle(Vector2.ZERO, 8.0, Color(0.20, 0.28, 0.29))
-		draw_circle(Vector2.ZERO, 3.0, Color(0.055, 0.078, 0.086))
+		draw_circle(Vector2.ZERO, 8.0, Color("#534f3e"))
+		draw_circle(Vector2.ZERO, 3.0, Color("#d3c49e"))
 	elif Engine.is_editor_hint() and not editor_preview:
 		draw_circle(Vector2.ZERO, 3.0, Color(0.3, 0.86, 0.76))
 

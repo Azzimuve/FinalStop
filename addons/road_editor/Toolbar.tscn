@@ -35,6 +35,11 @@ layout_mode = 2
 text = "Добавить точку интереса"
 tooltip_text = "Выберите один дорожный узел в сцене города. Новый объект появится на нём; назначение выбирается в Inspector."
 
+[node name="AddCheckpoint" type="Button" parent="Content/MapTools"]
+layout_mode = 2
+text = "Поставить блокпост"
+tooltip_text = "Нажмите и щёлкните в нужном месте на трассе или городской улице. Стрелка показывает направление въезда."
+
 [node name="Preview" type="HFlowContainer" parent="Content"]
 layout_mode = 2
 

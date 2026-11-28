@@ -51,7 +51,9 @@ func read_graph() -> Dictionary:
 			var city := _city_of(point)
 			ids.append(city.city_id if city != null else point.point_id)
 		var points: Array[Vector2] = road.path_points(reference)
-		data.roads.append({"from": ids[0], "to": ids[1], "points": points})
+		data.roads.append({"from": ids[0], "to": ids[1], "from_point": ends[0].point_id, "to_point": ends[1].point_id,
+			"scene": road, "points": points, "checkpoints": road.checkpoints(),
+			"id": String(road.name), "radio_name": road.radio_name.strip_edges()})
 		_road_geometry[road] = points
 		for index in range(2):
 			if by_id.has(ids[index]):

@@ -1,10 +1,13 @@
 [gd_scene format=3]
 
+[ext_resource type="Theme" path="res://resources/atlas/AtlasTheme.tres" id="atlas"]
+[ext_resource type="Texture2D" path="res://resources/atlas/ural_side.webp" id="truck"]
 [ext_resource type="Script" path="res://scripts/ui/VehicleStatusDialog.gd" id="1"]
 
 [ext_resource type="PackedScene" path="res://scenes/ui/VehiclePartsView.tscn" id="2"]
 
 [node name="VehicleStatusDialog" type="AcceptDialog"]
+theme = ExtResource("atlas")
 script = ExtResource("1")
 title = "Диагностика автомобиля"
 size = Vector2i(390, 290)
@@ -13,7 +16,18 @@ ok_button_text = "Закрыть"
 [node name="Content" type="VBoxContainer" parent="."]
 
 
-[node name="PartsView" parent="Content" instance=ExtResource("2")]
+[node name="Diagram" type="HBoxContainer" parent="Content"]
+theme_override_constants/separation = 20
+
+[node name="Ural" type="TextureRect" parent="Content/Diagram"]
+custom_minimum_size = Vector2(280,160)
+texture_filter = 2
+texture = ExtResource("truck")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="PartsView" parent="Content/Diagram" instance=ExtResource("2")]
 selectable = true
 
 [node name="RepairDetails" type="VBoxContainer" parent="Content"]

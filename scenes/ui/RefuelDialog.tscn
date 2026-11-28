@@ -1,0 +1,232 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/RefuelDialog.gd" id="station"]
+[ext_resource type="Texture2D" path="res://resources/atlas/fuel_hose.webp" id="rubber"]
+[ext_resource type="Texture2D" path="res://resources/atlas/fuel_nozzle_seated.webp" id="seated"]
+[ext_resource type="Script" path="res://scripts/ui/FuelMeter.gd" id="meter"]
+[ext_resource type="Texture2D" path="res://resources/atlas/fuel_station.webp" id="art"]
+[ext_resource type="Texture2D" path="res://resources/atlas/fuel_nozzle.webp" id="nozzle"]
+[ext_resource type="FontFile" path="res://resources/fonts/PTSansNarrow-Bold.ttf" id="bold"]
+[ext_resource type="Theme" path="res://resources/atlas/OrderFolderTheme.tres" id="theme"]
+
+[sub_resource type="Gradient" id="LitGlass"]
+offsets = PackedFloat32Array(0, 0.57, 1)
+colors = PackedColorArray(1,0.92,0.49,0.72, 1,0.68,0.18,0.43, 1,0.53,0.08,0)
+
+[sub_resource type="GradientTexture2D" id="CapLight"]
+gradient = SubResource("LitGlass")
+width = 56
+height = 56
+fill = 1
+fill_from = Vector2(0.5,0.5)
+fill_to = Vector2(1,0.5)
+
+[sub_resource type="StyleBoxFlat" id="Footing"]
+bg_color = Color(0.16, 0.16, 0.105, 0.95)
+content_margin_left = 15.0
+content_margin_right = 15.0
+content_margin_top = 5.0
+content_margin_bottom = 5.0
+
+[node name="RefuelDialog" type="Control"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 0
+script = ExtResource("station")
+texture_filter = 2
+
+[node name="Surround" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.15, 0.15, 0.10, 1)
+
+[node name="Station" type="Control" parent="."]
+unique_name_in_owner = true
+offset_right = 1672
+offset_bottom = 941
+clip_contents = true
+mouse_filter = 2
+
+[node name="Forecourt" type="TextureRect" parent="Station"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("art")
+expand_mode = 1
+mouse_filter = 2
+
+[node name="Dock" type="Marker2D" parent="Station"]
+unique_name_in_owner = true
+position = Vector2(1473, 199)
+
+[node name="DockedFrame" type="Node2D" parent="Station"]
+unique_name_in_owner = true
+
+[node name="Hose" type="Line2D" parent="Station/DockedFrame"]
+width = 34.0
+texture = ExtResource("rubber")
+texture_mode = 1
+default_color = Color(0.83, 0.84, 0.77, 1)
+texture_repeat = 2
+texture_filter = 4
+points = PackedVector2Array(1548, 642, 1548, 658, 1547, 685, 1545, 718, 1542, 752, 1538, 784, 1533, 813, 1527, 839, 1519, 864, 1509, 887, 1498, 909, 1484, 930, 1466, 951, 1444, 973)
+joint_mode = 2
+antialiased = true
+
+[node name="NozzleArt" type="Sprite2D" parent="Station/DockedFrame"]
+unique_name_in_owner = true
+position = Vector2(1465, 196)
+texture = ExtResource("nozzle")
+centered = false
+
+[node name="ConnectedFrame" type="Node2D" parent="Station"]
+unique_name_in_owner = true
+visible = false
+
+[node name="TankNozzle" type="Sprite2D" parent="Station/ConnectedFrame"]
+position = Vector2(852, 550)
+texture = ExtResource("seated")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 63, 180)
+region_filter_clip_enabled = true
+
+[node name="PickNozzle" type="TextureButton" parent="Station/Dock"]
+unique_name_in_owner = true
+offset_left = -8
+offset_top = -3
+offset_right = 124
+offset_bottom = 452
+mouse_default_cursor_shape = 2
+tooltip_text = "Подключить пистолет к баку"
+accessibility_name = "Подключить пистолет к баку"
+
+[node name="ReturnNozzle" type="TextureButton" parent="Station/Dock"]
+unique_name_in_owner = true
+visible = false
+offset_left = -57
+offset_top = -35
+offset_right = 129
+offset_bottom = 687
+mouse_default_cursor_shape = 2
+tooltip_text = "Вернуть пистолет в держатель"
+accessibility_name = "Вернуть пистолет в держатель"
+
+[node name="Liters" type="Control" parent="Station"]
+unique_name_in_owner = true
+offset_left = 1079
+offset_top = 215
+offset_right = 1273
+offset_bottom = 257
+clip_contents = true
+mouse_filter = 2
+script = ExtResource("meter")
+numeral_font = ExtResource("bold")
+
+[node name="Cost" type="Control" parent="Station"]
+unique_name_in_owner = true
+offset_left = 1079
+offset_top = 307
+offset_right = 1273
+offset_bottom = 349
+clip_contents = true
+mouse_filter = 2
+script = ExtResource("meter")
+numeral_font = ExtResource("bold")
+
+[node name="Tariff" type="Label" parent="Station"]
+unique_name_in_owner = true
+offset_left = 995
+offset_top = 453
+offset_right = 1176
+offset_bottom = 516
+text = "15 кр./л"
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_fonts/font = ExtResource("bold")
+theme_override_font_sizes/font_size = 43
+theme_override_colors/font_color = Color(0.215, 0.215, 0.137, 1)
+
+[node name="Supply" type="TextureButton" parent="Station"]
+unique_name_in_owner = true
+offset_left = 1064
+offset_top = 591
+offset_right = 1152
+offset_bottom = 674
+disabled = true
+keep_pressed_outside = true
+mouse_default_cursor_shape = 2
+tooltip_text = "Удерживать для подачи топлива"
+accessibility_name = "Подача топлива, удерживать"
+
+[node name="ButtonMechanism" type="Node2D" parent="Station"]
+position = Vector2(1104, 627)
+
+[node name="Socket" type="Polygon2D" parent="Station/ButtonMechanism"]
+texture = ExtResource("art")
+polygon = PackedVector2Array(-29,-7,-24,-20,-13,-28,1,-30,15,-27,27,-18,32,-3,31,10,22,25,10,32,-5,33,-19,27,-28,16,-31,4)
+uv = PackedVector2Array(1549,228,1554,215,1565,207,1579,205,1593,208,1605,217,1610,232,1609,245,1600,260,1588,267,1573,268,1559,262,1550,251,1547,239)
+
+[node name="Plunger" type="Polygon2D" parent="Station/ButtonMechanism"]
+unique_name_in_owner = true
+texture = ExtResource("art")
+self_modulate = Color(0.69,0.65,0.59,1)
+polygon = PackedVector2Array(-28,-5,-24,-16,-16,-23,-5,-27,6,-27,18,-21,26,-11,29,1,27,12,20,23,8,29,-3,30,-15,25,-24,17,-28,8)
+uv = PackedVector2Array(1076,622,1080,611,1088,604,1099,600,1110,600,1122,606,1130,616,1133,628,1131,639,1124,650,1112,656,1101,657,1089,652,1080,644,1076,635)
+
+[node name="Pilot" type="Sprite2D" parent="Station/ButtonMechanism/Plunger"]
+unique_name_in_owner = true
+visible = false
+texture = SubResource("CapLight")
+
+[node name="StatusStrip" type="PanelContainer" parent="Station"]
+offset_left = 28
+offset_top = 857
+offset_right = 780
+offset_bottom = 918
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Footing")
+
+[node name="Row" type="HBoxContainer" parent="Station/StatusStrip"]
+mouse_filter = 2
+theme_override_constants/separation = 18
+
+[node name="Hint" type="Label" parent="Station/StatusStrip/Row"]
+unique_name_in_owner = true
+mouse_filter = 2
+size_flags_horizontal = 3
+text = "Снимите пистолет с колонки"
+theme_override_colors/font_color = Color(0.97,0.91,0.73,1)
+theme_override_font_sizes/font_size = 26
+
+[node name="BalanceGroup" type="HBoxContainer" parent="Station/StatusStrip/Row"]
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="Caption" type="Label" parent="Station/StatusStrip/Row/BalanceGroup"]
+mouse_filter = 2
+text = "Баланс"
+theme_override_colors/font_color = Color(0.88,0.82,0.64,1)
+theme_override_font_sizes/font_size = 25
+
+[node name="Balance" type="Label" parent="Station/StatusStrip/Row/BalanceGroup"]
+unique_name_in_owner = true
+mouse_filter = 2
+text = "300,00 кр."
+horizontal_alignment = 2
+theme_override_colors/font_color = Color(0.88,0.82,0.64,1)
+theme_override_font_sizes/font_size = 25
+
+[node name="Leave" type="Button" parent="Station/StatusStrip/Row"]
+unique_name_in_owner = true
+theme = ExtResource("theme")
+theme_type_variation = &"FolderAction"
+theme_override_font_sizes/font_size = 26
+text = "Выйти с АЗС"
+mouse_default_cursor_shape = 2
+
+[node name="BalanceRefresh" type="Timer" parent="."]
+unique_name_in_owner = true
+wait_time = 0.1

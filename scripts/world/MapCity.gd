@@ -102,7 +102,7 @@ func get_entrance_points() -> Array[MapPoint]:
 	return points
 
 func get_data(reference: Node2D) -> Dictionary:
-	var data := {"id": city_id, "name": display_name, "type": city_type,
+	var data := {"id": city_id, "name": display_name, "type": city_type, "marker": $Marker,
 		"position": position, "entry_location_id": "", "entrances": {},
 		"street_nodes": [], "street_roads": [], "places": []}
 	var entry := get_node_or_null(entry_node) as MapPoint
@@ -116,12 +116,12 @@ func get_data(reference: Node2D) -> Dictionary:
 			var ends: Array[Node2D] = road.endpoints()
 			if ends[0] is MapPoint and ends[1] is MapPoint:
 				data.street_roads.append({"from": ends[0].point_id, "to": ends[1].point_id,
-					"points": road.path_points(reference)})
+					"scene": road, "points": road.path_points(reference), "checkpoints": road.checkpoints()})
 	for place in $Layout/Places.get_children():
 		if place is MapPlace:
 			var point := place.get_node_or_null(place.road_node) as MapPoint
 			if point != null:
-				data.places.append({"id": place.place_id, "name": place.display_name,
+				data.places.append({"id": place.place_id, "name": place.display_name, "marker": place.get_node("Marker"),
 					"type": place.gameplay_type(), "position": reference.to_local(place.global_position) - reference.to_local(global_position),
 					"road_node_id": point.point_id})
 	return data
@@ -135,7 +135,7 @@ func set_view(detail: float, current: bool, selected_place: String) -> void:
 	$Layout.scale = authored_layout_scale * maxf(detail, 0.00001)
 	$Layout.visible = detail > 0.0
 	$Marker.modulate.a = 1.0 - smoothstep(0.0, 0.3, detail)
-	$Marker.color = Color(0.48, 0.78, 0.65) if current else Color(0.76, 0.81, 0.78)
+	$Marker.color = Color("#bf713b") if current else Color("#79795d")
 	$Caption.text = display_name
 	$Caption.modulate.a = $Marker.modulate.a
 	var opacity := smoothstep(0.55, 0.95, detail)

@@ -35,6 +35,7 @@ enabled=PackedStringArray("res://addons/godot_mcp_toolkit/plugin.cfg", "res://ad
 [gui]
 
 theme/default_font_multichannel_signed_distance_field=true
+theme/custom_font="res://resources/fonts/PTSansNarrow-Regular.ttf"
 
 [mcp_toolkit]
 

@@ -1,34 +1,59 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/InventoryWindow.gd" id="1"]
-
 [ext_resource type="PackedScene" path="res://scenes/ui/InventoryInteraction.tscn" id="2"]
+[ext_resource type="Texture2D" path="res://resources/atlas/terrain.webp" id="map"]
 
 [node name="InventoryWindow" type="Panel"]
 script = ExtResource("1")
 visible = false
-offset_left = 340
-offset_top = 40
-offset_right = 940
-offset_bottom = 680
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12
+offset_top = 12
+offset_right = -12
+offset_bottom = -12
+
+[node name="MapPaper" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -50
+expand_mode = 1
+stretch_mode = 6
+texture = ExtResource("map")
+texture_filter = 2
+self_modulate = Color(1,1,1,0.38)
+mouse_filter = 2
 
 [node name="Interaction" parent="." instance=ExtResource("2")]
 
+[node name="Footer" type="ColorRect" parent="."]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -50
+color = Color(0.16,0.16,0.14,1)
+mouse_filter = 2
 
 [node name="TakeAll" type="Button" parent="."]
 text = "Взять всё"
-offset_left = 12
-offset_top = 600
-offset_right = 92
-offset_bottom = 630
-
-[node name="Close" type="Button" parent="."]
-text = "Закрыть"
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -100
-offset_top = -40
-offset_right = -12
-offset_bottom = -10
+offset_left = -288
+offset_top = -42
+offset_right = -156
+offset_bottom = -8
+
+[node name="Close" type="Button" parent="."]
+text = "Закрыть"
+theme_type_variation = &"PrimaryButton"
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -142
+offset_top = -42
+offset_right = -14
+offset_bottom = -8

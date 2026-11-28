@@ -24,6 +24,7 @@ func _ready() -> void:
 	interaction.transfer_check = _check_trade
 	interaction.describe_item = _describe
 	interaction.trading = true
+	interaction.get_node("Shopfront").visible = is_store
 	interaction.item_price = _price
 	interaction.transferred.connect(_complete_trade)
 	interaction.discarded.connect(func(item: CargoItem): discarded.emit(item))
@@ -37,7 +38,7 @@ func open(vehicle: VehicleState, money: float, balance: GameBalanceSettings, cit
 	credits = money
 	settings = balance
 	stock = _stock_for_location(city_id, place_id)
-	interaction.configure(inventory, stock, "Инвентарь торговца · 16×24")
+	interaction.configure(inventory, stock, "Товары магазина" if is_store else "Запчасти")
 	popup_centered()
 
 

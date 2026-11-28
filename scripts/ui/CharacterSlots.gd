@@ -5,7 +5,7 @@ var vehicle: VehicleState
 
 func show_vehicle(model: VehicleState) -> void:
 	if vehicle != model:
-		if vehicle != null:
+		if is_instance_valid(vehicle):
 			vehicle.passengers_changed.disconnect(_refresh)
 		vehicle = model
 		if vehicle != null:
@@ -13,5 +13,9 @@ func show_vehicle(model: VehicleState) -> void:
 	_refresh()
 
 func _refresh() -> void:
-	$Passenger1/Occupant.visible = vehicle != null and vehicle.passenger_count >= 1
-	$Passenger2/Occupant.visible = vehicle != null and vehicle.passenger_count >= 2
+	var occupants: Array[TextureRect] = [$Passenger1/Occupant, $Passenger2/Occupant]
+	for i in occupants.size():
+		occupants[i].visible = is_instance_valid(vehicle) and i < vehicle.passenger_count
+		if occupants[i].visible:
+			var portrait := vehicle.passenger_portraits[i]
+			occupants[i].texture = portrait if portrait != null else preload("res://resources/atlas/driver.webp")

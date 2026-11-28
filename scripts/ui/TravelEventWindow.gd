@@ -5,10 +5,10 @@ const ACTION_SCENE = preload("res://scenes/ui/EventAction.tscn")
 signal action_selected(index: int)
 signal continue_requested
 
-@onready var heading: Label = $Panel/Layout/Heading
-@onready var description: Label = $Panel/Layout/Description
-@onready var actions: VBoxContainer = $Panel/Layout/Actions
-@onready var continue_button: Button = $Panel/Layout/Continue
+@onready var heading: Label = %Heading
+@onready var description: Label = %Description
+@onready var actions: VBoxContainer = %Actions
+@onready var continue_button: Button = %Continue
 
 
 func _ready() -> void:

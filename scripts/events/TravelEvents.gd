@@ -51,7 +51,9 @@ func load_data() -> void:
 func _valid_event(entry: Variant) -> bool:
 	if not entry is Dictionary:
 		return false
-	if not _known_keys(entry, ["id", "title", "description", "weight", "actions"]):
+	if not _known_keys(entry, ["id", "title", "description", "weight", "actions", "radio_message"]):
+		return false
+	if entry.has("radio_message") and not entry.radio_message is String:
 		return false
 	for key in ["id", "title", "description"]:
 		if not entry.get(key) is String or str(entry[key]).is_empty():
@@ -104,11 +106,15 @@ func advance_distance(km: float) -> bool:
 	if randf() * 100.0 >= chance:
 		chance = minf(100.0, chance + chance_step)
 		return false
-	active_event = _weighted_pick(events)
+	begin_road_event(_weighted_pick(events))
+	return true
+
+
+func begin_road_event(event: Dictionary) -> void:
+	active_event = event
 	resolved = false
 	chance = base_chance
 	distance_to_check = cooldown_km + interval_km
-	return true
 
 
 func can_choose(index: int, money: float, fuel: float) -> bool:

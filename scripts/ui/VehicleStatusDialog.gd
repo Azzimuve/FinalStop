@@ -9,7 +9,7 @@ var vehicle: VehicleState
 var repairs_allowed: bool = false
 var credits: float = 0.0
 var selected_repair_part_id: String = ""
-@onready var vehicle_parts_view: VehiclePartsView = $Content/PartsView
+@onready var vehicle_parts_view: VehiclePartsView = $Content/Diagram/PartsView
 @onready var repair_details: VBoxContainer = $Content/RepairDetails
 @onready var repair_details_label: Label = $Content/RepairDetails/Description
 @onready var selected_repair_button: Button = $Content/RepairDetails/Repair

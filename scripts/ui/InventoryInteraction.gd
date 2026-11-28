@@ -16,21 +16,23 @@ var transfer_check: Callable
 var describe_item: Callable
 var item_price: Callable
 var trading: bool = false
-@onready var card: PanelContainer = $ItemCard
+@onready var card: Panel = $ItemCard
 @onready var card_title: Label = $ItemCard/Layout/Title
 @onready var card_shape: ColorRect = $ItemCard/Layout/Shape
-@onready var card_description: Label = $ItemCard/Layout/Description
+@onready var card_description: Label = $ItemCard/Layout/Notes/Description
 @onready var card_texture: TextureRect = $ItemCard/Layout/Texture
 @onready var card_price: Label = $ItemCard/Layout/Footer/Price
 @onready var card_weight: Label = $ItemCard/Layout/Footer/Weight
-@export var single_inventory_width: float = 600.0
-@export var dual_inventory_width: float = 1200.0
+@export var single_inventory_width: float = 704.0
+@export var dual_inventory_width: float = 1214.0
 var cargo_capacity_kg: float = -1.0
 var left: VehicleInventory
 var right: VehicleInventory
-@onready var grids: Array[InventoryGrid] = [$LeftScroll/Grid, $RightScroll/Grid]
-@onready var character_slots: CharacterSlots = $CharacterSlots
-@onready var grid_scrolls: Array[ScrollContainer] = [$LeftScroll, $RightScroll]
+@onready var grids: Array[InventoryGrid] = [$Truck/Diagram/Hold/Grid, $RightScroll/Grid]
+@onready var character_slots: CharacterSlots = $Truck/Diagram/CharacterSlots
+@onready var stock_scroll: ScrollContainer = $RightScroll
+var inspected: CargoItem
+var inspected_right := false
 @onready var right_title: Label = $RightTitle
 @onready var info: Label = $Info
 @onready var menu: PopupMenu = $ContextMenu
@@ -48,27 +50,27 @@ var click_position: Vector2
 func _ready() -> void:
 	for index in range(grids.size()):
 		var grid := grids[index]
-		var scroll := grid_scrolls[index]
 		var side := index == 1
-		for bar in [scroll.get_v_scroll_bar(), scroll.get_h_scroll_bar()]:
-			bar.value_changed.connect(func(_value: float):
-				card.hide()
-				grid.queue_redraw()
-			)
 		grid.clicked.connect(_click.bind(side))
 		grid.context_requested.connect(_context.bind(side))
 		grid.hovered.connect(_hover.bind(side))
-		grid.mouse_exited.connect(func(): card.hide())
 	menu.id_pressed.connect(_context_action)
 
 
 func _hover(item: CargoItem, on_right: bool) -> void:
-	if item == null or menu.visible:
-		card.hide()
+	if item == null or (item == inspected and on_right == inspected_right and card.visible):
 		return
-	card_weight.text = "Вес: %s кг" % str(item.weight_kg) if item.weight_kg >= 0.0 else "Вес не задан"
+	$ItemCard/Layout/Notes.scroll_vertical = 0
+	_show_card(item, on_right)
+
+
+func _show_card(item: CargoItem, on_right: bool) -> void:
+	inspected = item
+	inspected_right = on_right
+	$ItemCard/Layout/Footer/Dimensions.text = "%d × %d" % [item.size.x, item.size.y]
+	card_weight.text = "%s кг" % String.num(item.weight_kg, 2) if item.weight_kg >= 0.0 else "Вес не указан"
 	card_title.text = item.title
-	card_description.text = item.description if not item.description.is_empty() else "Описание не задано"
+	card_description.text = item.description
 	var effects := item.effects_text()
 	if not effects.is_empty():
 		card_description.text += "\n" + effects
@@ -77,38 +79,28 @@ func _hover(item: CargoItem, on_right: bool) -> void:
 	card_texture.texture = InventoryGrid.item_texture(item)
 	card_texture.visible = card_texture.texture != null
 	card_shape.visible = not card_texture.visible
-	card_shape.custom_minimum_size = Vector2(item.size) * 20.0
+	card_shape.custom_minimum_size = Vector2(item.size) * minf(20.0, 88.0 / maxi(item.size.x, item.size.y))
 	card_price.visible = trading
 	if trading:
 		card_price.text = "%.2f кр." % float(item_price.call(item, on_right)) if item.price_credits >= 0.0 else "Цена не задана"
-	card.reset_size()
-	var edge_margin := 16.0
-	var cursor_gap := 18.0
-	var cursor := get_global_mouse_position()
-	var viewport_size := get_viewport_rect().size
-	var screen_position := cursor + Vector2(cursor_gap, 0)
-	if screen_position.x + card.size.x > viewport_size.x - edge_margin:
-		screen_position.x = cursor.x - cursor_gap - card.size.x
-	screen_position.x = clampf(screen_position.x, edge_margin, maxf(edge_margin, viewport_size.x - card.size.x - edge_margin))
-	screen_position.y = clampf(screen_position.y, edge_margin, maxf(edge_margin, viewport_size.y - card.size.y - edge_margin))
-	card.global_position = screen_position
+	card.get_node("Layout/Notes").visible = not card_description.text.is_empty()
 	card.show()
 
 
 func configure(player: VehicleInventory, other: VehicleInventory, caption: String) -> void:
-	$PlayerTitle.text = "Мой инвентарь · %d×%d" % [player.dimensions.x, player.dimensions.y]
+	$PlayerTitle.text = "Урал  ·  кузов %d × %d" % [player.dimensions.x, player.dimensions.y]
 	left = player
 	right = other
 	custom_minimum_size = Vector2(dual_inventory_width if right != null else single_inventory_width, custom_minimum_size.y)
 	size = custom_minimum_size
 	grids[0].setup(left)
 	grids[1].visible = right != null
-	grid_scrolls[1].visible = right != null
-	for scroll in grid_scrolls:
-		scroll.scroll_vertical = 0
-		scroll.scroll_horizontal = 0
+	stock_scroll.visible = right != null
+	stock_scroll.scroll_vertical = 0
+	stock_scroll.scroll_horizontal = 0
 	right_title.visible = right != null
 	right_title.text = caption
+	inspected = null
 	if right != null:
 		grids[1].setup(right)
 	reset_selection()
@@ -120,8 +112,6 @@ func _model(on_right: bool) -> VehicleInventory:
 
 func reset_selection() -> void:
 	click_item = null
-	if card != null:
-		card.hide()
 	selected = null
 	context_item = null
 	menu.hide()
@@ -129,6 +119,17 @@ func reset_selection() -> void:
 
 
 func refresh() -> void:
+	if inspected == null or _model(inspected_right) == null or not _model(inspected_right).contains(inspected):
+		inspected = null
+		card.hide()
+		for side: bool in [true, false]:
+			var inventory := _model(side)
+			if inventory != null and not inventory.placements.is_empty():
+				_hover(inventory.placements[0].item, side)
+				break
+	else:
+		_show_card(inspected, inspected_right)
+	$Empty.visible = inspected == null
 	if selected != null and not _model(source_right).contains(selected):
 		selected = null
 	for grid in grids:
@@ -154,6 +155,7 @@ func refresh() -> void:
 
 
 func _choose(item: CargoItem, on_right: bool) -> void:
+	_hover(item, on_right)
 	selected = item
 	source_right = on_right
 	rotated = false
@@ -242,7 +244,7 @@ func _context(item: CargoItem, _cell: Vector2i, on_right: bool) -> void:
 	context_item = item
 	context_right = on_right
 	menu.clear()
-	card.hide()
+	_hover(item, on_right)
 	if trading and on_right:
 		menu.add_item("Купить", 3)
 	if not on_right:
